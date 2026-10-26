@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncFlow | PM Workspace</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Vis-Network for interactive graph & tree visualizations -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <!-- Chart.js for PMBOK S-Curve & Cumulative Progress visualizations -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Distinct Blue Workspace Sidebar -->
+    <aside class="sidebar sidebar-blue" id="workspace-sidebar">
+      <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 1rem; margin-bottom: 1rem; flex-shrink: 0;">
+        <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #93C5FD; margin-bottom: 0.3rem;">
+          Active Project
+        </div>
+        <h3 id="sidebar-proj-name" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #FFFFFF; line-height: 1.3;">
+          Workspace
+        </h3>
+      </div>
+
+      <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #93C5FD; margin-bottom: 0.5rem; flex-shrink: 0;">
+        Schedule Process Group
+      </div>
+
+      <!-- Standard 6 PMBOK Schedule Management Menu Items -->
+      <nav id="workspace-nav" style="display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto;">
+        <div class="sidebar-nav-item active" data-view="1">1. Plan Schedule Management</div>
+        <div class="sidebar-nav-item" data-view="2">2. Define Activities</div>
+        <div class="sidebar-nav-item" data-view="3">3. Sequence Activities</div>
+        <div class="sidebar-nav-item" data-view="4">4. Estimate Activity Duration</div>
+        <div class="sidebar-nav-item" data-view="5">5. Develop Schedule</div>
+        <div class="sidebar-nav-item" data-view="6">6. Control Schedule</div>
+      </nav>
+
+      <!-- Sticky Bottom Action Buttons Container -->
+      <div class="sidebar-bottom-actions" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 0.85rem; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; position: sticky; bottom: 0; background: var(--dark-blue); z-index: 10;">
+        <button id="btn-return-dashboard" class="btn btn-secondary btn-block btn-sm" style="background: rgba(255, 255, 255, 0.15); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.25); font-weight: 600;">
+          ⬅️ Return to Main Page
+        </button>
+        <button id="btn-workspace-logout" class="btn btn-secondary btn-block btn-sm" style="background: rgba(255, 255, 255, 0.15); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.25); font-weight: 600;">
+          Log Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Workspace Main Content View -->
+    <main class="main-content">
+      <div class="brand-header">
+        <div class="brand-logo-group">
+          <span class="brand-icon">⚡</span>
+          <div>
+            <div class="brand-title">SyncFlow</div>
+            <div id="workspace-header-subtitle" class="brand-subtitle">Plan Schedule Management — Policies, Procedures & Governance</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="pm-workspace-notification-bell-container"></div>
+          <div id="workspace-user-badge"></div>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           VIEW 1: PLAN SCHEDULE MANAGEMENT
+           ==================================================================== -->
+      <section id="view-1-plan" class="workspace-view">
+        <!-- Overview Banner -->
+        <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-left: 5px solid var(--primary); border-radius: var(--radius-md); padding: 1.5rem 1.8rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <span class="badge badge-blue" style="margin-bottom: 0.4rem;">Schedule Management Plan</span>
+            <h2 id="plan-proj-title" style="margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--charcoal);">
+              Project Name
+            </h2>
+          </div>
+          <div style="text-align: right; font-size: 0.85rem; color: var(--muted);">
+            <div><strong>Planned Start:</strong> <code id="plan-start-date">-</code></div>
+            <div><strong>Created:</strong> <span id="plan-created-date">-</span></div>
+          </div>
+        </div>
+
+        <!-- Editable Project Description -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.4rem 1.6rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
+          <h3 style="margin: 0 0 0.25rem 0; font-size: 1.15rem;">📝 Project Scope & Description</h3>
+          <p style="font-size: 0.86rem; color: var(--muted); margin-bottom: 1rem;">
+            Review or update the Project Charter scope statement. Changes are saved directly to the database.
+          </p>
+
+          <div id="desc-save-alert" class="alert-box alert-green" style="display: none; margin-bottom: 1rem;">
+            Description updated successfully!
+          </div>
+
+          <form id="form-edit-description">
+            <div class="form-group">
+              <label for="input-plan-description">Project Charter & Scope Description</label>
+              <textarea id="input-plan-description" style="min-height: 120px;" placeholder="Define high-level objectives, deliverables, and scope boundaries..."></textarea>
+            </div>
+            <button type="submit" id="btn-save-description" class="btn btn-primary" style="padding: 0.6rem 1.4rem;">
+              Save Description
+            </button>
+          </form>
+        </div>
+
+        <!-- Project Personnel Access Section -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.4rem 1.6rem; box-shadow: var(--shadow-sm);">
+          <h3 style="margin: 0 0 0.25rem 0; font-size: 1.15rem;">👥 Project Personnel & Organization</h3>
+          <p style="font-size: 0.86rem; color: var(--muted); margin-bottom: 1.2rem;">
+            Access the dedicated personnel roster window to review project controllers, configured teams, and individual contributors.
+          </p>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem 1.4rem; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="font-weight: 700; color: var(--charcoal); font-size: 0.98rem;">Active Personnel Allocation</div>
+              <div id="plan-personnel-stats" style="font-size: 0.85rem; color: var(--muted); margin-top: 2px;">
+                Configured Teams: 0 • Total Allocated Contributors: 0
+              </div>
+            </div>
+            <button id="btn-open-personnel-modal" class="btn btn-primary">
+              👥 View Project Personnel
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 2: DEFINE ACTIVITIES & WBS
+           ==================================================================== -->
+      <section id="view-2-wbs" class="workspace-view" style="display: none;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.4rem 1.6rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;">
+          
+          <!-- View Header & Controls -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 style="margin: 0; font-size: 1.3rem; color: var(--charcoal);">Define Activities & Work Breakdown Structure (WBS)</h3>
+                <span id="wbs-save-status" class="badge badge-emerald" style="display: none;">All Changes Saved</span>
+              </div>
+              <p style="margin: 0.3rem 0 0 0; font-size: 0.88rem; color: var(--slate);">
+                Decompose project scope hierarchically: Level 1 (Project) ➔ Level 2 (Major Deliverables) ➔ Sub-deliverables ➔ Terminal Work Packages, then define concrete activities for each Work Package.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button type="button" id="btn-ai-text-to-wbs" onclick="window.SyncFlowAI && window.SyncFlowAI.openWbsModal()" class="btn btn-secondary" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #fff; border: none; padding: 0.7rem 1.4rem; font-size: 0.95rem; font-weight: 700; border-radius: var(--radius-sm); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35); display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                <span>✨</span> AI Text-to-WBS
+              </button>
+              <button type="button" id="btn-save-wbs-activities" class="btn btn-primary" style="padding: 0.7rem 1.6rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);">
+                💾 Save All Changes
+              </button>
+            </div>
+          </div>
+
+          <!-- Alert / Status notifications -->
+          <div id="wbs-alert-msg" class="alert alert-success" style="display: none; margin-bottom: 1rem;"></div>
+
+          <!-- Tabs Segmented Control: Project Builder, WBS Tree, Define Activities -->
+          <div style="display: flex; border-bottom: 2px solid var(--border-light); margin-bottom: 1.2rem; gap: 8px;">
+            <button type="button" class="wbs-tab-btn active" data-tab="builder">
+              🏗️ Project Builder
+            </button>
+            <button type="button" class="wbs-tab-btn" data-tab="tree">
+              🌳 WBS Tree Diagram
+            </button>
+            <button type="button" class="wbs-tab-btn" data-tab="activities">
+              📝 Define Activities
+            </button>
+          </div>
+
+          <!-- TAB 1: PROJECT BUILDER (Primary View) -->
+          <div id="tab-pane-wbs-builder" class="wbs-tab-pane">
+            <div id="wbs-cards-container">
+              <!-- Rendered hierarchically: Level 1 (Project Container) -> Level 2 (Major Deliverables) -> Sub-deliverables -> Work Packages -->
+            </div>
+          </div>
+
+          <!-- TAB 2: WBS TREE DIAGRAM -->
+          <div id="tab-pane-wbs-tree" class="wbs-tab-pane" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; font-size: 0.82rem; color: var(--muted); flex-wrap: wrap; gap: 8px;">
+              <span>Interactive Vis-Network: Drag nodes or zoom with mouse scroll. Recursive decomposition from Project to Work Packages.</span>
+            </div>
+            <div id="wbs-network-canvas" class="vis-container" style="height: 520px;">
+              <!-- Rendered by vis-network -->
+            </div>
+          </div>
+
+          <!-- TAB 3: DEFINE ACTIVITIES (Per Work Package) -->
+          <div id="tab-pane-wbs-activities" class="wbs-tab-pane" style="display: none;">
+            <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.2rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div style="flex: 1; min-width: 280px;">
+                <label for="select-activity-wp" style="font-size: 0.86rem; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 4px;">
+                  📦 Select Work Package (Terminal Leaf):
+                </label>
+                <select id="select-activity-wp" class="form-control" style="font-weight: 600; padding: 0.55rem 0.75rem;">
+                  <!-- Populated with all Work Packages -->
+                </select>
+              </div>
+              <div>
+                <button type="button" id="btn-add-activity-item" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+                  ➕ Add Activity
+                </button>
+              </div>
+            </div>
+
+            <!-- Breadcrumb Path to selected Work Package -->
+            <div id="wp-activities-breadcrumb" style="font-size: 0.88rem; color: var(--slate); margin-bottom: 1rem; padding: 0.4rem 0.8rem; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-weight: 500;">
+              No Work Package selected.
+            </div>
+
+            <!-- Activities Table / List for the selected Work Package -->
+            <div id="wp-activities-list-container">
+              <!-- Rendered by JavaScript -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 3: SEQUENCE ACTIVITIES
+           ==================================================================== -->
+      <section id="view-3-sequence" class="workspace-view" style="display: none;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.4rem 1.6rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;">
+          
+          <!-- View Header & Controls -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; font-size: 1.3rem; color: var(--charcoal);">3. Sequence Activities</h3>
+                <span id="seq-save-status" class="badge badge-emerald" style="display: none;">Saved</span>
+              </div>
+              <p style="margin: 3px 0 0 0; font-size: 0.88rem; color: var(--slate);">
+                Define the logical relationships and workflow between project activities.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button type="button" id="btn-ai-extract-dependencies" onclick="window.SyncFlowAI && window.SyncFlowAI.openDependencyModal()" class="btn btn-secondary" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #fff; border: none; padding: 0.65rem 1.3rem; font-weight: 700; border-radius: var(--radius-sm); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35); display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                <span>✨</span> AI Extract Dependencies
+              </button>
+              <button type="button" id="btn-open-add-dependency" class="btn btn-outline-primary" style="font-weight: 600;">
+                ➕ Add Dependency
+              </button>
+              <button type="button" id="btn-save-dependencies" class="btn btn-primary" style="font-weight: 700;">
+                💾 Save Dependencies
+              </button>
+            </div>
+          </div>
+
+          <!-- Alert / Status notifications -->
+          <div id="seq-alert-msg" class="alert alert-success" style="display: none; margin-bottom: 1rem;"></div>
+
+          <!-- Schedule Health Compact Status Bar -->
+          <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <span id="health-status-indicator" class="badge badge-emerald" style="font-size: 0.85rem; padding: 5px 12px;">
+                ● Schedule Health: 100%
+              </span>
+              <span id="health-quick-summary" style="font-size: 0.88rem; color: var(--slate);">
+                Evaluating logical workflow...
+              </span>
+            </div>
+            <button type="button" id="btn-toggle-health-details" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; padding: 4px 10px;">
+              Diagnostics ▾
+            </button>
+          </div>
+
+          <!-- Collapsible Diagnostic Drawer -->
+          <div id="schedule-health-drawer" style="display: none; background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.2rem; margin-bottom: 1.2rem;">
+            <div id="health-diagnostics-details"></div>
+          </div>
+
+          <!-- Segmented Tab Navigation: Diagram vs Table -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-light); margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="tab-btn-diagram" class="seq-tab-btn active" data-tab="diagram" style="background: none; border: none; padding: 0.6rem 1.2rem; font-weight: 700; font-size: 0.92rem; color: var(--primary); border-bottom: 3px solid var(--primary); cursor: pointer;">
+                🔀 Network Diagram
+              </button>
+              <button type="button" id="tab-btn-table" class="seq-tab-btn" data-tab="table" style="background: none; border: none; padding: 0.6rem 1.2rem; font-weight: 600; font-size: 0.92rem; color: var(--slate); border-bottom: 3px solid transparent; cursor: pointer;">
+                📋 Dependencies List (<span id="seq-deps-badge-count">0</span>)
+              </button>
+            </div>
+
+            <!-- Toolbar (Legend and Zoom controls) -->
+            <div id="diagram-toolbar" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div style="display: flex; gap: 6px; font-size: 0.76rem; font-weight: 600;">
+                <span style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; padding: 2px 7px; border-radius: 4px;">● FS (Finish-to-Start)</span>
+                <span style="background: #F5F3FF; color: #7C3AED; border: 1px solid #DDD6FE; padding: 2px 7px; border-radius: 4px;">● SS (Start-to-Start)</span>
+                <span style="background: #ECFEFF; color: #0891B2; border: 1px solid #A5F3FC; padding: 2px 7px; border-radius: 4px;">● FF (Finish-to-Finish)</span>
+              </div>
+              <div style="display: flex; gap: 4px;">
+                <button type="button" id="btn-canvas-zoom-in" class="btn btn-secondary btn-sm" title="Zoom In" style="padding: 3px 8px;">🔍 +</button>
+                <button type="button" id="btn-canvas-zoom-out" class="btn btn-secondary btn-sm" title="Zoom Out" style="padding: 3px 8px;">🔍 -</button>
+                <button type="button" id="btn-canvas-fit" class="btn btn-secondary btn-sm" title="Fit Network" style="padding: 3px 8px;">🎯 Fit</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 1: Network Diagram Canvas -->
+          <div id="seq-pane-diagram" class="seq-tab-pane">
+            <div id="pdm-network-canvas" class="vis-container" style="border: 1px solid var(--border); border-radius: var(--radius-sm); min-height: 520px; background: #FAFAFA;">
+              <!-- Rendered by vis-network -->
+            </div>
+          </div>
+
+          <!-- Tab 2: Dependencies List Table -->
+          <div id="seq-pane-table" class="seq-tab-pane" style="display: none;">
+            <div id="pdm-dependencies-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 4: ESTIMATE ACTIVITY DURATION
+           ==================================================================== -->
+      <section id="view-4-estimate" class="workspace-view" style="display: none;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.4rem 1.6rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;">
+          
+          <!-- View Header & Action Buttons -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; font-size: 1.3rem; color: var(--charcoal);">4. Estimate Activity Duration</h3>
+                <span id="estimate-save-status" class="badge badge-emerald" style="display: none;">Saved</span>
+              </div>
+              <p style="margin: 3px 0 0 0; font-size: 0.88rem; color: var(--slate);">
+                Estimate activity durations using Three-Point (Beta Distribution), Parametric, Analogous, and Single-Point techniques.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button type="button" id="btn-ai-estimate-durations" onclick="window.SyncFlowAI && window.SyncFlowAI.openEstimateModal()" class="btn btn-secondary" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #fff; border: none; padding: 0.65rem 1.3rem; font-weight: 700; border-radius: var(--radius-sm); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35); display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                <span>✨</span> AI DCMA PERT Estimator
+              </button>
+              <button type="button" id="btn-seed-pert-defaults" class="btn btn-outline-primary" style="font-weight: 600;">
+                ⚡ Reset Standard Baseline
+              </button>
+              <button type="button" id="btn-save-duration-estimates" class="btn btn-primary" style="font-weight: 700; padding: 0.6rem 1.4rem;">
+                💾 Save Duration Estimates
+              </button>
+            </div>
+          </div>
+
+          <!-- Alert / Status Notifications -->
+          <div id="estimate-alert-msg" class="alert alert-success" style="display: none; margin-bottom: 1.2rem;"></div>
+
+          <!-- ================================================================
+               EXECUTIVE SCHEDULE CONFIDENCE & PERT RISK SIMULATOR (TOP BANNER)
+               ================================================================ -->
+          <div style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border-radius: var(--radius-md); padding: 1.5rem 1.8rem; color: #FFFFFF; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);">
+            
+            <!-- Top Stat Counters -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 1.2rem; margin-bottom: 1.2rem;">
+              <div>
+                <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8;">
+                  Critical Path Analysis (PERT Beta Distribution)
+                </span>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 4px;">
+                  <span id="pert-mu-display" style="font-size: 2.2rem; font-weight: 800; color: #38BDF8; font-family: monospace;">1,637.7 d</span>
+                  <span style="font-size: 1rem; color: #CBD5E1; font-weight: 600;">Expected Duration (μ)</span>
+                  <span id="pert-sigma-display" style="font-size: 1rem; color: #F59E0B; font-weight: 700; margin-left: 8px;">± 61.2 d (σ)</span>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap;">
+                <div style="background: rgba(255,255,255,0.07); padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1);">
+                  <div style="font-size: 0.7rem; color: #94A3B8; font-weight: 700; text-transform: uppercase;">Critical Path Tasks</div>
+                  <div id="pert-cp-count" style="font-size: 1.2rem; font-weight: 800; color: #F8FAFC;">25 / 41</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.07); padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1);">
+                  <div style="font-size: 0.7rem; color: #94A3B8; font-weight: 700; text-transform: uppercase;">Path Variance (σ²)</div>
+                  <div id="pert-var-display" style="font-size: 1.2rem; font-weight: 800; color: #F8FAFC; font-family: monospace;">3,748 d²</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Target Completion Probability Simulator -->
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-sm); padding: 1.2rem 1.4rem; margin-bottom: 1.2rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <h4 style="margin: 0; font-size: 1.05rem; color: #F8FAFC;">
+                    🎯 Target Duration (D) & Completion Probability Simulator
+                  </h4>
+                  <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #94A3B8;">
+                    Slide or type a target deadline duration to calculate the cumulative on-time completion probability: Z = (D - μ) / σ
+                  </p>
+                </div>
+
+                <!-- Big Animated Probability Ring/Badge -->
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="text-align: right;">
+                    <div id="pert-prob-badge" style="font-size: 1.8rem; font-weight: 800; color: #4ADE80; font-family: monospace;">
+                      50.0%
+                    </div>
+                    <div id="pert-z-badge" style="font-size: 0.76rem; color: #CBD5E1;">
+                      Z = 0.00 (Median)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Interactive Slider and Number Input -->
+              <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 0.8rem; flex-wrap: wrap;">
+                <input type="range" id="pert-target-slider" min="1300" max="2100" step="1" value="1638" style="flex: 1; min-width: 220px; accent-color: #38BDF8; cursor: pointer; height: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <label for="pert-target-input" style="font-size: 0.82rem; color: #CBD5E1; font-weight: 600;">Target D:</label>
+                  <input type="number" id="pert-target-input" min="1000" max="3000" step="1" value="1638" style="width: 100px; padding: 4px 8px; font-weight: 700; font-size: 0.95rem; border-radius: 4px; border: 1px solid #64748B; background: #0F172A; color: #38BDF8; text-align: center;">
+                  <span style="font-size: 0.85rem; color: #94A3B8; font-weight: 600;">days</span>
+                </div>
+              </div>
+
+              <!-- Simulator Narrative Insight -->
+              <div id="pert-narrative-insight" style="font-size: 0.84rem; color: #E2E8F0; line-height: 1.45; background: rgba(0,0,0,0.25); padding: 8px 12px; border-radius: 4px;">
+                With target <strong>D = 1,637.7 days</strong> (~4.5 years, Z = 0.00), there is an exact <strong>50.0% probability</strong> that project critical path deliverables will finish on or before this duration.
+              </div>
+            </div>
+
+            <!-- One-Click Confidence Milestones Buttons -->
+            <div>
+              <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94A3B8; margin-bottom: 6px;">
+                Quick-Set Risk Confidence Milestones:
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-sm btn-pert-preset" data-prob="50">
+                  <strong>P50 (50% Median):</strong> <span id="preset-p50-val">1641.0d</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-pert-preset" data-prob="80">
+                  <strong>P80 (80% Management Buffer):</strong> <span id="preset-p80-val">1692.8d</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-pert-preset" data-prob="90">
+                  <strong>P90 (90% High Assurance):</strong> <span id="preset-p90-val">1719.8d</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-pert-preset" data-prob="95">
+                  <strong>P95 (95% Contractual):</strong> <span id="preset-p95-val">1742.2d</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-pert-preset" data-prob="99">
+                  <strong>P99 (99% Extreme Certainty):</strong> <span id="preset-p99-val">1784.1d</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               SMART ESTIMATION TABLE & FILTER CONTROLS
+               ================================================================ -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.2rem; margin-bottom: 1rem;">
+            
+            <!-- Table Filter Toolbar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex: 1;">
+                <input type="text" id="estimate-search-input" placeholder="🔍 Search activity ID or name..." style="padding: 0.45rem 0.75rem; font-size: 0.86rem; border: 1px solid var(--border); border-radius: var(--radius-sm); min-width: 220px;">
+                <select id="estimate-wp-filter" style="padding: 0.45rem 0.75rem; font-size: 0.86rem; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                  <option value="">All Work Packages</option>
+                </select>
+                <select id="estimate-tech-filter" style="padding: 0.45rem 0.75rem; font-size: 0.86rem; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                  <option value="">All Techniques</option>
+                  <option value="three_point">Three-Point (Beta)</option>
+                  <option value="parametric">Parametric</option>
+                  <option value="analogous">Analogous</option>
+                  <option value="single_point">Single-Point</option>
+                </select>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal); display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
+                  <input type="checkbox" id="estimate-cp-only-filter" style="accent-color: #EF4444; width: 16px; height: 16px; cursor: pointer;">
+                  🔥 Show Critical Path Only
+                </label>
+              </div>
+            </div>
+
+            <!-- Activities Estimation Table Container -->
+            <div id="estimate-table-container">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 5: DEVELOP SCHEDULE
+           ==================================================================== -->
+      <section id="view-5-schedule" class="workspace-view" style="display: none;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.4rem 1.6rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;">
+          
+          <!-- View Header & Controls -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; font-size: 1.3rem; color: var(--charcoal);">5. Develop Schedule</h3>
+                <span id="sched-save-status" class="badge badge-emerald" style="display: none;">Saved</span>
+              </div>
+              <p style="margin: 3px 0 0 0; font-size: 0.88rem; color: var(--slate);">
+                Create the definitive schedule model: Activity-on-Node (CPM), Activity-on-Arrow (PERT), Critical &amp; Near-Critical Float Analysis.
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button type="button" id="btn-recalculate-schedule" class="btn btn-outline-primary" style="font-weight: 600;">
+                🔄 Recalculate Network
+              </button>
+              <button type="button" id="btn-save-schedule-settings" class="btn btn-primary" style="font-weight: 700; padding: 0.6rem 1.4rem;">
+                💾 Save Baseline Schedule
+              </button>
+            </div>
+          </div>
+
+          <!-- Alert / Status Notifications -->
+          <div id="sched-alert-msg" class="alert alert-success" style="display: none; margin-bottom: 1.2rem;"></div>
+
+          <!-- ================================================================
+               EXECUTIVE SCHEDULE KPI & PROJECT FLOAT BANNER
+               ================================================================ -->
+          <div style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border-radius: var(--radius-md); padding: 1.5rem 1.8rem; color: #FFFFFF; margin-bottom: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);">
+            
+            <!-- Top Metric Tiles Row -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 1.2rem;">
+              
+              <!-- Planned Duration -->
+              <div style="background: rgba(255,255,255,0.06); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; font-weight: 700;">
+                  Planned Duration (CPM μ)
+                </div>
+                <div id="kpi-sched-duration" style="font-size: 1.8rem; font-weight: 800; color: #38BDF8; font-family: monospace; margin: 4px 0 2px 0;">
+                  1,641.0 d
+                </div>
+                <div style="font-size: 0.78rem; color: #CBD5E1;">~ 4.5 Years Baseline</div>
+              </div>
+
+              <!-- Planned Schedule Span -->
+              <div style="background: rgba(255,255,255,0.06); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; font-weight: 700;">
+                  Planned Start ➔ Finish
+                </div>
+                <div id="kpi-sched-dates" style="font-size: 1.05rem; font-weight: 700; color: #F8FAFC; margin: 8px 0 4px 0;">
+                  14 Oct 2026 ➔ 12 Apr 2031
+                </div>
+                <div id="kpi-sched-variance" style="font-size: 0.78rem; color: #F59E0B;">σ = ± 61.5 days (PERT Risk)</div>
+              </div>
+
+              <!-- Critical Path Tasks -->
+              <div style="background: rgba(255,255,255,0.06); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; font-weight: 700;">
+                  Critical Path Tasks (TF = 0)
+                </div>
+                <div id="kpi-sched-cp-count" style="font-size: 1.8rem; font-weight: 800; color: #F87171; font-family: monospace; margin: 4px 0 2px 0;">
+                  25 / 41
+                </div>
+                <div id="kpi-sched-cp-pct" style="font-size: 0.78rem; color: #CBD5E1;">61.0% of all activities</div>
+              </div>
+
+              <!-- Near-Critical Tasks -->
+              <div style="background: rgba(255,255,255,0.06); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1);">
+                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94A3B8; font-weight: 700;">
+                  Near-Critical Tasks
+                </div>
+                <div id="kpi-sched-near-crit-count" style="font-size: 1.8rem; font-weight: 800; color: #FBBF24; font-family: monospace; margin: 4px 0 2px 0;">
+                  3 / 41
+                </div>
+                <div id="kpi-sched-near-crit-sub" style="font-size: 0.78rem; color: #CBD5E1;">Float ≤ 25d (Monitored Risk)</div>
+              </div>
+
+              <!-- Project Float (Owned by PM) -->
+              <div id="kpi-sched-pf-card" style="background: rgba(16, 185, 129, 0.12); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid rgba(16, 185, 129, 0.3);">
+                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6EE7B7; font-weight: 700;">
+                  Project Float (Owned by PM)
+                </div>
+                <div id="kpi-sched-project-float" style="font-size: 1.8rem; font-weight: 800; color: #34D399; font-family: monospace; margin: 4px 0 2px 0;">
+                  + 78.8 d
+                </div>
+                <div id="kpi-sched-pf-desc" style="font-size: 0.78rem; color: #D1FAE5;">Buffer ahead of deadline</div>
+              </div>
+            </div>
+
+            <!-- Project Float & Imposed Deadline Simulator Row -->
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-sm); padding: 1.1rem 1.3rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <h4 style="margin: 0; font-size: 1.05rem; color: #F8FAFC;">
+                    ⏱️ Imposed Deadline &amp; Project Float Manager
+                  </h4>
+                  <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: #94A3B8;">
+                    <strong>Project Float = Imposed Deadline – Planned Finish Date</strong>. Total Float and Free Float belong to activities; Project Float is owned by the Project Manager to buffer against project-level external delivery commitments.
+                  </p>
+                </div>
+                <div id="project-float-badge" style="padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; background: #065F46; color: #A7F3D0; border: 1px solid #059669;">
+                  ● Contingency Buffer: +78.8 Days
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                  <label for="sched-input-imposed-date" style="font-size: 0.8rem; font-weight: 600; color: #CBD5E1; display: block; margin-bottom: 4px;">
+                    📅 Externally Imposed Deadline (Client / Sponsor Target Date):
+                  </label>
+                  <input type="date" id="sched-input-imposed-date" style="background: #0F172A; color: #F8FAFC; border: 1px solid #475569; padding: 6px 10px; border-radius: 4px; font-size: 0.9rem; width: 100%;">
+                </div>
+
+                <div style="flex: 1; min-width: 180px;">
+                  <label for="sched-input-imposed-days" style="font-size: 0.8rem; font-weight: 600; color: #CBD5E1; display: block; margin-bottom: 4px;">
+                    🎯 Target Duration (Days from Start):
+                  </label>
+                  <input type="number" id="sched-input-imposed-days" step="1" min="1000" max="3000" style="background: #0F172A; color: #38BDF8; font-weight: 700; border: 1px solid #475569; padding: 6px 10px; border-radius: 4px; font-size: 0.95rem; width: 100%;">
+                </div>
+
+                <div style="flex: 1; min-width: 220px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <label for="sched-slider-near-crit" style="font-size: 0.8rem; font-weight: 600; color: #CBD5E1;">
+                      ⚠️ Near-Critical Float Threshold:
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span id="sched-near-crit-val-display" style="font-size: 0.82rem; font-weight: 700; color: #FBBF24;">25 days</span>
+                      <span id="sched-threshold-saved-pill" class="badge badge-emerald" style="display: none; font-size: 0.7rem; padding: 2px 7px;">Saved</span>
+                    </div>
+                  </div>
+                  <input type="range" id="sched-slider-near-crit" min="5" max="100" step="5" value="25" style="width: 100%; accent-color: #F59E0B; cursor: pointer;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               COLLAPSIBLE SCHEDULE METRICS & FORMULA LEGEND GUIDE
+               ================================================================ -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 1.2rem; overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div id="btn-toggle-sched-legend" style="padding: 0.75rem 1.2rem; background: #F8FAFC; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.1rem;">📖</span>
+                <strong style="color: var(--charcoal); font-size: 0.92rem;">Schedule Metrics, Floats &amp; Network Diagram Legend</strong>
+                <span class="badge badge-blue" style="font-size: 0.72rem;">PMBOK Guide</span>
+              </div>
+              <span id="sched-legend-chevron" style="color: var(--primary); font-weight: 700; font-size: 0.85rem;">Expand Guide ▾</span>
+            </div>
+
+            <div id="sched-legend-content" style="display: none; padding: 1.2rem 1.4rem;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                
+                <!-- Card 1: Forward & Backward Dates -->
+                <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+                  <h5 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                    <span>⏱️</span> 1. Forward &amp; Backward Dates
+                  </h5>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.6;">
+                    <li><strong>Early Start (ES):</strong> Earliest point an activity can start based on predecessor Early Finishes.</li>
+                    <li><strong>Early Finish (EF):</strong> <code>EF = ES + Duration</code>. Earliest completion date.</li>
+                    <li><strong>Late Finish (LF):</strong> Latest point an activity can finish without delaying project completion.</li>
+                    <li><strong>Late Start (LS):</strong> <code>LS = LF - Duration</code>. Latest point an activity can start.</li>
+                  </ul>
+                </div>
+
+                <!-- Card 2: Float Calculations -->
+                <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+                  <h5 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                    <span>📐</span> 2. The Three Types of Float
+                  </h5>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.6;">
+                    <li><strong>Total Float (TF):</strong> <code>TF = LF - EF = LS - ES</code>. Permissible activity delay without postponing the final project completion.</li>
+                    <li><strong>Free Float (FF):</strong> <code>FF = min(ES_succ - lag) - EF</code>. Permissible activity delay without delaying the Early Start of <em>any</em> successor.</li>
+                    <li><strong>Project Float:</strong> <code>Project Float = Imposed Deadline – Planned Finish</code>. Surplus or deficit buffer between client commitment and calculated finish. Owned by the PM.</li>
+                  </ul>
+                </div>
+
+                <!-- Card 3: Critical & Near-Critical Paths -->
+                <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+                  <h5 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                    <span>🔥</span> 3. Critical vs Near-Critical Paths
+                  </h5>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.6;">
+                    <li><strong style="color: #DC2626;">Critical Path (TF = 0):</strong> The longest sequence of dependent activities. Directly dictates the project minimum duration. Any delay here delays the entire project!</li>
+                    <li><strong style="color: #D97706;">Near-Critical Path (0 &lt; TF ≤ Threshold):</strong> Paths with very small float. Highly vulnerable: a minor delay turns them critical, shifting project delivery risk.</li>
+                    <li><strong style="color: #2563EB;">Flexible Tasks (TF &gt; Threshold):</strong> Activities with comfortable schedule contingency.</li>
+                  </ul>
+                </div>
+
+                <!-- Card 4: AON vs AOA & Dummy Activities -->
+                <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+                  <h5 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                    <span>🔀</span> 4. AON (CPM) vs AOA (PERT) &amp; Dummy Links
+                  </h5>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.6;">
+                    <li><strong>Activity-on-Node (AON):</strong> Nodes = Activities (with CPM blocks). Arrows = Precedence dependencies.</li>
+                    <li><strong>Activity-on-Arrow (AOA):</strong> Nodes = Milestone Events (with TE, TL, Slack). Arrows = Activities (with te, σ²).</li>
+                    <li><strong>Dummy Activity (d = 0):</strong> Dashed arrows carrying 0 time/cost, required in AOA to enforce logical precedence and avoid ambiguous parallel arrows between the same two events.</li>
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               SEGMENTED TABS: AON (CPM), AOA (PERT), MATRIX, TIMELINE (GANTT)
+               ================================================================ -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-light); margin-bottom: 1.2rem; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="sched-tab-btn active" data-tab="aon" style="background: none; border: none; padding: 0.65rem 1.2rem; font-weight: 700; font-size: 0.92rem; color: var(--primary); border-bottom: 3px solid var(--primary); cursor: pointer;">
+                🔀 Activity-on-Node (CPM Network)
+              </button>
+              <button type="button" class="sched-tab-btn" data-tab="aoa" style="background: none; border: none; padding: 0.65rem 1.2rem; font-weight: 600; font-size: 0.92rem; color: var(--slate); border-bottom: 3px solid transparent; cursor: pointer;">
+                🎯 Activity-on-Arrow (PERT Events)
+              </button>
+              <button type="button" class="sched-tab-btn" data-tab="matrix" style="background: none; border: none; padding: 0.65rem 1.2rem; font-weight: 600; font-size: 0.92rem; color: var(--slate); border-bottom: 3px solid transparent; cursor: pointer;">
+                📊 Schedule Matrix &amp; Floats (<span id="sched-matrix-count">41</span>)
+              </button>
+              <button type="button" class="sched-tab-btn" data-tab="gantt" style="background: none; border: none; padding: 0.65rem 1.2rem; font-weight: 600; font-size: 0.92rem; color: var(--slate); border-bottom: 3px solid transparent; cursor: pointer;">
+                📅 Schedule Timeline &amp; Gantt
+              </button>
+              <button type="button" class="sched-tab-btn" data-tab="dcma" style="background: none; border: none; padding: 0.65rem 1.2rem; font-weight: 600; font-size: 0.92rem; color: var(--slate); border-bottom: 3px solid transparent; cursor: pointer;">
+                🛡️ DCMA 14-Point Diagnostic
+              </button>
+            </div>
+
+            <!-- Tab Specific Quick Controls Toolbar -->
+            <div id="sched-tab-toolbar" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"></div>
+          </div>
+
+          <!-- TAB 1: ACTIVITY-ON-NODE (AON / CPM NETWORK) -->
+          <div id="sched-pane-aon" class="sched-tab-pane">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 0.8rem; font-weight: 600;">
+                <span style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; padding: 3px 8px; border-radius: 4px;">● Critical Path (TF = 0)</span>
+                <span style="background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; padding: 3px 8px; border-radius: 4px;">● Near-Critical Path</span>
+                <span style="background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; padding: 3px 8px; border-radius: 4px;">● Flexible Path (Float Available)</span>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <select id="sched-aon-filter-mode" style="padding: 4px 8px; font-size: 0.84rem; border: 1px solid var(--border); border-radius: 4px;">
+                  <option value="all">Show All 41 Activities</option>
+                  <option value="critical">Critical Path Only (25)</option>
+                  <option value="near_critical">Near-Critical Only</option>
+                </select>
+                <button type="button" id="btn-aon-zoom-in" class="btn btn-secondary btn-sm" style="padding: 3px 8px;">🔍 +</button>
+                <button type="button" id="btn-aon-zoom-out" class="btn btn-secondary btn-sm" style="padding: 3px 8px;">🔍 -</button>
+                <button type="button" id="btn-aon-fit" class="btn btn-secondary btn-sm" style="padding: 3px 8px;">🎯 Fit</button>
+              </div>
+            </div>
+            
+            <!-- AON Diagram Canvas -->
+            <div id="aon-network-canvas" class="vis-container" style="border: 1px solid var(--border); border-radius: var(--radius-sm); min-height: 560px; background: #FAFAFA;"></div>
+            
+            <!-- Standard CPM Node Legend Box -->
+            <div style="margin-top: 0.8rem; background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; font-size: 0.82rem; color: var(--slate); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <strong>Standard PMBOK CPM Block Format:</strong> Each node displays:
+                <code>[Activity ID] Name</code> | Top Row: <strong>ES (Early Start)</strong>, <strong>D (Duration)</strong>, <strong>EF (Early Finish)</strong> | Bottom Row: <strong>LS (Late Start)</strong>, <strong>TF (Total Float)</strong>, <strong>LF (Late Finish)</strong>.
+              </div>
+              <div>
+                <em>Hover or click any node to inspect detailed float breakdown and predecessor constraints.</em>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: ACTIVITY-ON-ARROW (AOA / PERT EVENTS NETWORK) -->
+          <div id="sched-pane-aoa" class="sched-tab-pane" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 0.8rem; font-weight: 600;">
+                <span style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; padding: 3px 8px; border-radius: 4px;">➔ Critical Activity Arrow</span>
+                <span style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; padding: 3px 8px; border-radius: 4px;">➔ Non-Critical Activity Arrow</span>
+                <span style="background: #F8FAFC; color: #64748B; border: 1px dashed #94A3B8; padding: 3px 8px; border-radius: 4px;">╌╌ Dummy Precedence Link (d=0)</span>
+                <span style="background: #FEF2F2; color: #B91C1C; border: 1px solid #DC2626; padding: 3px 8px; border-radius: 12px;">● Critical Event (Slack = 0)</span>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <select id="sched-aoa-filter-mode" style="padding: 4px 8px; font-size: 0.84rem; border: 1px solid var(--border); border-radius: 4px;">
+                  <option value="all">Show Full PERT Network</option>
+                  <option value="critical">Critical Events &amp; Arrows Only</option>
+                </select>
+                <button type="button" id="btn-aoa-zoom-in" class="btn btn-secondary btn-sm" style="padding: 3px 8px;">🔍 +</button>
+                <button type="button" id="btn-aoa-zoom-out" class="btn btn-secondary btn-sm" style="padding: 3px 8px;">🔍 -</button>
+                <button type="button" id="btn-aoa-fit" class="btn btn-secondary btn-sm" style="padding: 3px 8px;">🎯 Fit</button>
+              </div>
+            </div>
+
+            <!-- AOA Diagram Canvas -->
+            <div id="aoa-network-canvas" class="vis-container" style="border: 1px solid var(--border); border-radius: var(--radius-sm); min-height: 560px; background: #FAFAFA;"></div>
+
+            <!-- AOA PERT Explanation Banner -->
+            <div style="margin-top: 0.8rem; background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.5;">
+              <strong>Activity-on-Arrow (AOA) / PERT Representation:</strong>
+              Milestones and project states are represented by <strong>Event Nodes</strong> displaying Earliest Event Time (<strong>TE</strong>) and Latest Event Time (<strong>TL</strong>). Activities are represented by <strong>Arrows</strong> displaying Expected Time (<strong>te</strong>) and Beta Variance (<strong>σ²</strong>). Dashed arrows represent <strong>Dummy Activities</strong> required to maintain dependency logic without multi-edge ambiguity.
+            </div>
+          </div>
+
+          <!-- TAB 3: SCHEDULE MATRIX & FLOAT ANALYSIS -->
+          <div id="sched-pane-matrix" class="sched-tab-pane" style="display: none;">
+            <!-- Matrix Filters Toolbar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex: 1;">
+                <input type="text" id="sched-matrix-search" placeholder="🔍 Search activity ID, name, or team..." style="padding: 0.45rem 0.75rem; font-size: 0.86rem; border: 1px solid var(--border); border-radius: var(--radius-sm); min-width: 240px;">
+                <select id="sched-matrix-status-filter" style="padding: 0.45rem 0.75rem; font-size: 0.86rem; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                  <option value="">All Statuses (41)</option>
+                  <option value="critical">🔥 Critical Path Only (TF = 0)</option>
+                  <option value="near_critical">⚠️ Near-Critical (Float ≤ Threshold)</option>
+                  <option value="flexible">🟢 Flexible Buffer (Float > Threshold)</option>
+                </select>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--muted);">
+                Showing <strong id="sched-matrix-filtered-count">41</strong> of 41 project activities
+              </div>
+            </div>
+
+            <!-- Matrix Table Container -->
+            <div id="sched-matrix-table-container" style="overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm);"></div>
+          </div>
+
+          <!-- TAB 4: SCHEDULE TIMELINE & GANTT -->
+          <div id="sched-pane-gantt" class="sched-tab-pane" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h4 style="margin: 0; font-size: 1.05rem; color: var(--charcoal);">
+                  Project Schedule Gantt &amp; Float Buffer Visualization
+                </h4>
+                <p style="margin: 2px 0 0 0; font-size: 0.82rem; color: var(--muted);">
+                  Visual progression of all activities across the lifecycle. Solid bar = Early Dates duration; Shaded extension = Total Float buffer; Lower bar = Frozen Baseline snapshot.
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; font-size: 0.8rem; font-weight: 600; flex-wrap: wrap;">
+                <span style="background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5; padding: 3px 8px; border-radius: 4px;">■ Critical Activity</span>
+                <span style="background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; padding: 3px 8px; border-radius: 4px;">■ Near-Critical Activity</span>
+                <span style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; padding: 3px 8px; border-radius: 4px;">■ Flexible Activity</span>
+                <span style="background: #F1F5F9; color: #64748B; border: 1px dashed #94A3B8; padding: 3px 8px; border-radius: 4px;">░ Total Float Buffer</span>
+              </div>
+            </div>
+
+            <!-- Multi-Baseline Comparison Toolbar -->
+            <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.65rem 1rem; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="font-weight: 700; font-size: 0.86rem; color: #1E293B; display: flex; align-items: center; gap: 6px;">
+                  <span>📐</span> Tracking Gantt (Multi-Baseline):
+                </span>
+                <select id="select-compare-baseline" style="padding: 4px 10px; font-size: 0.84rem; font-weight: 600; border: 1px solid #94A3B8; border-radius: 4px; background: #FFFFFF;">
+                  <option value="none">No Baseline (Current Schedule Only)</option>
+                </select>
+                <span id="badge-baseline-status" class="badge badge-gray" style="font-size: 0.74rem;">Current Forecast</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="display: flex; align-items: center; gap: 6px; font-size: 0.76rem; color: #475569;">
+                  <span style="width: 14px; height: 6px; background: #94A3B8; border-radius: 1px; display: inline-block;"></span> Baseline Frozen Bar
+                </span>
+                <button type="button" id="btn-freeze-baseline" class="btn btn-sm btn-primary" style="font-weight: 700; padding: 4px 10px; font-size: 0.82rem;">
+                  📷 Freeze Schedule Baseline
+                </button>
+              </div>
+            </div>
+
+            <div id="sched-gantt-container" style="border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; background: #FFFFFF; min-height: 520px; overflow-x: auto;">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+
+          <!-- TAB 5: DCMA 14-POINT QUALITY DIAGNOSTIC -->
+          <div id="sched-pane-dcma" class="sched-tab-pane" style="display: none;">
+            <div id="dcma-audit-container">
+              <div style="text-align: center; padding: 2.5rem; color: var(--muted);">Loading DCMA 14-Point Diagnostic...</div>
+            </div>
+          </div>
+
+
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 6: CONTROL SCHEDULE (PMBOK PROCESS 6.6)
+           ==================================================================== -->
+      <section id="view-6-control" class="workspace-view" style="display: none;">
+        <div style="margin-bottom: 1.5rem;">
+          <!-- Section Header & Controls Toolbar -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.2rem 1.6rem; box-shadow: var(--shadow-sm); margin-bottom: 1.2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+              <div>
+                <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); margin-bottom: 0.2rem;">
+                  PMBOK Process 6.6
+                </div>
+                <h3 style="margin: 0 0 0.4rem 0; font-size: 1.35rem; color: var(--charcoal);">
+                  6. Control Schedule — Operational Monitoring, Task Execution &amp; S-Curve
+                </h3>
+                <p style="margin: 0; color: var(--slate); font-size: 0.88rem; max-width: 820px; line-height: 1.5;">
+                  Monitor task execution states (Not Started, In-Progress, Completed, Verified by Controller), evaluate leading and lagging performance metrics against the approved baseline, and assess cumulative project progress using the Earned Value S-Curve.
+                </p>
+              </div>
+
+              <!-- Toolbar: Status Date & Actions -->
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 6px; background: #F8FAFC; border: 1px solid var(--border); padding: 5px 10px; border-radius: var(--radius-sm);">
+                  <label for="ctrl-status-date" style="font-size: 0.8rem; font-weight: 700; color: var(--charcoal); white-space: nowrap;">
+                    📅 Status Date:
+                  </label>
+                  <input type="date" id="ctrl-status-date" class="form-control" style="padding: 3px 8px; font-size: 0.82rem; font-weight: 600; width: 135px;">
+                  <button type="button" id="btn-ctrl-apply-date" class="btn btn-primary btn-sm" style="padding: 3px 9px;">Apply</button>
+                  <button type="button" id="btn-ctrl-today" class="btn btn-secondary btn-sm" style="padding: 3px 8px;" title="Reset to today's date">Today</button>
+                </div>
+                <button type="button" id="btn-ctrl-seed-progress" class="btn btn-secondary btn-sm" style="background: #EFF6FF; color: #2563EB; border-color: #BFDBFE;" title="Populate realistic sample progress across pre-production and production">
+                  🌟 Load Benchmark Progress
+                </button>
+                <button type="button" id="btn-ctrl-refresh" class="btn btn-secondary btn-sm" style="padding: 5px 10px;">
+                  🔄 Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Feedback Alert -->
+            <div id="ctrl-alert-msg" class="alert alert-success" style="display: none; margin-top: 1rem; margin-bottom: 0;"></div>
+          </div>
+
+          <!-- ================================================================
+               COLLAPSIBLE CONTROL SCHEDULE METRICS & KPI LEGEND GUIDE
+               ================================================================ -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 1.2rem; overflow: hidden; box-shadow: var(--shadow-sm);">
+            <div id="btn-toggle-ctrl-legend" style="padding: 0.75rem 1.2rem; background: #F8FAFC; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.1rem;">📖</span>
+                <strong style="color: var(--charcoal); font-size: 0.92rem;">Control Schedule KPIs, Earned Value &amp; Status Color Legend</strong>
+                <span class="badge badge-blue" style="font-size: 0.72rem;">PMBOK Guide</span>
+              </div>
+              <span id="ctrl-legend-chevron" style="color: var(--primary); font-weight: 700; font-size: 0.85rem;">Expand Guide ▾</span>
+            </div>
+
+            <div id="ctrl-legend-content" style="display: none; padding: 1.2rem 1.4rem;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                
+                <!-- Card 1: 4 Execution Status Colors -->
+                <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+                  <h5 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                    <span>🎨</span> 1. Task Execution Status Colors
+                  </h5>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.6;">
+                    <li><strong style="color: #475569;">⚪ White — Not Yet Started:</strong> Work has not commenced (0% completion). Activity is queued in the baseline schedule.</li>
+                    <li><strong style="color: #CA8A04;">🟡 Yellow — WIP (Work-in-Progress):</strong> Work has begun and is actively ongoing (1% to 99% completion). Actual start date recorded.</li>
+                    <li><strong style="color: #16A34A;">🟢 Green — Completed:</strong> Execution is 100% finished by the delivery team. Actual finish date recorded.</li>
+                    <li><strong style="color: #2563EB;">🔵 Blue — Completed &amp; Verified:</strong> Deliverable has been both finished (100%) and formally validated/signed off by the Controller.</li>
+                  </ul>
+                </div>
+
+                <!-- Card 2: Earned Value Metrics (EV, PV, SV, SPI) -->
+                <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+                  <h5 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                    <span>📐</span> 2. Earned Value KPIs (Schedule)
+                  </h5>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.6;">
+                    <li><strong>Planned Value (PV):</strong> Budgeted work scheduled up to the status date: <code>PV = Planned Progress × Duration</code>.</li>
+                    <li><strong>Earned Value (EV):</strong> Budgeted work actually accomplished: <code>EV = Actual Progress % × Duration</code>.</li>
+                    <li><strong>Schedule Variance (SV):</strong> <code>SV = EV - PV</code>. If SV &gt; 0, ahead of schedule; if SV &lt; 0, project is experiencing slippage.</li>
+                    <li><strong>Schedule Performance Index (SPI):</strong> <code>SPI = EV / PV</code>. Efficiency ratio. Target &ge; 1.00. SPI &lt; 1.0 indicates slower execution than planned.</li>
+                  </ul>
+                </div>
+
+                <!-- Card 3: Leading vs Lagging Indicators & Forecasting -->
+                <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+                  <h5 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                    <span>🔮</span> 3. Leading vs Lagging &amp; EAC Forecast
+                  </h5>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.6;">
+                    <li><strong>Leading Indicators (Predictive):</strong> Early warnings such as Forecast Finish (EAC<sub>t</sub> = Planned / SPI), Critical Path slippage projection, and Project Float buffer remaining.</li>
+                    <li><strong>Lagging Indicators (Historical):</strong> Measured results of past work: tasks completed, actual duration variance, and Controller verified deliverables.</li>
+                    <li><strong>Critical Path Slippage:</strong> Unrecovered delay on critical path activities directly extends total project finish date.</li>
+                  </ul>
+                </div>
+
+                <!-- Card 4: S-Curve Banana Envelope -->
+                <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem;">
+                  <h5 style="margin: 0 0 0.5rem 0; color: #1E293B; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                    <span>📈</span> 4. S-Curve &amp; Banana Envelope
+                  </h5>
+                  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--slate); line-height: 1.6;">
+                    <li><strong>Early Curve (PV Early):</strong> Cumulative progress if all activities start at their Early Start (ES). Represents aggressive schedule.</li>
+                    <li><strong>Late Curve (PV Late):</strong> Cumulative progress if all activities start at their Late Start (LS). Represents relaxed boundary.</li>
+                    <li><strong>Banana Envelope:</strong> The allowable execution area between Early and Late curves. EV within envelope = acceptable float usage. Below Late curve = severe slippage requiring recovery actions (fast-tracking/crashing).</li>
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               EXECUTIVE SCHEDULE HEALTH & VARIANCE OVERVIEW BANNER
+               ================================================================ -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 1.2rem;">
+            <!-- KPI 1: Overall Health Badge -->
+            <div class="kpi-card" id="ctrl-card-health" style="background: #FFFFFF; border-left: 4px solid #10B981;">
+              <div class="kpi-title" style="font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Schedule Health Status</div>
+              <div style="margin-top: 6px;">
+                <span id="ctrl-health-badge" class="badge" style="background: #D1FAE5; color: #065F46; border: 1px solid #10B981; font-size: 0.86rem; padding: 4px 10px;">
+                  ● On Schedule
+                </span>
+              </div>
+              <div id="ctrl-health-sub" style="font-size: 0.74rem; color: var(--slate); margin-top: 6px;">
+                Within acceptable performance tolerances
+              </div>
+            </div>
+
+            <!-- KPI 2: Schedule Performance Index (SPI = EV / PV) -->
+            <div class="kpi-card" style="background: #FFFFFF; border-left: 4px solid var(--primary);">
+              <div class="kpi-title" style="font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Schedule Performance Index (SPI)</div>
+              <div id="ctrl-kpi-spi" style="font-size: 1.65rem; font-weight: 800; color: var(--primary); margin: 3px 0;">1.00</div>
+              <div id="ctrl-spi-desc" style="font-size: 0.74rem; color: var(--slate);">
+                <code>SPI = EV / PV</code> (Target: &ge; 1.00)
+              </div>
+            </div>
+
+            <!-- KPI 3: Schedule Variance (SV = EV - PV) -->
+            <div class="kpi-card" style="background: #FFFFFF; border-left: 4px solid #F59E0B;">
+              <div class="kpi-title" style="font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Schedule Variance (SV)</div>
+              <div id="ctrl-kpi-sv" style="font-size: 1.65rem; font-weight: 800; color: #D97706; margin: 3px 0;">+0.0 d</div>
+              <div style="font-size: 0.74rem; color: var(--slate);">
+                <code>SV = EV - PV</code> (Days Ahead / Behind)
+              </div>
+            </div>
+
+            <!-- KPI 4: Cumulative Progress (Earned vs Planned) -->
+            <div class="kpi-card" style="background: #FFFFFF; border-left: 4px solid #8B5CF6;">
+              <div class="kpi-title" style="font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Cumulative Progress (EV %)</div>
+              <div id="ctrl-kpi-ev-pct" style="font-size: 1.65rem; font-weight: 800; color: #7C3AED; margin: 3px 0;">0.0%</div>
+              <div id="ctrl-kpi-pv-pct" style="font-size: 0.74rem; color: var(--slate);">
+                Planned: 0.0% at status date
+              </div>
+            </div>
+
+            <!-- KPI 5: Forecast Finish Date (EAC) -->
+            <div class="kpi-card" style="background: #FFFFFF; border-left: 4px solid #EC4899;">
+              <div class="kpi-title" style="font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Forecast Finish (EAC)</div>
+              <div id="ctrl-kpi-forecast-date" style="font-size: 1.25rem; font-weight: 800; color: #BE185D; margin: 5px 0;">2031-04-12</div>
+              <div id="ctrl-kpi-slippage-sub" style="font-size: 0.74rem; color: var(--slate);">
+                Slippage: 0.0 d vs baseline
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               LEADING VS LAGGING PMBOK INDICATORS CARDS
+               ================================================================ -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px; margin-bottom: 1.2rem;">
+            
+            <!-- GROUP 1: LEADING INDICATORS (PREDICTIVE / FUTURE TRENDS) -->
+            <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.2rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 0.6rem; margin-bottom: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 1.15rem;">🔮</span>
+                  <strong style="color: var(--charcoal); font-size: 0.95rem;">Leading Indicators (Predictive Trends)</strong>
+                </div>
+                <span class="badge badge-blue" style="font-size: 0.7rem;">Early Warnings</span>
+              </div>
+              <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.83rem; color: var(--slate); line-height: 1.8;">
+                <li>
+                  <strong>Forecast Duration (EAC<sub>t</sub>):</strong> 
+                  <span id="ctrl-lead-eac-days" style="font-weight: 700; color: var(--charcoal);">1,641.0 days</span>
+                  <span style="font-size: 0.75rem; color: var(--muted);">(Planned: 1,641.0 d)</span>
+                </li>
+                <li>
+                  <strong>Critical Path Slippage Forecast:</strong> 
+                  <span id="ctrl-lead-cp-slippage" style="font-weight: 700; color: #16A34A;">0.0 days delay projected</span>
+                </li>
+                <li>
+                  <strong>SPI Velocity Trend:</strong> 
+                  <span id="ctrl-lead-spi-velocity" style="font-weight: 700; color: var(--charcoal);">On Track (1.00x)</span>
+                </li>
+                <li>
+                  <strong>Project Float Buffer Remaining:</strong> 
+                  <span id="ctrl-lead-pf-rem" style="font-weight: 700; color: #2563EB;">+94.0 days</span>
+                  <span style="font-size: 0.75rem; color: var(--muted);">(Contract: 2031-07-15)</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- GROUP 2: LAGGING INDICATORS (HISTORICAL PERFORMANCE & TASK BREAKDOWN) -->
+            <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.2rem; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 0.6rem; margin-bottom: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 1.15rem;">📊</span>
+                  <strong style="color: var(--charcoal); font-size: 0.95rem;">Lagging Indicators (Completed Performance)</strong>
+                </div>
+                <span class="badge badge-gray" style="font-size: 0.7rem;">Past Metrics</span>
+              </div>
+              
+              <!-- 4-Color Status Distribution Bar -->
+              <div style="margin-bottom: 0.8rem;">
+                <div style="font-size: 0.76rem; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase;">
+                  Task Execution Statuses (4 PMBOK Categories):
+                </div>
+                <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 8px;">
+                  <div id="ctrl-bar-not-started" style="width: 100%; background: #E2E8F0;" title="Not Started (White)"></div>
+                  <div id="ctrl-bar-in-progress" style="width: 0%; background: #FCD34D;" title="Work-in-Progress (Yellow)"></div>
+                  <div id="ctrl-bar-completed" style="width: 0%; background: #4ADE80;" title="Completed (Green)"></div>
+                  <div id="ctrl-bar-verified" style="width: 0%; background: #60A5FA;" title="Completed & Verified (Blue)"></div>
+                </div>
+
+                <!-- 4 Color Pills requested by prompt -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; font-size: 0.76rem;">
+                  <div class="status-pill-not-started" style="padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>⚪ Not Started:</span>
+                    <strong id="ctrl-count-not-started">41 (100%)</strong>
+                  </div>
+                  <div class="status-pill-in-progress" style="padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>🟡 In-Progress:</span>
+                    <strong id="ctrl-count-in-progress">0 (0%)</strong>
+                  </div>
+                  <div class="status-pill-completed" style="padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>🟢 Completed:</span>
+                    <strong id="ctrl-count-completed">0 (0%)</strong>
+                  </div>
+                  <div class="status-pill-verified" style="padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>🔵 Verified:</span>
+                    <strong id="ctrl-count-verified">0 (0%)</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--slate); border-top: 1px dashed var(--border-light); padding-top: 6px;">
+                <span>Earned Effort: <strong id="ctrl-lag-ev-effort">0.0 d</strong></span>
+                <span>Planned Effort: <strong id="ctrl-lag-pv-effort">0.0 d</strong></span>
+                <span>Total Work: <strong id="ctrl-lag-total-effort">2,978.5 d</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               SEGMENTED TABS: EXECUTION NETWORK (4-COLOR), S-CURVE, MATRIX
+               ================================================================ -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-light); margin-bottom: 1.2rem; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="ctrl-tab-btn-pdm" class="ctrl-tab-btn active" data-tab="pdm" style="background: none; border: none; padding: 0.6rem 1.2rem; font-weight: 700; font-size: 0.92rem; color: var(--primary); border-bottom: 3px solid var(--primary); cursor: pointer;">
+                🔀 Execution Network Diagram (4-Color Status)
+              </button>
+              <button type="button" id="ctrl-tab-btn-kanban" class="ctrl-tab-btn" data-tab="kanban" style="background: none; border: none; padding: 0.6rem 1.2rem; font-weight: 600; font-size: 0.92rem; color: var(--slate); border-bottom: 3px solid transparent; cursor: pointer;">
+                📌 Kanban Execution Board
+              </button>
+              <button type="button" id="ctrl-tab-btn-scurve" class="ctrl-tab-btn" data-tab="scurve" style="background: none; border: none; padding: 0.6rem 1.2rem; font-weight: 600; font-size: 0.92rem; color: var(--slate); border-bottom: 3px solid transparent; cursor: pointer;">
+                📈 Project S-Curve Envelope
+              </button>
+              <button type="button" id="ctrl-tab-btn-matrix" class="ctrl-tab-btn" data-tab="matrix" style="background: none; border: none; padding: 0.6rem 1.2rem; font-weight: 600; font-size: 0.92rem; color: var(--slate); border-bottom: 3px solid transparent; cursor: pointer;">
+                📋 Activity Execution &amp; Variance Matrix
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB 1: EXECUTION NETWORK DIAGRAM (4-COLOR STATUS) -->
+          <div id="ctrl-pane-pdm" class="ctrl-tab-pane">
+            <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.4rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;">
+              <!-- Toolbar & Status Color Legend -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; flex-wrap: wrap; gap: 12px;">
+                <!-- 4 Status Color Legend Pills requested by user -->
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 0.78rem; font-weight: 700;">
+                  <span style="background: #FFFFFF; color: #334155; border: 2px solid #64748B; padding: 3px 9px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">⚪ White: Not Started</span>
+                  <span style="background: #FEF08A; color: #854D0E; border: 2px solid #CA8A04; padding: 3px 9px; border-radius: 4px;">🟡 Yellow: WIP (In-Progress)</span>
+                  <span style="background: #DCFCE7; color: #166534; border: 2px solid #16A34A; padding: 3px 9px; border-radius: 4px;">🟢 Green: Completed</span>
+                  <span style="background: #DBEAFE; color: #1E40AF; border: 2.5px solid #2563EB; padding: 3px 9px; border-radius: 4px;">🔵 Blue: Completed &amp; Verified</span>
+                </div>
+
+                <!-- Controls & Filter -->
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <select id="ctrl-pdm-filter-mode" style="padding: 4px 8px; font-size: 0.84rem; font-weight: 600; border: 1px solid var(--border); border-radius: 4px;">
+                    <option value="all">Show All 41 Activities</option>
+                    <option value="not_started">⚪ White: Not Started Only</option>
+                    <option value="in_progress">🟡 Yellow: WIP Only</option>
+                    <option value="completed">🟢 Green: Completed Only</option>
+                    <option value="verified">🔵 Blue: Verified Only</option>
+                    <option value="critical">🔥 Critical Path Only</option>
+                  </select>
+                  <button type="button" id="btn-ctrl-pdm-zoom-in" class="btn btn-secondary btn-sm" style="padding: 3px 8px;" title="Zoom In">🔍 +</button>
+                  <button type="button" id="btn-ctrl-pdm-zoom-out" class="btn btn-secondary btn-sm" style="padding: 3px 8px;" title="Zoom Out">🔍 -</button>
+                  <button type="button" id="btn-ctrl-pdm-fit" class="btn btn-secondary btn-sm" style="padding: 3px 8px;" title="Fit Graph">🎯 Fit</button>
+                </div>
+              </div>
+
+              <!-- PDM Network Canvas -->
+              <div id="ctrl-pdm-network-canvas" class="vis-container" style="border: 1px solid var(--border); border-radius: var(--radius-sm); min-height: 560px; background: #FAFAFA;"></div>
+
+              <!-- Network Interaction Guidance Footer -->
+              <div style="margin-top: 0.8rem; background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; font-size: 0.82rem; color: var(--slate); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <strong>Interactive Activity Execution Network:</strong> Activities are connected by their precedence dependencies (FS, SS, FF, SF).
+                  Box background and border reflect the <strong>4 execution states</strong>.
+                </div>
+                <div>
+                  <em style="color: var(--primary); font-weight: 600;">👆 Click any activity box to update status, progress %, actual dates, or Controller sign-off.</em>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: KANBAN EXECUTION BOARD -->
+          <div id="ctrl-pane-kanban" class="ctrl-tab-pane" style="display: none;">
+            <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.4rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.1rem; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <h4 style="margin: 0; font-size: 1.12rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px;">
+                    <span>📌</span> Interactive PMBOK Execution Kanban Board
+                  </h4>
+                  <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--muted);">
+                    Track and transition tasks across 4 workflow stages: Not Started (⚪), WIP (🟡), Completed (🟢), and Controlled (🔵). Click any card to inspect or update.
+                  </p>
+                </div>
+              </div>
+              <div id="ctrl-kanban-board-container"></div>
+            </div>
+          </div>
+
+          <!-- TAB 2: PROJECT S-CURVE ENVELOPE -->
+          <div id="ctrl-pane-scurve" class="ctrl-tab-pane" style="display: none;">
+            <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.4rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
+                <div>
+                  <h4 style="margin: 0 0 0.2rem 0; font-size: 1.12rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px;">
+                    <span>📈</span> Project S-Curve (Cumulative Progress Envelope vs Timeline)
+                  </h4>
+                  <p style="margin: 0; font-size: 0.82rem; color: var(--slate);">
+                    Compares cumulative planned progress over time through the <strong>Early Curve ($PV_{\text{Early}}$)</strong> and <strong>Late Curve ($PV_{\text{Late}}$)</strong>, forming the allowable execution envelope (Banana Curve), alongside the <strong>Actual Earned Progress ($EV$)</strong> curve and projected forecast.
+                  </p>
+                </div>
+
+                <!-- S-Curve Legend Pills & Export Toolbar -->
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 0.75rem; font-weight: 700;">
+                  <span style="background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; padding: 2px 7px; border-radius: 4px;">━ Early Curve (PV Early)</span>
+                  <span style="background: #FFF7ED; color: #EA580C; border: 1px solid #FFEDD5; padding: 2px 7px; border-radius: 4px;">━ Late Curve (PV Late)</span>
+                  <span style="background: #F0FDF4; color: #16A34A; border: 1.5px solid #22C55E; padding: 2px 7px; border-radius: 4px;">● Actual Earned (EV)</span>
+                  <span style="background: #FDF4FF; color: #9333EA; border: 1px dashed #C084FC; padding: 2px 7px; border-radius: 4px;">╌ Forecast Trajectory</span>
+                  <span style="background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; padding: 2px 7px; border-radius: 4px;">| Status Date</span>
+                </div>
+              </div>
+
+              <!-- Canvas wrapper -->
+              <div style="position: relative; width: 100%; min-height: 380px; max-height: 440px;">
+                <canvas id="control-scurve-canvas"></canvas>
+                <!-- SVG Fallback Chart Container -->
+                <div id="control-scurve-svg" style="display: none; width: 100%; min-height: 380px;"></div>
+              </div>
+
+              <!-- S-Curve Interpretation Guide Box -->
+              <div style="margin-top: 1rem; background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; font-size: 0.8rem; color: var(--slate); line-height: 1.5;">
+                <strong>PMBOK S-Curve Interpretation Guide:</strong>
+                The shaded area between the Early and Late curves forms the <strong>Schedule Envelope ("Banana Curve")</strong>.
+                If the <strong>Actual Curve (EV)</strong> remains inside this envelope, project execution is operating within allowable float reserves.
+                If the curve drops <em>below</em> the Late curve, schedule slippage is exceeding allowable tolerances and requires immediate corrective actions (e.g., fast-tracking or crashing). If it runs <em>above</em> the Early curve, the project is ahead of its aggressive schedule plan.
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: ACTIVITY EXECUTION & VARIANCE MATRIX -->
+          <div id="ctrl-pane-matrix" class="ctrl-tab-pane" style="display: none;">
+            <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.4rem; box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;">
+              <!-- Table Header & Filter Toolbar -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <h4 style="margin: 0 0 0.2rem 0; font-size: 1.12rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px;">
+                    <span>📋</span> Activity Execution, Controller Verification &amp; Variance Matrix
+                  </h4>
+                  <p style="margin: 0; font-size: 0.82rem; color: var(--slate);">
+                    Directly inspect and update the status of each task with the 4 PMBOK color states (White = Not Started, Yellow = Work-in-Progress, Green = Completed, Blue = Completed &amp; Verified).
+                  </p>
+                </div>
+
+                <!-- Filters Toolbar -->
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <input type="text" id="ctrl-filter-search" placeholder="🔍 Search Activity ID, Name, WP..." style="padding: 0.35rem 0.65rem; font-size: 0.84rem; border: 1px solid var(--border); border-radius: var(--radius-sm); min-width: 220px;">
+                  
+                  <select id="ctrl-filter-status" style="padding: 0.35rem 0.65rem; font-size: 0.84rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-weight: 600;">
+                    <option value="all">All Statuses (41)</option>
+                    <option value="not_started">⚪ White: Not Started</option>
+                    <option value="in_progress">🟡 Yellow: Work-in-Progress</option>
+                    <option value="completed">🟢 Green: Completed</option>
+                    <option value="verified">🔵 Blue: Completed &amp; Verified</option>
+                  </select>
+
+                  <select id="ctrl-filter-critical" style="padding: 0.35rem 0.65rem; font-size: 0.84rem; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                    <option value="all">All Activities</option>
+                    <option value="critical">🔥 Critical Path Only</option>
+                    <option value="near_critical">⚠️ Near-Critical Only</option>
+                    <option value="flexible">Flexible Only</option>
+                  </select>
+
+                  <span style="font-size: 0.8rem; color: var(--muted); margin-left: 4px;">
+                    Showing: <strong id="ctrl-filter-count">41</strong> activities
+                  </span>
+                </div>
+              </div>
+
+              <!-- Tasks Table Container -->
+              <div id="ctrl-tasks-table-container" class="table-responsive" style="max-height: 640px; overflow-y: auto;">
+                <!-- Rendered dynamically by pm_workspace.js -->
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           MODAL: ACTIVITY EXECUTION STATUS & CONTROLLER VERIFICATION
+           ==================================================================== -->
+      <div id="ctrl-activity-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-dialog" style="max-width: 600px;">
+          <div class="modal-header">
+            <div>
+              <h4 id="ctrl-modal-title" style="margin: 0; font-size: 1.15rem; color: var(--charcoal);">
+                ✏️ Update Activity Execution &amp; Controller Sign-off
+              </h4>
+              <p id="ctrl-modal-sub" style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--muted);">
+                Activity: ACT-1.1.1
+              </p>
+            </div>
+            <button id="btn-close-ctrl-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+          </div>
+          <form id="ctrl-activity-form">
+            <div class="modal-body" style="padding: 1.2rem 1.4rem;">
+              <input type="hidden" id="ctrl-modal-act-id">
+              
+              <!-- 1. Status Selection (4 colors) -->
+              <div class="form-group">
+                <label for="ctrl-modal-status" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal);">
+                  1. Execution Status: *
+                </label>
+                <select id="ctrl-modal-status" class="form-control" required style="font-weight: 700; font-size: 0.92rem;">
+                  <option value="not_started">⚪ White — Not Yet Started (0% Progress)</option>
+                  <option value="in_progress">🟡 Yellow — Work-in-Progress (1% to 99%)</option>
+                  <option value="completed">🟢 Green — Completed (100% Finished)</option>
+                  <option value="verified">🔵 Blue — Completed &amp; Verified (Controller Validated)</option>
+                </select>
+                <div id="ctrl-modal-status-desc" style="font-size: 0.78rem; color: var(--slate); margin-top: 4px;">
+                  Select the operational state. Controller validation requires signing off completed deliverables.
+                </div>
+              </div>
+
+              <!-- 2. Progress Percentage Slider -->
+              <div class="form-group" id="ctrl-modal-prog-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label for="ctrl-modal-progress" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal);">
+                    2. Completion Percentage:
+                  </label>
+                  <span id="ctrl-modal-prog-val" style="font-weight: 800; color: var(--primary); font-size: 0.92rem;">50%</span>
+                </div>
+                <input type="range" id="ctrl-modal-progress" min="0" max="100" step="5" value="50" style="width: 100%; accent-color: var(--primary);">
+              </div>
+
+              <!-- 3. Actual Dates -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                  <label for="ctrl-modal-act-start" style="font-size: 0.84rem; font-weight: 600; color: var(--charcoal);">
+                    Actual Start Date:
+                  </label>
+                  <input type="date" id="ctrl-modal-act-start" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="ctrl-modal-act-finish" style="font-size: 0.84rem; font-weight: 600; color: var(--charcoal);">
+                    Actual Finish Date:
+                  </label>
+                  <input type="date" id="ctrl-modal-act-finish" class="form-control">
+                </div>
+              </div>
+
+              <!-- 4. Deliverable Evidence / Completion Proof -->
+              <div class="form-group" id="ctrl-modal-proof-group" style="margin-top: 0.8rem;">
+                <label for="ctrl-modal-completion-proof" style="font-size: 0.84rem; font-weight: 700; color: var(--charcoal); display: flex; align-items: center; gap: 6px;">
+                  <span>📝</span> Deliverable Evidence / Completion Proof:
+                </label>
+                <textarea id="ctrl-modal-completion-proof" class="form-control" rows="2" placeholder="Text description / proof of deliverables produced..."></textarea>
+                <div style="font-size: 0.74rem; color: var(--muted); margin-top: 3px;">
+                  Text evidence supplied by members when requesting review, reviewed by Controllers.
+                </div>
+              </div>
+
+              <!-- 5. Controller Sign-off & Verification Checklist (for Blue / Verified state) -->
+              <div id="ctrl-modal-verify-group" style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius-sm); padding: 0.8rem; margin-top: 0.5rem;">
+                <label for="ctrl-modal-verified-by" style="font-size: 0.84rem; font-weight: 700; color: #1E40AF; display: flex; align-items: center; gap: 6px;">
+                  <span>🛡️</span> Controller Sign-off &amp; Approval:
+                </label>
+                <input type="text" id="ctrl-modal-verified-by" class="form-control" style="margin-top: 4px; font-size: 0.85rem;" placeholder="e.g. Sarah Williams (Lead Controller)">
+                <div style="font-size: 0.74rem; color: #1E3A8A; margin-top: 3px; margin-bottom: 8px;">
+                  Formal verification confirms that the work product meets all acceptance criteria.
+                </div>
+
+                <div style="border-top: 1px solid #BFDBFE; padding-top: 8px;">
+                  <label style="font-size: 0.82rem; font-weight: 700; color: #1E40AF; display: block; margin-bottom: 6px;">
+                    ☑️ Structured Verification Checklist (Acceptance Criteria):
+                  </label>
+                  <div id="ctrl-modal-checklist-container" class="checklist-group"></div>
+                  <div id="ctrl-modal-checklist-warning" style="display: none; color: #DC2626; font-size: 0.76rem; font-weight: 600; margin-top: 5px;">
+                    ⚠️ All verification criteria must be checked before confirming Controlled status.
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- 8. Variance / Operational Notes -->
+              <div class="form-group" style="margin-top: 0.8rem; margin-bottom: 0;">
+                <label for="ctrl-modal-notes" style="font-size: 0.84rem; font-weight: 600; color: var(--slate);">
+                  Variance Notes / Corrective Actions (Optional):
+                </label>
+                <textarea id="ctrl-modal-notes" class="form-control" rows="2" placeholder="e.g. Activity completed ahead of schedule due to analogous component reuse..."></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 0.8rem 1.4rem;">
+              <button type="button" id="btn-cancel-ctrl-modal" class="btn btn-secondary">Cancel</button>
+              <button type="submit" id="btn-save-ctrl-modal" class="btn btn-primary">💾 Save &amp; Update Schedule Model</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Generic Placeholder fallback for invalid views -->
+      <section id="view-placeholder" class="workspace-view" style="display: none;">
+        <div style="background: #FFFFFF; border: 1px dashed var(--border); border-radius: var(--radius-md); padding: 3.5rem 2rem; text-align: center; margin-top: 1.5rem;">
+          <div style="font-size: 2.8rem; margin-bottom: 0.8rem;">⚙️</div>
+          <h3 id="placeholder-title" style="margin: 0 0 0.5rem 0; color: var(--charcoal); font-size: 1.3rem;">Workspace View</h3>
+          <p id="placeholder-desc" style="margin: 0 auto; color: var(--muted); font-size: 0.92rem; max-width: 620px; line-height: 1.5;">
+            Select a Schedule Management process from the left sidebar navigation.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ========================================================================
+       PROJECT PERSONNEL & CONTROLLERS MODAL
+       ======================================================================== -->
+  <div id="personnel-modal" class="modal-overlay">
+    <div class="modal-dialog modal-dialog-large">
+      <div class="modal-header">
+        <h4 id="personnel-modal-title" style="margin: 0; font-size: 1.15rem;">Project Personnel & Team Assignments</h4>
+        <button id="btn-close-personnel-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+      <div class="modal-body" id="personnel-modal-body">
+        <!-- ── VIEW MODE CONTAINER ─────────────────────────────────────────── -->
+        <div id="personnel-view-container">
+          <p style="color: var(--slate); font-size: 0.88rem; margin-bottom: 1.2rem;">
+            Roster of all human resources allocated to this project, including Designated Controllers, Configured Teams, and Individual Contributors.
+          </p>
+
+          <!-- 1. Controllers Section -->
+          <div id="personnel-controllers-section" style="margin-bottom: 1.4rem;">
+            <h5 style="color: var(--charcoal); font-size: 0.95rem; margin-bottom: 0.6rem;">
+              🛡️ Project Controllers (Monitoring & Oversight)
+            </h5>
+            <div id="personnel-controllers-list"></div>
+          </div>
+
+          <!-- 2. Teams Section -->
+          <div id="personnel-teams-section" style="margin-bottom: 1.4rem;">
+            <h5 style="color: var(--charcoal); font-size: 0.95rem; margin-bottom: 0.6rem;">
+              🏢 Project Teams
+            </h5>
+            <div id="personnel-teams-list"></div>
+          </div>
+
+          <!-- 3. Unassigned Individuals Section -->
+          <div id="personnel-unassigned-section">
+            <h5 style="color: var(--charcoal); font-size: 0.95rem; margin-bottom: 0.6rem;">
+              👤 Individual Contributors (Not Assigned to Any Team)
+            </h5>
+            <div id="personnel-unassigned-list"></div>
+          </div>
+        </div>
+
+        <!-- ── EDIT MODE CONTAINER ─────────────────────────────────────────── -->
+        <div id="personnel-edit-container" style="display: none;">
+          <div id="personnel-edit-error" class="alert-box alert-danger" style="display: none; margin-bottom: 1.2rem;"></div>
+          <div id="personnel-edit-success" class="alert-box alert-green" style="display: none; margin-bottom: 1.2rem;"></div>
+
+          <p style="color: var(--slate); font-size: 0.88rem; margin-bottom: 1.2rem;">
+            Modify project human resources: rename or delete teams, add/remove team members, manage unassigned individual contributors, and adjust appointed controllers.
+          </p>
+
+          <!-- Edit Section 1: Teams Management -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; margin-bottom: 1.4rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+              <h5 style="margin: 0; font-size: 1rem; color: var(--charcoal);">
+                🏢 Teams Configuration
+              </h5>
+              <button type="button" id="btn-show-add-team" class="btn btn-outline-primary btn-sm">
+                ➕ Add New Team
+              </button>
+            </div>
+
+            <!-- Inline New Team Form -->
+            <div id="new-team-form-container" style="display: none; background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;">
+              <h6 style="margin: 0 0 0.6rem 0; font-size: 0.9rem; color: var(--charcoal);">Create a New Team</h6>
+              <div class="form-row">
+                <div class="form-group" style="flex: 2; margin-bottom: 0.5rem;">
+                  <label style="font-size: 0.82rem; margin-bottom: 3px;">Team Name*</label>
+                  <input type="text" id="input-new-team-name" placeholder="e.g. Frontend Engineering" style="padding: 0.5rem 0.75rem;">
+                </div>
+                <div class="form-group" style="flex: 1; display: flex; align-items: flex-end; gap: 6px; margin-bottom: 0.5rem;">
+                  <button type="button" id="btn-confirm-add-team" class="btn btn-primary btn-sm" style="height: 38px;">Create</button>
+                  <button type="button" id="btn-cancel-add-team" class="btn btn-secondary btn-sm" style="height: 38px;">Cancel</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- List of Editable Teams -->
+            <div id="edit-teams-list"></div>
+          </div>
+
+          <!-- Edit Section 2: Individual Contributors (Unassigned) -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; margin-bottom: 1.4rem;">
+            <div style="margin-bottom: 0.8rem;">
+              <h5 style="margin: 0; font-size: 1rem; color: var(--charcoal);">
+                👤 Individual Contributors (Not Assigned to Any Team)
+              </h5>
+              <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: var(--muted);">
+                Specialists working directly on the project outside of formal teams. (Controllers not on teams do not appear here).
+              </p>
+            </div>
+
+            <!-- Add Individual Contributor Form -->
+            <div style="display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;">
+              <select id="select-add-individual" style="flex: 1; min-width: 200px; padding: 0.5rem 0.75rem; font-size: 0.88rem;">
+                <option value="">Select contributor to add...</option>
+              </select>
+              <button type="button" id="btn-confirm-add-individual" class="btn btn-outline-primary btn-sm">
+                ➕ Add Individual
+              </button>
+            </div>
+
+            <!-- List of Unassigned Individuals -->
+            <div id="edit-unassigned-list"></div>
+          </div>
+
+          <!-- Edit Section 3: Project Controllers -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.2rem 1.4rem; margin-bottom: 1rem;">
+            <div style="margin-bottom: 0.8rem;">
+              <h5 style="margin: 0; font-size: 1rem; color: var(--charcoal);">
+                🛡️ Project Controllers
+              </h5>
+              <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: var(--muted);">
+                Individuals monitoring progress and status. Controllers assigned to teams also appear inside their team.
+              </p>
+            </div>
+
+            <!-- Add Controller Form -->
+            <div style="display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;">
+              <select id="select-add-controller" style="flex: 1; min-width: 200px; padding: 0.5rem 0.75rem; font-size: 0.88rem;">
+                <option value="">Select project member to appoint as controller...</option>
+              </select>
+              <button type="button" id="btn-confirm-add-controller" class="btn btn-outline-primary btn-sm">
+                ➕ Appoint Controller
+              </button>
+            </div>
+
+            <!-- List of Controllers -->
+            <div id="edit-controllers-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <div id="personnel-view-footer" style="display: flex; justify-content: flex-end; gap: 10px; width: 100%;">
+          <button id="btn-dismiss-personnel-modal" class="btn btn-secondary">Close</button>
+          <button id="btn-edit-personnel-modal" class="btn btn-primary">✏️ Edit</button>
+        </div>
+        <div id="personnel-edit-footer" style="display: none; justify-content: flex-end; gap: 10px; width: 100%;">
+          <button id="btn-cancel-edit-personnel" class="btn btn-secondary">Cancel</button>
+          <button id="btn-save-edit-personnel" class="btn btn-primary">💾 Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       WBS ELEMENT (ADD / EDIT) MODAL
+       ======================================================================== -->
+  <div id="wbs-element-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h4 id="wbs-modal-title" style="margin: 0; font-size: 1.15rem;">Add WBS Element</h4>
+        <button type="button" id="btn-close-wbs-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+      <form id="wbs-element-form">
+        <div class="modal-body">
+          <input type="hidden" id="wbs-edit-mode" value="add">
+          <input type="hidden" id="wbs-node-id" value="">
+          <input type="hidden" id="wbs-parent-id" value="">
+
+          <!-- Element Type Selector -->
+          <div class="form-group" id="group-wbs-type">
+            <label for="select-wbs-type" style="font-size: 0.88rem; font-weight: 600;">Element Type:</label>
+            <select id="select-wbs-type" class="form-control">
+              <option value="major_deliverable">Major Deliverable (Level 2)</option>
+              <option value="sub_deliverable">Sub-deliverable (Intermediate Node)</option>
+              <option value="work_package">Work Package (Terminal Leaf Node)</option>
+            </select>
+          </div>
+
+          <!-- Parent Node Selector (for Sub-deliverables and Work Packages) -->
+          <div class="form-group" id="group-parent-element" style="display: none;">
+            <label for="select-parent-element" style="font-size: 0.88rem; font-weight: 600;">Parent Deliverable / Container:</label>
+            <select id="select-parent-element" class="form-control"></select>
+          </div>
+
+          <!-- Name -->
+          <div class="form-group">
+            <label for="input-wbs-name" style="font-size: 0.88rem; font-weight: 600;">Element Name: *</label>
+            <input type="text" id="input-wbs-name" class="form-control" required placeholder="e.g. Core Engine, Game Design Document, Shader Pipeline">
+          </div>
+
+          <!-- Description -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="input-wbs-desc" style="font-size: 0.88rem; font-weight: 600;">Description (Optional):</label>
+            <textarea id="input-wbs-desc" class="form-control" rows="3" placeholder="Brief technical or operational description..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btn-cancel-wbs-modal" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="btn-submit-wbs-modal" class="btn btn-primary">Apply Element</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       ACTIVITY (ADD / EDIT) MODAL
+       ======================================================================== -->
+  <!-- ========================================================================
+       ACTIVITY / TASK (ADD / EDIT) MODAL
+       ======================================================================== -->
+  <div id="activity-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog modal-dialog-large">
+      <div class="modal-header">
+        <h4 id="activity-modal-title" style="margin: 0; font-size: 1.15rem;">Add Activity</h4>
+        <button type="button" id="btn-close-activity-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+      <form id="activity-form">
+        <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+          <input type="hidden" id="activity-edit-mode" value="add">
+          <input type="hidden" id="activity-edit-id" value="">
+          <input type="hidden" id="activity-target-wp-id" value="">
+
+          <div id="activity-modal-error" class="alert-box alert-danger" style="display: none; margin-bottom: 1rem;"></div>
+
+          <!-- Activity / Task Name -->
+          <div class="form-group">
+            <label for="input-activity-name" style="font-size: 0.88rem; font-weight: 600;">Activity Name: *</label>
+            <input type="text" id="input-activity-name" class="form-control" required placeholder="e.g. Implement Character Collision Physics">
+          </div>
+
+          <!-- Activity / Task Description -->
+          <div class="form-group">
+            <label for="input-activity-desc" style="font-size: 0.88rem; font-weight: 600;">Description (Optional):</label>
+            <textarea id="input-activity-desc" class="form-control" rows="2" placeholder="Actionable steps or technical notes..."></textarea>
+          </div>
+
+          <!-- Milestone Designation (Zero Duration) -->
+          <div class="form-group" style="background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: var(--radius-sm); padding: 0.65rem 0.9rem; margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; color: #5B21B6; margin: 0;">
+              <input type="checkbox" id="input-activity-is-milestone" style="accent-color: #7C3AED; width: 17px; height: 17px; cursor: pointer;">
+              <span>◆ Mark as Milestone (Zero Duration, 0 Days)</span>
+            </label>
+            <div style="font-size: 0.76rem; color: #6D28D9; margin-left: 25px; margin-top: 2px;">
+              Key project event or deliverable check-point. Visualized with diamond markers across Gantt &amp; PDM network diagrams.
+            </div>
+          </div>
+
+          <!-- Appointed Controller (Mandatory) -->
+          <div class="form-group" style="background: #F8FAFC; border: 1px solid var(--border); border-left: 3px solid #3B82F6; border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.2rem;">
+            <label for="select-activity-controller" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 4px;">
+              🛡️ Appointed Controller: *
+            </label>
+            <select id="select-activity-controller" class="form-control" required style="font-weight: 600;">
+              <option value="">Select an appointed project controller...</option>
+            </select>
+            <div style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">
+              Must be assigned to a Controller established at project inception.
+            </div>
+          </div>
+
+          <!-- Assigned Human Resources: Teams and Individuals -->
+          <div style="border-top: 1px solid var(--border-light); padding-top: 1rem; margin-bottom: 0.5rem;">
+            <div style="margin-bottom: 0.6rem;">
+              <h5 style="margin: 0; font-size: 0.95rem; color: var(--charcoal);">
+                👥 Resource Assignment (Teams & Individuals): *
+              </h5>
+              <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--muted);">
+                Assign one or more teams, one or more individuals, or any combination. Individuals who belong to a selected team cannot be selected separately.
+              </p>
+            </div>
+
+            <!-- Teams Assignment Checklist -->
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label style="font-size: 0.84rem; font-weight: 700; color: var(--slate); display: block; margin-bottom: 4px;">
+                🏢 Project Teams:
+              </label>
+              <div id="activity-teams-checkboxes" style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; max-height: 130px; overflow-y: auto;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Individuals Assignment Checklist -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="font-size: 0.84rem; font-weight: 700; color: var(--slate); display: block; margin-bottom: 4px;">
+                👤 Individual Contributors:
+              </label>
+              <div id="activity-users-checkboxes" style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem 0.8rem; max-height: 150px; overflow-y: auto;">
+                <!-- Populated dynamically -->
+              </div>
+              <div style="font-size: 0.76rem; color: var(--muted); margin-top: 4px;">
+                <em>Note: If an individual belongs to any of the selected teams above, they are automatically included via their team and disabled here.</em>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btn-cancel-activity-modal" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="btn-submit-activity-modal" class="btn btn-primary">Save Activity</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       ADD / EDIT DEPENDENCY MODAL
+       ======================================================================== -->
+  <div id="dependency-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h4 id="dependency-modal-title" style="margin: 0; font-size: 1.15rem; color: var(--charcoal);">Add Activity Precedence Dependency</h4>
+        <button type="button" id="btn-close-dependency-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+      <form id="dependency-form">
+        <div class="modal-body">
+          <input type="hidden" id="dependency-edit-index" value="-1">
+
+          <!-- Real-time Warning / Validation Banner inside modal -->
+          <div id="dependency-modal-alert" class="alert-box alert-danger" style="display: none; margin-bottom: 1rem; font-size: 0.85rem;"></div>
+
+          <!-- Predecessor (From Activity) -->
+          <div class="form-group">
+            <label for="select-dep-predecessor" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal);">
+              1. Predecessor Activity (From): *
+            </label>
+            <select id="select-dep-predecessor" class="form-control" required style="font-size: 0.88rem;">
+              <option value="">Select predecessor activity...</option>
+            </select>
+            <div style="font-size: 0.78rem; color: var(--muted); margin-top: 3px;">
+              The leading task whose completion or start governs the timing of the downstream successor.
+            </div>
+          </div>
+
+          <!-- Logical Relationship Type -->
+          <div class="form-group">
+            <label for="select-dep-type" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal);">
+              2. Precedence Relationship Type: *
+            </label>
+            <select id="select-dep-type" class="form-control" required style="font-weight: 600; font-size: 0.88rem;">
+              <option value="FS" selected>Finish-to-Start (FS)</option>
+              <option value="SS">Start-to-Start (SS)</option>
+              <option value="FF">Finish-to-Finish (FF)</option>
+              <option value="SF">Start-to-Finish (SF)</option>
+            </select>
+            <div id="dep-type-explanation" style="font-size: 0.78rem; color: var(--slate); margin-top: 4px;">
+              Activity A must be completed before Activity B can start (Most common).
+            </div>
+          </div>
+
+          <!-- Successor (To Activity) -->
+          <div class="form-group">
+            <label for="select-dep-successor" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal);">
+              3. Successor Activity (To): *
+            </label>
+            <select id="select-dep-successor" class="form-control" required style="font-size: 0.88rem;">
+              <option value="">Select successor activity...</option>
+            </select>
+            <div style="font-size: 0.78rem; color: var(--muted); margin-top: 3px;">
+              The dependent downstream task whose schedule is driven by the predecessor.
+            </div>
+          </div>
+
+          <!-- Lag in Days (Strictly >= 0) -->
+          <div class="form-group">
+            <label for="input-dep-lag" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal);">
+              4. Lag (Days):
+            </label>
+            <input type="number" id="input-dep-lag" class="form-control" min="0" step="0.5" value="0" required placeholder="0">
+            <div style="font-size: 0.78rem; color: var(--muted); margin-top: 3px;">
+              Offset in working days. Negative lags (lead times) are strictly blocked to preserve critical path validity.
+            </div>
+          </div>
+
+          <!-- Description / Justification -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="input-dep-desc" style="font-size: 0.88rem; font-weight: 600; color: var(--slate);">
+              Technical / Operational Justification (Optional):
+            </label>
+            <textarea id="input-dep-desc" class="form-control" rows="2" placeholder="e.g. Requires API documentation sign-off before frontend wiring begins..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btn-cancel-dependency-modal" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="btn-submit-dependency-modal" class="btn btn-primary">➕ Add Dependency Link</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       ANALOGOUS COMPLETED ACTIVITY PICKER MODAL
+       ======================================================================== -->
+  <div id="analogous-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog modal-dialog-large" style="max-width: 860px;">
+      <div class="modal-header">
+        <div>
+          <h4 id="analogous-modal-title" style="margin: 0; font-size: 1.15rem; color: var(--charcoal);">
+            📜 Analogous Estimating: Select Controller-Approved Completed Activity
+          </h4>
+          <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--muted);">
+            Only past activities that have been formally inspected, validated, and signed off by a Project Controller qualify for analogous duration benchmarking.
+          </p>
+        </div>
+        <button id="btn-close-analogous-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+      <div class="modal-body" style="max-height: 520px; overflow-y: auto; padding: 1.2rem 1.4rem;">
+        <div id="analogous-loading-spinner" style="text-align: center; padding: 2.5rem; color: var(--slate);">
+          ⏳ Fetching verified controller-approved completed activities from historical projects...
+        </div>
+        <div id="analogous-activities-list" style="display: none;"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" id="btn-cancel-analogous-modal" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       AI TEXT-TO-WBS MODAL (GOOGLE GEMINI FLASH)
+       ======================================================================== -->
+  <div id="ai-wbs-modal" class="modal-overlay" style="display: none; z-index: 10000;">
+    <div class="modal-dialog modal-dialog-large" style="max-width: 760px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; border-bottom: none; border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 1.2rem 1.5rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.4rem;">✨</span>
+            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">AI Text-to-WBS Generator</h4>
+            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">Google Gemini Flash (Free Tier)</span>
+          </div>
+          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #e0e7ff;">
+            Decompose unstructured project scopes, charters, and specifications into formal PMBOK Work Breakdown Structures.
+          </p>
+        </div>
+        <button id="btn-close-ai-wbs-modal" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #c7d2fe;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.4rem 1.6rem; max-height: 560px; overflow-y: auto;">
+        <!-- Context Card -->
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin-bottom: 1.2rem;">
+          <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: 0.5px;">Active Project Context</div>
+          <div id="ai-wbs-context-title" style="font-weight: 700; color: var(--charcoal); font-size: 0.95rem; margin-top: 2px;">—</div>
+          <div id="ai-wbs-context-desc" style="font-size: 0.82rem; color: var(--slate); margin-top: 2px;">—</div>
+        </div>
+
+        <!-- Scope Narrative Textarea -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label for="ai-wbs-scope-input" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal); display: flex; justify-content: space-between;">
+            <span>1. Project Scope Narrative / Requirements Text <span style="color: #ef4444;">*</span></span>
+            <span style="font-size: 0.78rem; font-weight: 400; color: var(--muted);">Paste project charter, meeting notes, or specs</span>
+          </label>
+          <textarea id="ai-wbs-scope-input" class="form-control" rows="5" placeholder="e.g. Develop an enterprise customer relationship and billing management platform. Scope includes database architecture and migrations, multi-tenant authentication, automated invoicing pipeline, real-time analytics dashboard, payment gateway integration, and SOC 2 security compliance audit..." style="font-size: 0.88rem; line-height: 1.5;"></textarea>
+        </div>
+
+        <!-- Custom Prompt Instructions -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label for="ai-wbs-prompt-input" style="font-size: 0.88rem; font-weight: 600; color: var(--slate);">
+            2. Custom Instructions / Focus Areas (Optional):
+          </label>
+          <input type="text" id="ai-wbs-prompt-input" class="form-control" placeholder="e.g. Prioritize API security, payment integrations, and deployment milestones..." style="font-size: 0.88rem;">
+        </div>
+
+        <!-- Insertion Mode: Smart Merge vs Replace -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 6px;">
+            3. WBS Insertion Strategy:
+          </label>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; cursor: pointer;">
+              <input type="radio" name="ai-wbs-mode" value="merge" checked>
+              <span><strong>Smart Merge & Append (Recommended)</strong> — Preserves existing deliverables & activities</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; cursor: pointer;">
+              <input type="radio" name="ai-wbs-mode" value="replace">
+              <span style="color: #b91c1c;"><strong>Replace Entire WBS</strong> — Recreates baseline from scratch</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Optional Gemini API Key input -->
+        <div style="background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label for="ai-wbs-api-key" style="font-size: 0.8rem; font-weight: 700; color: #475569; margin: 0;">
+              🔑 Google Gemini API Key (Optional — 100% Free):
+            </label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="font-size: 0.75rem; color: #4338ca; text-decoration: underline;">
+              Get Free Key from Google AI Studio &nearr;
+            </a>
+          </div>
+          <input type="password" id="ai-wbs-api-key" class="form-control" placeholder="Leave empty to use server .env key, or paste your free Gemini key here" style="font-size: 0.82rem; font-family: monospace;">
+        </div>
+
+        <!-- Live Dynamic Progress Tracker -->
+        <div id="ai-wbs-loading" style="display: none; background: #f8fafc; border: 1px solid #c7d2fe; border-radius: var(--radius-sm); padding: 1.2rem 1.4rem; margin-top: 1rem; box-shadow: 0 4px 12px rgba(99,102,241,0.08);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="ai-spinner" style="display: inline-block; width: 18px; height: 18px; border: 2.5px solid #c7d2fe; border-top-color: #4f46e5; border-radius: 50%; animation: aiSpin 0.8s linear infinite;"></span>
+              <span id="ai-wbs-step-title" style="font-weight: 700; color: #3730a3; font-size: 0.92rem;">
+                Step 1/3: Connecting to Google Gemini AI...
+              </span>
+            </div>
+            <span id="ai-wbs-step-pct" style="font-size: 0.82rem; font-weight: 700; color: #4f46e5;">30%</span>
+          </div>
+          <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 8px;">
+            <div id="ai-wbs-progress-bar" style="width: 30%; height: 100%; background: linear-gradient(90deg, #4f46e5, #7c3aed, #06b6d4); border-radius: 999px; transition: width 0.5s ease;"></div>
+          </div>
+          <div id="ai-wbs-step-detail" style="font-size: 0.8rem; color: #64748b; font-style: italic;">
+            Analyzing project scope narrative and preparing PMBOK WBS decomposition...
+          </div>
+        </div>
+
+        <!-- Error Alert with Retry -->
+        <div id="ai-wbs-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 0.9rem 1.1rem; color: #991b1b; font-size: 0.88rem; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="ai-wbs-error-msg" style="flex: 1;"></div>
+            <button type="button" id="btn-retry-ai-wbs" class="btn btn-outline-danger btn-sm" style="margin-left: 10px; font-weight: 700;">
+              🔄 Retry
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid var(--border);">
+        <button type="button" id="btn-cancel-ai-wbs" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="btn-submit-ai-wbs" class="btn btn-primary" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: none; font-weight: 700; padding: 0.65rem 1.5rem; box-shadow: 0 2px 6px rgba(99,102,241,0.4);">
+          ✨ Synthesize & Insert WBS
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       AI DCMA 14-POINT PERT ESTIMATOR MODAL
+       ======================================================================== -->
+  <div id="ai-estimate-modal" class="modal-overlay" style="display: none; z-index: 10000;">
+    <div class="modal-dialog modal-dialog-large" style="max-width: 720px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; border-bottom: none; border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 1.2rem 1.5rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.4rem;">✨</span>
+            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">AI DCMA 14-Point PERT Estimator</h4>
+            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">Google Gemini Flash (Free Tier)</span>
+          </div>
+          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #e0e7ff;">
+            Calculates realistic 3-point duration estimates (a, m, b) compliant with DCMA Metric 6 (durations &le; 44d).
+          </p>
+        </div>
+        <button id="btn-close-ai-estimate-modal" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #c7d2fe;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.4rem 1.6rem; max-height: 560px; overflow-y: auto;">
+        <!-- Context Card -->
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin-bottom: 1.2rem;">
+          <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: 0.5px;">Estimation Scope</div>
+          <div id="ai-estimate-context-stats" style="font-weight: 700; color: var(--charcoal); font-size: 0.95rem; margin-top: 2px;">
+            Targeting all activities lacking 3-point estimates or with default values
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <span class="badge badge-indigo" style="font-size: 0.75rem;">DCMA Metric 6: Durations &le; 44 Days</span>
+            <span class="badge badge-emerald" style="font-size: 0.75rem;">PERT Beta Distribution: &mu; = (a+4m+b)/6</span>
+          </div>
+        </div>
+
+        <!-- Custom Guidance Input -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label for="ai-estimate-prompt-input" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal);">
+            Project Manager Guidance / Technical Velocity (Optional):
+          </label>
+          <textarea id="ai-estimate-prompt-input" class="form-control" rows="3" placeholder="e.g. Senior engineering team with high domain velocity; apply tighter duration ranges for core development. Third-party vendor integrations carry moderate delivery uncertainty..." style="font-size: 0.88rem; line-height: 1.5;"></textarea>
+        </div>
+
+        <!-- Optional Gemini API Key input -->
+        <div style="background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label for="ai-estimate-api-key" style="font-size: 0.8rem; font-weight: 700; color: #475569; margin: 0;">
+              🔑 Google Gemini API Key (Optional — 100% Free):
+            </label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="font-size: 0.75rem; color: #4338ca; text-decoration: underline;">
+              Get Free Key from Google AI Studio &nearr;
+            </a>
+          </div>
+          <input type="password" id="ai-estimate-api-key" class="form-control" placeholder="Leave empty to use server .env key, or paste your free Gemini key here" style="font-size: 0.82rem; font-family: monospace;">
+        </div>
+
+        <!-- Live Dynamic Progress Tracker -->
+        <div id="ai-estimate-loading" style="display: none; background: #f8fafc; border: 1px solid #c7d2fe; border-radius: var(--radius-sm); padding: 1.2rem 1.4rem; margin-top: 1rem; box-shadow: 0 4px 12px rgba(99,102,241,0.08);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="ai-spinner" style="display: inline-block; width: 18px; height: 18px; border: 2.5px solid #c7d2fe; border-top-color: #4f46e5; border-radius: 50%; animation: aiSpin 0.8s linear infinite;"></span>
+              <span id="ai-estimate-step-title" style="font-weight: 700; color: #3730a3; font-size: 0.92rem;">
+                Step 1/3: Contacting Gemini AI Engine...
+              </span>
+            </div>
+            <span id="ai-estimate-step-pct" style="font-size: 0.82rem; font-weight: 700; color: #4f46e5;">30%</span>
+          </div>
+          <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 8px;">
+            <div id="ai-estimate-progress-bar" style="width: 30%; height: 100%; background: linear-gradient(90deg, #4f46e5, #7c3aed, #06b6d4); border-radius: 999px; transition: width 0.5s ease;"></div>
+          </div>
+          <div id="ai-estimate-step-detail" style="font-size: 0.8rem; color: #64748b; font-style: italic;">
+            Evaluating activities against DCMA 14-Point Metric 6 guidelines...
+          </div>
+        </div>
+
+        <!-- Error Alert with Retry -->
+        <div id="ai-estimate-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 0.9rem 1.1rem; color: #991b1b; font-size: 0.88rem; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="ai-estimate-error-msg" style="flex: 1;"></div>
+            <button type="button" id="btn-retry-ai-estimate" class="btn btn-outline-danger btn-sm" style="margin-left: 10px; font-weight: 700;">
+              🔄 Retry
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid var(--border);">
+        <button type="button" id="btn-cancel-ai-estimate" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="btn-submit-ai-estimate" class="btn btn-primary" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: none; font-weight: 700; padding: 0.65rem 1.5rem; box-shadow: 0 2px 6px rgba(99,102,241,0.4);">
+          ✨ Calculate & Apply Estimates
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       AI PRECEDENCE DEPENDENCY EXTRACTOR MODAL
+       ======================================================================== -->
+  <div id="ai-dependency-modal" class="modal-overlay" style="display: none; z-index: 10000;">
+    <div class="modal-dialog modal-dialog-large" style="max-width: 740px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; border-bottom: none; border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 1.2rem 1.5rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.4rem;">✨</span>
+            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">AI Precedence Dependency Extractor</h4>
+            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">Google Gemini Flash (Free Tier)</span>
+          </div>
+          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #e0e7ff;">
+            Infers logical relationships (FS, SS, FF, SF) and non-negative lags from scope narratives, validating against circular loops.
+          </p>
+        </div>
+        <button id="btn-close-ai-dependency-modal" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #c7d2fe;">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.4rem 1.6rem; max-height: 560px; overflow-y: auto;">
+        <!-- Context Card -->
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin-bottom: 1.2rem;">
+          <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: 0.5px;">Network Precedence Engine</div>
+          <div id="ai-dependency-context-stats" style="font-weight: 700; color: var(--charcoal); font-size: 0.95rem; margin-top: 2px;">
+            Connecting available project activities into a cycle-free CPM schedule network
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <span class="badge badge-emerald" style="font-size: 0.75rem;">DCMA Metric 2: Non-Negative Lags Only</span>
+            <span class="badge badge-indigo" style="font-size: 0.75rem;">Kahn's Cycle Detection Guaranteed</span>
+          </div>
+        </div>
+
+        <!-- Workflow / Handoff Narrative Input -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label for="ai-dep-narrative-input" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal);">
+            Workflow & Sequencing Narrative (Optional):
+          </label>
+          <textarea id="ai-dep-narrative-input" class="form-control" rows="4" placeholder="e.g. System architecture and database schema design must be finalized before core API development can start. Frontend dashboard and backend services can proceed in parallel (SS with 2 days lag). User acceptance testing requires all security audits to complete..." style="font-size: 0.88rem; line-height: 1.5;"></textarea>
+        </div>
+
+        <!-- Custom Prompt Instructions -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label for="ai-dep-prompt-input" style="font-size: 0.88rem; font-weight: 600; color: var(--slate);">
+            Sequencing Rules / Focus (Optional):
+          </label>
+          <input type="text" id="ai-dep-prompt-input" class="form-control" placeholder="e.g. Prefer linear Finish-to-Start handoffs between major deliverables..." style="font-size: 0.88rem;">
+        </div>
+
+        <!-- Optional Gemini API Key input -->
+        <div style="background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label for="ai-dep-api-key" style="font-size: 0.8rem; font-weight: 700; color: #475569; margin: 0;">
+              🔑 Google Gemini API Key (Optional — 100% Free):
+            </label>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="font-size: 0.75rem; color: #4338ca; text-decoration: underline;">
+              Get Free Key from Google AI Studio &nearr;
+            </a>
+          </div>
+          <input type="password" id="ai-dep-api-key" class="form-control" placeholder="Leave empty to use server .env key, or paste your free Gemini key here" style="font-size: 0.82rem; font-family: monospace;">
+        </div>
+
+        <!-- Live Dynamic Progress Tracker -->
+        <div id="ai-dep-loading" style="display: none; background: #f8fafc; border: 1px solid #c7d2fe; border-radius: var(--radius-sm); padding: 1.2rem 1.4rem; margin-top: 1rem; box-shadow: 0 4px 12px rgba(99,102,241,0.08);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="ai-spinner" style="display: inline-block; width: 18px; height: 18px; border: 2.5px solid #c7d2fe; border-top-color: #4f46e5; border-radius: 50%; animation: aiSpin 0.8s linear infinite;"></span>
+              <span id="ai-dep-step-title" style="font-weight: 700; color: #3730a3; font-size: 0.92rem;">
+                Step 1/3: Analyzing Narrative with Gemini AI...
+              </span>
+            </div>
+            <span id="ai-dep-step-pct" style="font-size: 0.82rem; font-weight: 700; color: #4f46e5;">30%</span>
+          </div>
+          <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 8px;">
+            <div id="ai-dep-progress-bar" style="width: 30%; height: 100%; background: linear-gradient(90deg, #4f46e5, #7c3aed, #06b6d4); border-radius: 999px; transition: width 0.5s ease;"></div>
+          </div>
+          <div id="ai-dep-step-detail" style="font-size: 0.8rem; color: #64748b; font-style: italic;">
+            Extracting dependency pairs and testing cycle freedom with Kahn's algorithm...
+          </div>
+        </div>
+
+        <!-- Error Alert with Retry -->
+        <div id="ai-dep-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-sm); padding: 0.9rem 1.1rem; color: #991b1b; font-size: 0.88rem; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="ai-dep-error-msg" style="flex: 1;"></div>
+            <button type="button" id="btn-retry-ai-dep" class="btn btn-outline-danger btn-sm" style="margin-left: 10px; font-weight: 700;">
+              🔄 Retry
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid var(--border);">
+        <button type="button" id="btn-cancel-ai-dep" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="btn-submit-ai-dep" class="btn btn-primary" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: none; font-weight: 700; padding: 0.65rem 1.5rem; box-shadow: 0 2px 6px rgba(99,102,241,0.4);">
+          ✨ Extract & Apply Dependencies
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes aiSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script type="module" src="/js/pm_workspace.js?v=8"></script>
+  <script type="module" src="/js/ai-modals.js?v=8"></script>
+</body>
+</html>

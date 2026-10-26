@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncFlow | Project Manager Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Left Sidebar: Profile & Controls -->
+    <aside class="sidebar" id="pm-profile-sidebar">
+      <!-- Injected by auth.js renderProfileSidebar -->
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div class="brand-header">
+        <div class="brand-logo-group">
+          <span class="brand-icon">⚡</span>
+          <div>
+            <div class="brand-title">SyncFlow</div>
+            <div class="brand-subtitle">Project Initiation & Governance Setup</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="pm-notification-bell-container"></div>
+          <div id="pm-header-badge"></div>
+        </div>
+      </div>
+
+      <!-- Executive Portfolio Overview Container -->
+      <div id="portfolio-dashboard-container" style="margin-bottom: 1.8rem;"></div>
+
+      <!-- Action Toolbar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h2 style="margin: 0; font-size: 1.35rem; color: var(--charcoal);">📁 Project Catalog & Workspaces</h2>
+          <p style="margin: 0.2rem 0 0 0; font-size: 0.88rem; color: var(--muted);">
+            Manage, initialize, and monitor active schedule management workspaces.
+          </p>
+        </div>
+        <button id="btn-open-create-modal" class="btn btn-primary" style="padding: 0.75rem 1.4rem;">
+          ➕ Create a New Project from Scratch
+        </button>
+      </div>
+
+      <!-- Projects Grid Container -->
+      <div id="projects-container">
+        <p style="color: var(--muted); padding: 2rem 0; text-align: center;">Loading project portfolio...</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Centered Error Alert (for 4-second transient notifications) -->
+  <div id="center-error-container"></div>
+
+  <!-- ========================================================================
+       TWO-STAGE PROJECT CREATION MODAL / WIZARD
+       ======================================================================== -->
+  <div id="create-project-modal" class="modal-overlay">
+    <div class="modal-dialog modal-dialog-large">
+      <div class="modal-header">
+        <div>
+          <div id="wizard-step-indicator" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <!-- Step indicator dynamically updated -->
+          </div>
+          <h3 id="wizard-modal-title" style="margin: 0; font-size: 1.25rem;">Initiate a New Project</h3>
+        </div>
+        <button id="btn-close-create-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+
+      <div class="modal-body" id="wizard-modal-body">
+        <!-- ── STAGE 1: CHARTER & GOVERNANCE SETUP ──────────────────────────── -->
+        <div id="stage-1-container">
+          <p style="font-size: 0.9rem; color: var(--slate); margin-bottom: 1.2rem;">
+            Define project charter parameters, timeline start date, and resource assignment governance before assembling teams.
+          </p>
+
+          <div id="stage-1-error" class="alert-box alert-danger" style="display: none; margin-bottom: 1rem;"></div>
+
+          <div class="form-group">
+            <label for="create-proj-name">Project Name*</label>
+            <input type="text" id="create-proj-name" placeholder="e.g. NextGen Core Banking Transformation" required>
+          </div>
+
+          <div class="form-group">
+            <label for="create-proj-desc">Description (Optional)</label>
+            <textarea id="create-proj-desc" placeholder="Project scope, objectives, boundary constraints, and key deliverables..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="create-proj-date">Start Date*</label>
+            <input type="date" id="create-proj-date" required>
+            <span style="font-size: 0.78rem; color: var(--muted); margin-top: 2px; display: block;">
+              Project Start Date cannot be in the past. Defaults to today.
+            </span>
+          </div>
+
+          <!-- Team Membership Governance Card (Prominent & High Visibility) -->
+          <div class="governance-card">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.35rem;">
+              <span style="font-size: 1.5rem;">🛡️</span>
+              <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700;">Team Membership Governance</h4>
+            </div>
+            <p style="margin: 0 0 1rem 0; font-size: 0.95rem; color: var(--slate);">
+              Configure whether project human resources can be assigned to multiple teams simultaneously.
+            </p>
+
+            <label class="checkbox-group">
+              <input type="checkbox" id="cb-allow-multiteam">
+              <span class="checkbox-label">Allow personnel to belong to more than one team</span>
+            </label>
+
+            <div id="gov-feedback-single" class="alert-box alert-amber">
+              <span style="font-size: 1.3rem;">🔒</span>
+              <div>
+                <strong>Single-Team Assignment Active:</strong> Contributors already assigned to a team (or registered as unassigned contributors) cannot be assigned to another team.
+              </div>
+            </div>
+
+            <div id="gov-feedback-multi" class="alert-box alert-blue" style="display: none;">
+              <span style="font-size: 1.3rem;">🔓</span>
+              <div>
+                <strong>Multi-Team Membership Enabled:</strong> Contributors can be assigned to multiple teams across this project simultaneously.
+              </div>
+            </div>
+          </div>
+
+          <!-- Project Participation & Membership Policy Card -->
+          <div class="governance-card" style="margin-top: 1.2rem;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.35rem;">
+              <span style="font-size: 1.5rem;">🚪</span>
+              <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700;">Project Participation &amp; Membership Policy</h4>
+            </div>
+            <p style="margin: 0 0 1rem 0; font-size: 0.95rem; color: var(--slate);">
+              Define whether team members can join automatically upon search, or if PM confirmation is required.
+            </p>
+
+            <label class="checkbox-group">
+              <input type="checkbox" id="cb-open-participation">
+              <span class="checkbox-label">Enable Open Participation (Immediate Self-Enrollment)</span>
+            </label>
+
+            <div id="part-feedback-approval" class="alert-box alert-amber">
+              <span style="font-size: 1.3rem;">🛡️</span>
+              <div>
+                <strong>Approval Required:</strong> When users discover and request to join this project, you will receive a notification to confirm or decline their access.
+              </div>
+            </div>
+
+            <div id="part-feedback-open" class="alert-box alert-blue" style="display: none;">
+              <span style="font-size: 1.3rem;">🌐</span>
+              <div>
+                <strong>Open Participation Active:</strong> Team members can freely join this project immediately via search without generating join requests or notifications.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STAGE 2: PERSONNEL & TEAM ALLOCATION ────────────────────────── -->
+        <div id="stage-2-container" style="display: none;">
+          <!-- Active Project Charter Summary Bar with Back Button -->
+          <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem 1.4rem; margin-bottom: 1.4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                Active Project Charter
+              </div>
+              <div id="stage2-summary-name" style="font-size: 1.2rem; font-weight: 800; color: var(--charcoal); margin: 2px 0;">
+                Untitled Project
+              </div>
+              <div style="display: flex; gap: 14px; align-items: center; font-size: 0.88rem; color: var(--slate); flex-wrap: wrap;">
+                <span>📅 Start Date: <strong id="stage2-summary-date">-</strong></span>
+                <span>🛡️ Policy: <span id="stage2-summary-badge"></span></span>
+              </div>
+            </div>
+            <div>
+              <button id="btn-back-to-stage-1" class="btn btn-secondary btn-sm" title="Change Project Name, Start Date, or Governance policy. Returning will wipe personnel/team assignments.">
+                ⬅️ Back to Project Setup
+              </button>
+              <div style="font-size: 0.75rem; color: #DC2626; margin-top: 3px;">
+                ⚠️ Returning wipes personnel allocation.
+              </div>
+            </div>
+          </div>
+
+          <!-- Locked Governance Policy Banner -->
+          <div id="stage2-locked-gov-banner" style="margin-bottom: 1.2rem;"></div>
+
+          <!-- Project Manager Auto-Assignment Info -->
+          <div class="alert-box alert-blue" style="margin-bottom: 1.4rem;">
+            <span>ℹ️</span>
+            <div>
+              <strong>Project Manager Auto-Assignment:</strong> You are automatically registered as the Project Manager for this workspace and excluded from candidate pickers.
+            </div>
+          </div>
+
+          <!-- Team Builder Section -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.3rem 1.5rem; margin-bottom: 1.4rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+              <h4 style="margin: 0; font-size: 1.05rem;">🏢 Section 2.A: Team Assembly</h4>
+              <button id="btn-import-reusable-teams" class="btn btn-outline-primary btn-sm">
+                📚 Import from Reusable Teams Library
+              </button>
+            </div>
+
+            <!-- Team Creation Form -->
+            <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1.1rem; margin-bottom: 1.2rem;">
+              <div class="form-group">
+                <label for="team-name-input">Team Name*</label>
+                <input type="text" id="team-name-input" placeholder="e.g. Core Engineering Team">
+              </div>
+
+              <!-- Dynamic Role Filter and Candidate Selection -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="team-role-filter">Filter by Role (Dynamic)</label>
+                  <select id="team-role-filter">
+                    <option value="All Roles">All Roles</option>
+                  </select>
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                  <button type="button" id="btn-add-all-filtered" class="btn btn-secondary btn-block" style="padding: 0.65rem 0.85rem;">
+                    ➕ Add All Filtered
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Select Team Members:</label>
+                <div id="team-candidate-picker-container" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem; background: #FFFFFF;">
+                  <!-- Checkbox candidate items -->
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 0.8rem;">
+                <label for="team-lead-select">Designate Team Lead (Optional):</label>
+                <select id="team-lead-select" style="width: 100%; padding: 0.5rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem;">
+                  <option value="">(None / No Designated Lead)</option>
+                </select>
+                <span style="font-size: 0.76rem; color: var(--muted); display: block; margin-top: 3px;">
+                  Designated leads receive an assignment notification and are authorized to submit completed activities for review.
+                </span>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" id="btn-cancel-team-edit" class="btn btn-secondary btn-sm" style="display: none;">Cancel Edit</button>
+                <button type="button" id="btn-confirm-team" class="btn btn-primary btn-sm">
+                  Add Team
+                </button>
+              </div>
+            </div>
+
+            <!-- Configured Teams Display -->
+            <div id="configured-teams-list">
+              <!-- Dynamically populated teams cards -->
+            </div>
+          </div>
+
+          <!-- Unassigned Individual Contributors Pool -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.3rem 1.5rem; margin-bottom: 1.4rem;">
+            <h4 style="margin: 0 0 0.4rem 0; font-size: 1.05rem;">👤 Section 2.A.2: Unassigned Individual Contributors</h4>
+            <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 0.8rem;">
+              Assign individual specialists to this project who will operate independently outside of formal teams.
+            </p>
+            <div id="unassigned-candidates-container" style="max-height: 160px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem; background: #FFFFFF;">
+              <!-- Unassigned checkboxes -->
+            </div>
+          </div>
+
+          <!-- Step 2.B: Project Controllers -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.3rem 1.5rem; margin-bottom: 1.4rem;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.4rem;">
+              <span style="font-size: 1.3rem;">🛡️</span>
+              <h4 style="margin: 0; font-size: 1.05rem;">Step 2.B: Project Controllers (Monitoring & Oversight)</h4>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--slate); margin-bottom: 1rem; line-height: 1.45;">
+              <strong>Controllers</strong> are responsible for monitoring project progress, overseeing operations, and reporting status directly to the Project Manager.
+              <br/>
+              <em>Note: Controllers may be appointed from any project human resources (even if they already belong to a team under single-team restrictions).</em>
+            </p>
+
+            <!-- PM as Lead Controller -->
+            <div id="pm-lead-controller-badge" class="alert-box alert-green" style="margin-bottom: 1rem;">
+              <span style="font-size: 1.3rem;">⭐</span>
+              <div>
+                <strong id="lead-controller-name">Lead Controller: Project Manager</strong>
+                <div style="font-size: 0.8rem; color: #15803D; margin-top: 1px;">
+                  The creating Project Manager is automatically designated as a permanent Controller.
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Appoint Additional Project Controllers:</label>
+              <div id="controllers-picker-container" style="max-height: 160px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem; background: #FFFFFF;">
+                <!-- Controller checkboxes -->
+              </div>
+              <div id="controllers-count-caption" style="font-size: 0.82rem; color: var(--muted); margin-top: 4px;">
+                ℹ️ Total Designated Controllers: <strong>1</strong> (⭐ 1 Lead PM)
+              </div>
+            </div>
+          </div>
+
+          <!-- Roster Health KPI Summary -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.1rem 1.5rem; margin-bottom: 1.4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
+            <div>
+              <div style="font-size: 0.78rem; color: var(--muted); font-weight: 700; text-transform: uppercase;">
+                Roster Health
+              </div>
+              <div id="roster-health-summary" style="font-size: 1rem; font-weight: 700; color: var(--charcoal); margin-top: 2px;">
+                🏢 0 Teams • 👤 0 Unassigned • 🛡️ 1 Controller • ⭐ 1 PM
+              </div>
+            </div>
+            <div style="background: var(--primary-light); border: 1px solid var(--primary-border); color: var(--primary-hover); font-weight: 700; font-size: 0.95rem; padding: 6px 16px; border-radius: 20px;">
+              👥 Total Personnel: <span id="total-personnel-count">1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <!-- Stage 1 Footer Buttons -->
+        <div id="stage-1-footer-buttons" style="display: flex; gap: 10px; width: 100%; justify-content: flex-end;">
+          <button id="btn-cancel-stage-1" class="btn btn-secondary">Cancel & Return</button>
+          <button id="btn-proceed-stage-2" class="btn btn-primary">Proceed to Personnel & Team Allocation ➔</button>
+        </div>
+
+        <!-- Stage 2 Footer Buttons -->
+        <div id="stage-2-footer-buttons" style="display: none; gap: 10px; width: 100%; justify-content: flex-end;">
+          <button id="btn-cancel-stage-2" class="btn btn-secondary">Cancel & Return</button>
+          <button id="btn-init-project" class="btn btn-primary">🚀 Initialize Project & Open Workspace</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Project Confirmation Modal -->
+  <div id="delete-project-modal" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-light); padding-bottom: 0.9rem;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--danger-bg); color: var(--danger); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+            🗑️
+          </div>
+          <h4 style="margin: 0; font-size: 1.15rem; color: var(--charcoal);">Delete Project?</h4>
+        </div>
+        <button id="btn-close-delete-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 1.1rem; padding-bottom: 1.1rem;">
+        <p style="font-size: 0.92rem; color: var(--slate); margin-bottom: 0.6rem; line-height: 1.45;">
+          Are you sure you want to delete project <strong id="delete-modal-project-name" style="color: var(--charcoal);"></strong>?
+        </p>
+        <p style="font-size: 0.82rem; color: var(--muted); margin: 0; line-height: 1.4;">
+          This will permanently remove the project and its activities, dependencies, and team configurations from the database. This action cannot be reversed.
+        </p>
+        <div id="delete-modal-error" class="alert-box alert-danger" style="display: none; margin-top: 0.9rem;"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button id="btn-cancel-delete" class="btn btn-secondary">Cancel</button>
+        <button id="btn-confirm-delete" class="btn" style="background-color: #DC2626; color: #FFFFFF; border: none; font-weight: 600;">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/pm_dashboard.js"></script>
+</body>
+</html>

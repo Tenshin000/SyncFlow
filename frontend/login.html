@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncFlow | Authentication</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="brand-header" style="border-bottom: none; margin-bottom: 1.2rem; padding-bottom: 0;">
+        <div class="brand-logo-group">
+          <span class="brand-icon">⚡</span>
+          <div>
+            <div class="brand-title">SyncFlow</div>
+            <div class="brand-subtitle">Project Schedule Intelligence Platform</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <h3 style="margin: 0; font-size: 1.35rem; color: var(--charcoal);">Sign In to Your Workspace</h3>
+        <p style="margin-top: 0.25rem; font-size: 0.88rem; color: var(--muted);">
+          Enter your credentials to access your projects and operational agenda.
+        </p>
+      </div>
+
+      <div id="login-error-alert" class="alert-box alert-danger" style="display: none; margin-bottom: 1.2rem;"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username*</label>
+          <input type="text" id="username" placeholder="e.g. pm_alice" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password*</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="password-toggle-btn" data-target="password" aria-label="Show password" title="Show password">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 1.2rem;">
+          <a href="#" id="link-forgot-pw" style="color: var(--primary); font-size: 0.85rem; text-decoration: none; font-weight: 600;">
+            Forgot Password?
+          </a>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block" style="padding: 0.75rem 1rem;">
+          Sign In
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.8rem; border-top: 1px solid var(--border-light); padding-top: 1.2rem; font-size: 0.88rem; color: var(--slate);">
+        Don't have an account yet? 
+        <a href="/signup.html" style="color: var(--primary); font-weight: 700; text-decoration: none; margin-left: 4px;">
+          Create an Account
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgot-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h4 style="margin: 0;">Reset Your Password</h4>
+        <button id="btn-close-forgot" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: var(--slate);">
+          Enter your registered username or email address below to receive password reset instructions.
+        </p>
+        <div class="form-group">
+          <label for="forgot-identifier">Username or Email</label>
+          <input type="text" id="forgot-identifier" placeholder="e.g. pm_alice or user@company.com">
+        </div>
+        <div id="forgot-status" style="font-size: 0.88rem; margin-top: 0.5rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-submit-forgot" class="btn btn-primary">Send Reset Link</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/login.js"></script>
+</body>
+</html>

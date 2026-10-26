@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncFlow | Account Registration</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card auth-card-wide">
+      <div class="brand-header" style="border-bottom: none; margin-bottom: 0.8rem; padding-bottom: 0;">
+        <div class="brand-logo-group">
+          <span class="brand-icon">⚡</span>
+          <div>
+            <div class="brand-title">SyncFlow</div>
+            <div class="brand-subtitle">Account Registration & Organization Onboarding</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.4rem;">
+        <h3 style="margin: 0; font-size: 1.35rem; color: var(--charcoal);">Create Your Account</h3>
+        <p style="margin-top: 0.25rem; font-size: 0.88rem; color: var(--muted);">
+          Complete the profile below to join your project workspaces.
+        </p>
+      </div>
+
+      <div id="signup-error-alert" class="alert-box alert-danger" style="display: none; margin-bottom: 1.2rem;"></div>
+      <div id="signup-success-alert" class="alert-box alert-green" style="display: none; margin-bottom: 1.2rem;"></div>
+
+      <!-- Step 1: Mandatory Project Manager Question -->
+      <div class="form-group" style="background: #F1F5F9; border-radius: var(--radius-sm); padding: 1rem 1.2rem; margin-bottom: 1.4rem;">
+        <label for="select-is-pm" style="font-size: 0.95rem; font-weight: 700; color: var(--charcoal); margin-bottom: 0.35rem;">
+          Are you a Project Manager?*
+        </label>
+        <select id="select-is-pm" required style="font-weight: 600;">
+          <option value="" disabled selected>Select Option</option>
+          <option value="yes">Yes — I manage projects and schedules</option>
+          <option value="no">No — I contribute as an individual team member</option>
+        </select>
+        <span style="font-size: 0.8rem; color: var(--muted); margin-top: 4px; display: block;">
+          Project Managers automatically receive full project leadership and administrative permissions.
+        </span>
+      </div>
+
+      <!-- Registration Form (Revealed once PM choice is made) -->
+      <form id="signup-form" style="display: none;">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="first-name">First Name*</label>
+            <input type="text" id="first-name" placeholder="e.g. John" required autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label for="last-name">Last Name*</label>
+            <input type="text" id="last-name" placeholder="e.g. Doe" required autocomplete="family-name">
+          </div>
+        </div>
+
+        <!-- Gender between last_name and username as required -->
+        <div class="form-group">
+          <label for="gender">Gender*</label>
+          <select id="gender" required>
+            <option value="" disabled selected>Select Option</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-username">Username*</label>
+            <input type="text" id="reg-username" placeholder="e.g. jdoe" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="reg-role">Role*</label>
+            <input type="text" id="reg-role" placeholder="e.g. Developer, Data Analyst, Controller" required>
+            <div id="pm-role-info" style="display: none; font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-top: 4px;">
+              ℹ️ Your role is automatically set to Project Manager.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-password">Password*</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="reg-password" placeholder="At least 6 characters" required autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" data-target="reg-password" aria-label="Show password" title="Show password">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password*</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="confirm-password" placeholder="Repeat your password" required autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" data-target="confirm-password" aria-label="Show password" title="Show password">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="date-of-birth">Date of Birth*</label>
+            <input type="date" id="date-of-birth" required>
+            <span style="font-size: 0.78rem; color: var(--muted); margin-top: 2px; display: block;">
+              Cannot be in the future or older than 130 years.
+            </span>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address*</label>
+            <input type="email" id="email" placeholder="e.g. john.doe@company.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="mobile-phone">Mobile Phone (Optional)</label>
+          <input type="tel" id="mobile-phone" placeholder="e.g. +1-555-0144" autocomplete="tel">
+        </div>
+
+        <button type="submit" id="btn-signup-submit" class="btn btn-primary btn-block" style="padding: 0.8rem 1rem; margin-top: 0.8rem;">
+          Complete Registration
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.8rem; border-top: 1px solid var(--border-light); padding-top: 1.2rem; font-size: 0.88rem; color: var(--slate);">
+        Already have an account? 
+        <a href="/login.html" style="color: var(--primary); font-weight: 700; text-decoration: none; margin-left: 4px;">
+          Sign In
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/signup.js"></script>
+</body>
+</html>
