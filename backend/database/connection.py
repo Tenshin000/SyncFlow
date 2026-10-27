@@ -7,7 +7,6 @@ from backend.config import settings
 
 logger = logging.getLogger(__name__)
 
-
 class DatabaseConnection:
     """Singleton MongoDB Client Connection Manager."""
     

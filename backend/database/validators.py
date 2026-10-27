@@ -1,7 +1,4 @@
-"""
-MongoDB JSON Schema Validation Rules.
-Defines $jsonSchema specifications for the 'users' and 'projects' collections.
-"""
+"""SyncFlow - MongoDB JSON Schema Validation Rules. Defines $jsonSchema specifications for the 'users' and 'projects' collections."""
 
 ASSIGNMENT_TYPES = ["User", "Team"]
 
@@ -17,9 +14,7 @@ DEPENDENCY_TYPES = [
     "NULL",
 ]
 
-# ==============================================================================
-# 1. USERS COLLECTION VALIDATOR SCHEMA
-# ==============================================================================
+# USERS COLLECTION VALIDATOR SCHEMA
 USERS_COLLECTION_VALIDATOR = {
     "$jsonSchema": {
         "bsonType": "object",
@@ -74,9 +69,8 @@ USERS_COLLECTION_VALIDATOR = {
     }
 }
 
-# ==============================================================================
-# 2. PROJECTS COLLECTION VALIDATOR SCHEMA
-# ==============================================================================
+
+# PROJECTS COLLECTION VALIDATOR SCHEMA
 PROJECTS_COLLECTION_VALIDATOR = {
     "$jsonSchema": {
         "bsonType": "object",

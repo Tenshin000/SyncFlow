@@ -1,5 +1,5 @@
 /**
- * SyncFlow Frontend – Authentication & Session Management Module
+ * SyncFlow Frontend - Authentication & Session Management Module
  * Manages user session state, route protection, transient center alerts,
  * and the unified Profile View/Edit side menu.
  */
@@ -105,6 +105,9 @@ export function renderProfileSidebar(containerElement, user, onUpdateCallback = 
   let isEditing = false;
   let originalData = { ...user };
 
+  /**
+   * Internal render function to generate the profile sidebar HTML in read or edit mode.
+   */
   function render() {
     const fn = user.first_name || "";
     const ln = user.last_name || "";

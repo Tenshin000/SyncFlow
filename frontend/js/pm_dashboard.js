@@ -1,5 +1,5 @@
 /**
- * SyncFlow Frontend – Project Manager Dashboard & Two-Stage Project Creation Wizard
+ * SyncFlow Frontend - Project Manager Dashboard & Two-Stage Project Creation Wizard
  * High-performance Vanilla JavaScript implementation replacing Streamlit UI.
  */
 
@@ -117,14 +117,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Mount project notification bell
   initNotificationBell("#pm-notification-bell-container", activeUser, null);
 
-  function openProjectWorkspace(projId) {
+  /**
+ * Navigates to the PM Workspace for the selected project.
+ */
+function openProjectWorkspace(projId) {
     if (projId) {
       sessionStorage.setItem("active_project_id", projId);
       window.location.href = "/project_manager/workspace.html";
     }
   }
 
-  function renderProjectCard(p) {
+  /**
+ * Generates HTML card markup for a project summary on the dashboard grid.
+ */
+function renderProjectCard(p) {
     const pid = p.id || p._id;
     const pName = p.name || "Untitled Project";
     const escapedName = pName.replace(/"/g, '&quot;');
@@ -167,7 +173,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Load Projects Portfolio
-  async function loadPortfolio() {
+  /**
+ * Fetches all projects created by current PM and renders the project grid.
+ */
+async function loadPortfolio() {
     projectsContainer.innerHTML = `<p style="color: var(--muted); padding: 2rem 0; text-align: center;">Loading project portfolio...</p>`;
     const { data: projects, error } = await fetchProjects(pmId);
 
@@ -208,7 +217,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  function openDeleteConfirmation(projId, projName) {
+  /**
+ * Opens confirmation modal to delete a project.
+ */
+function openDeleteConfirmation(projId, projName) {
     projectToDelete = { id: projId, name: projName };
     if (deleteModalProjName) deleteModalProjName.textContent = `"${projName}"`;
     if (deleteModalError) {
@@ -222,7 +234,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (deleteModal) deleteModal.style.display = "flex";
   }
 
-  function closeDeleteConfirmation() {
+  /**
+ * Closes project deletion confirmation modal.
+ */
+function closeDeleteConfirmation() {
     projectToDelete = null;
     if (deleteModal) deleteModal.style.display = "none";
   }
@@ -260,10 +275,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ── Multi-Project Executive Portfolio Overview ─────────────────────────────
+  // Multi-Project Executive Portfolio Overview
   const portfolioContainer = document.getElementById("portfolio-dashboard-container");
 
-  async function loadExecutivePortfolio() {
+  /**
+ * Loads aggregated portfolio metrics (PV, EV, SV, SPI) and cross-project health.
+ */
+async function loadExecutivePortfolio() {
     if (!portfolioContainer) return;
     portfolioContainer.innerHTML = `<div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; text-align: center; color: var(--muted); font-size: 0.88rem;">📊 Loading Executive Portfolio Overview...</div>`;
     const { data: pf, error } = await fetchPortfolioDashboard(pmId);
@@ -403,9 +421,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadPortfolio();
   loadExecutivePortfolio();
 
-  // ============================================================================
   // TWO-STAGE PROJECT CREATION WIZARD STATE & LOGIC
-  // ============================================================================
   let wizardStage = 1;
   let allUsersCache = [];
   let configuredTeams = [];
@@ -415,7 +431,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   let draftTeamMemberIds = [];
 
   // Open & Close Modal
-  function openCreateWizard() {
+  /**
+ * Opens the project creation wizard modal.
+ */
+function openCreateWizard() {
     wizardStage = 1;
     resetStage1Inputs();
     resetStage2Personnel();
@@ -423,7 +442,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     createModal.style.display = "flex";
   }
 
-  function closeCreateWizard() {
+  /**
+ * Closes the project creation wizard modal.
+ */
+function closeCreateWizard() {
     createModal.style.display = "none";
     resetStage1Inputs();
     resetStage2Personnel();
@@ -434,7 +456,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   btnCancelStage1.addEventListener("click", closeCreateWizard);
   btnCancelStage2.addEventListener("click", closeCreateWizard);
 
-  function resetStage1Inputs() {
+  /**
+ * Resets Stage 1 inputs (Name, Scope, Start Date, Governance flags).
+ */
+function resetStage1Inputs() {
     inputProjName.value = "";
     inputProjDesc.value = "";
     inputProjDate.value = todayStr;
@@ -453,7 +478,10 @@ document.addEventListener("DOMContentLoaded", async () => {
    * Resets all personnel, team assignments, and controllers.
    * Preserves Project Name, Description, and Start Date when returning to Stage 1.
    */
-  function resetStage2Personnel() {
+  /**
+ * Resets Stage 2 personnel selections (Teams, Individual Members, Controllers).
+ */
+function resetStage2Personnel() {
     configuredTeams = [];
     unassignedUserIds = [];
     designatedControllerIds = [pmId];
@@ -524,7 +552,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderWizardStage();
   });
 
-  function renderWizardStage() {
+  /**
+ * Renders current wizard stage (Stage 1 Charter vs Stage 2 Personnel).
+ */
+function renderWizardStage() {
     if (wizardStage === 1) {
       stepIndicator.innerHTML = `
         <span class="badge badge-blue">Step 1 of 2: Charter & Governance</span>
@@ -583,10 +614,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ============================================================================
-  // STAGE 2: TEAM BUILDER, DYNAMIC ROLE FILTERING & CONTROLLERS
-  // ============================================================================
-  function getGloballyBlockedIds() {
+  // Stage 2: TEAM BUILDER, DYNAMIC ROLE FILTERING & CONTROLLERS
+  /**
+ * Computes set of user IDs blocked when multi-team assignment is disabled.
+ */
+function getGloballyBlockedIds() {
     if (cbAllowMultiTeam.checked) return new Set();
 
     const blocked = new Set();
@@ -601,7 +633,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     return blocked;
   }
 
-  function renderTeamBuilderSection() {
+  /**
+ * Renders interactive team builder controls inside the creation wizard.
+ */
+function renderTeamBuilderSection() {
     const blocked = getGloballyBlockedIds();
     const availableForTeam = allUsersCache.filter(u => !blocked.has(String(u.id || u._id)));
 
@@ -633,7 +668,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderConfiguredTeamsList();
   }
 
-  function renderTeamLeadOptions(selectedLeadId = "") {
+  /**
+ * Renders dropdown options for selecting designated team lead.
+ */
+function renderTeamLeadOptions(selectedLeadId = "") {
     if (!selectTeamLead) return;
     let html = `<option value="">(None / No Designated Lead)</option>`;
     draftTeamMemberIds.forEach(uid => {
@@ -646,7 +684,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectTeamLead.innerHTML = html;
   }
 
-  function renderTeamCandidates() {
+  /**
+ * Renders available user candidates eligible for team membership.
+ */
+function renderTeamCandidates() {
     const blocked = getGloballyBlockedIds();
     const filterRole = selectTeamRole.value || "All Roles";
     const draftSet = new Set(draftTeamMemberIds.map(String));
@@ -765,7 +806,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderTeamBuilderSection();
   });
 
-  function renderConfiguredTeamsList() {
+  /**
+ * Renders the list of configured teams with member counts and removal triggers.
+ */
+function renderConfiguredTeamsList() {
     if (configuredTeams.length === 0) {
       configuredTeamsList.innerHTML = `<p style="font-size: 0.85rem; color: var(--muted); margin: 0.6rem 0;">No teams assembled yet.</p>`;
       return;
@@ -864,8 +908,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateRosterKPI();
   });
 
-  // Section 2.A.2: Unassigned Individual Contributors Pool
-  function renderUnassignedSection() {
+  // Unassigned Individual Contributors Pool
+  /**
+ * Renders individual contributor selection checkboxes.
+ */
+function renderUnassignedSection() {
     const isMulti = cbAllowMultiTeam.checked;
     const allocatedToTeams = new Set();
     if (!isMulti) {
@@ -908,8 +955,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Section 2.B: Project Controllers
-  function renderControllersSection() {
+  // Project Controllers
+  /**
+ * Renders project controller selection checkboxes.
+ */
+function renderControllersSection() {
     // Controllers can be chosen from any user (even if already in a team!)
     let itemsHtml = "";
     allUsersCache.forEach(u => {
@@ -940,7 +990,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  function updateRosterKPI() {
+  /**
+ * Updates total allocated headcount and personnel KPIs in the wizard sidebar.
+ */
+function updateRosterKPI() {
     const uniqueIds = new Set();
     uniqueIds.add(pmId); // PM always included
 
@@ -961,9 +1014,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ============================================================================
   // PROJECT SUBMISSION & INITIALIZATION
-  // ============================================================================
   btnInitProject.addEventListener("click", async () => {
     btnInitProject.disabled = true;
     btnInitProject.textContent = "Initializing Project...";

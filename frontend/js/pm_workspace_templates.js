@@ -1,8 +1,13 @@
 /**
- * SyncFlow Frontend – Project Manager Workspace UI Templates (pm_workspace_templates.js)
+ * SyncFlow Frontend - Project Manager Workspace UI Templates (pm_workspace_templates.js)
  * Encapsulates HTML templates and table generators for PMBOK workspace views.
  */
 
+import { formatDurationSeconds } from "./utility.js";
+
+/**
+ * Generates HTML markup for the overall DCMA 14-Point score banner and summary grid.
+ */
 export function renderDcmaScoreCardHtml({ score, grade, gradeColor, passCount, warnCount, failCount, cardsHtml }) {
   return `
     <div class="dcma-score-card">
@@ -26,6 +31,9 @@ export function renderDcmaScoreCardHtml({ score, grade, gradeColor, passCount, w
   `;
 }
 
+/**
+ * Generates HTML markup for an individual DCMA metric card with status, violations count, and culprits list.
+ */
 export function renderDcmaCardHtml({ m, statusPillClass, statusLabel, violationsCount, ratioDisplay, thresholdDisplay, culpritsHtml }) {
   return `
     <div class="dcma-card ${m.status}">
@@ -44,6 +52,9 @@ export function renderDcmaCardHtml({ m, statusPillClass, statusLabel, violations
 }
 
 
+/**
+ * Generates HTML table row markup for an activity in the Develop Schedule CPM matrix table.
+ */
 export function renderScheduleMatrixRowHtml(r, rowClass, badgeHtml) {
   return `
     <tr class="${rowClass}">
@@ -72,6 +83,9 @@ export function renderScheduleMatrixRowHtml(r, rowClass, badgeHtml) {
   `;
 }
 
+/**
+ * Generates HTML table row markup for duration estimation (Beta PERT, Parametric, Analogous, Single-Point).
+ */
 export function renderEstimateRowHtml({ aid, act, wpName, tech, inputsHtml, te, sigma, varVal, isCrit, pathBadge, sigmaBadgeColor }) {
   return `
     <tr data-row-id="${aid}" style="${isCrit ? 'background: #FFFBFB;' : ''}">
@@ -110,6 +124,9 @@ export function renderEstimateRowHtml({ aid, act, wpName, tech, inputsHtml, te, 
   `;
 }
 
+/**
+ * Generates HTML table row markup for an operational activity in the Control Project view.
+ */
 export function renderControlTaskRowHtml(a, statusPillClass, statusIcon, statusText, cpBadge, svColor) {
   return `
     <tr style="border-bottom: 1px solid var(--border-light); vertical-align: middle;">
@@ -167,6 +184,9 @@ export function renderControlTaskRowHtml(a, statusPillClass, statusIcon, statusT
         </select>
         <button type="button" class="btn btn-secondary btn-sm btn-edit-act-ctrl" data-act-id="${a.activity_id}" title="Edit detailed dates and controller sign-off" style="padding: 2px 7px; font-size: 0.78rem;">
           ✏️
+        </button>
+        <button type="button" class="btn btn-outline-primary btn-sm btn-view-act-timelogs" data-act-id="${a.activity_id}" title="Inspect logged time and contributor history" style="padding: 2px 7px; font-size: 0.78rem; font-weight: 700; margin-left: 3px; white-space: nowrap;">
+          ⏱️ ${formatDurationSeconds(a.total_logged_seconds || 0)}
         </button>
       </td>
     </tr>

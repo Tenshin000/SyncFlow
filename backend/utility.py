@@ -1,5 +1,5 @@
 """
-SyncFlow Backend – Shared Utility Module (`backend/utility.py`).
+SyncFlow Backend - Shared Utility Module (`backend/utility.py`).
 Houses reusable helpers for MongoDB ObjectIds, date/calendar calculations,
 document sanitization, and PERT statistical mathematics across backend routers and models.
 """
@@ -9,10 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from bson import ObjectId
 
 
-# ==============================================================================
 # 1. MONGODB OBJECTID & QUERY HELPERS
-# ==============================================================================
-
 def to_object_id(val: Any) -> Any:
     """Converts a value to bson.ObjectId if valid, otherwise returns stripped string or None."""
     if val is None:
@@ -28,12 +25,7 @@ def build_id_query(val: Any, id_field: str = "_id") -> Dict[str, Any]:
     return {id_field: to_object_id(val)}
 
 
-
-
-# ==============================================================================
 # 2. DATE PARSING, FORMATTING & WORKING CALENDAR HELPERS
-# ==============================================================================
-
 def parse_date(date_val: Any) -> Optional[date]:
     """Safely parses a datetime.date from datetime, date, or ISO/YYYY-MM-DD string."""
     if not date_val:
@@ -110,10 +102,7 @@ def get_nearest_business_day(
     return add_working_days(base_dt, 0.0, w_days, holidays).strftime("%Y-%m-%d")
 
 
-# ==============================================================================
 # 3. DOCUMENT & WBS SANITIZATION
-# ==============================================================================
-
 def clean_mongo_doc(val: Any) -> Any:
     """Recursively serializes datetimes, dates, and ObjectIds to JSON-safe primitives."""
     if isinstance(val, (datetime, date)):
@@ -127,10 +116,7 @@ def clean_mongo_doc(val: Any) -> Any:
     return val
 
 
-# ==============================================================================
 # 4. PERT STATISTICAL MATHEMATICS
-# ==============================================================================
-
 def calculate_pert_statistics(
     optimistic: float,
     most_likely: float,

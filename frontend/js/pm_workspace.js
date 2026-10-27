@@ -1,5 +1,5 @@
 /**
- * SyncFlow Frontend – Project Manager Workspace Controller (pm_workspace.js)
+ * SyncFlow Frontend - Project Manager Workspace Controller (pm_workspace.js)
  * Controls the 6 PMBOK process views, Plan Schedule Management,
  * Personnel modal with Controllers, and Vis-Network graph visualizations.
  */
@@ -27,7 +27,9 @@ import {
   fetchDcmaQuality,
   aiGenerateWbs,
   aiEstimateDurations,
-  aiExtractDependencies
+  aiExtractDependencies,
+  fetchActivityTimeLogs,
+  fetchProjectTimeLogsSummary
 } from "./api.js";
 import { requireAuth, logout } from "./auth.js";
 import { renderWbsTree, renderNetworkDiagram } from "./visualizations.js";
@@ -45,6 +47,7 @@ import {
   formatDateYmd,
   escapeHtml,
   CONTROLLER_CHECKLIST,
+  formatDurationSeconds,
   showTransientAlert
 } from "./utility.js";
 
@@ -200,7 +203,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userMap = new Map();
   allUsers.forEach(u => userMap.set(String(u.id || u._id), u));
 
-  function resolveUser(uidOrHandle) {
+  /**
+ * Resolves a user object by ID, username, or display name from cached project roster.
+ */
+function resolveUser(uidOrHandle) {
     const key = String(uidOrHandle);
     if (userMap.has(key)) return userMap.get(key);
     // Search by username
@@ -224,7 +230,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   inputDescription.value = project.description || "";
 
   // Helper to re-calculate stats
-  function updateProjectPersonnelStats() {
+  /**
+ * Recalculates and updates headcount statistics for teams, individual members, and controllers.
+ */
+function updateProjectPersonnelStats() {
     const teams = project.teams || [];
     const assignedUsers = project.assigned_user_ids || [];
     const distinctPersonnel = new Set(assignedUsers.map(String));
@@ -258,15 +267,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 3500);
   });
 
-  // ============================================================================
+  
   // PERSONNEL & CONTROLLERS MODAL: VIEW & EDIT IMPLEMENTATION
-  // ============================================================================
+  
   const isPM = Boolean(user.is_admin) || (user.role && user.role.trim() === "Project Manager") || (String(user.id || user._id) === String(project.created_by || ""));
   if (btnEditPersonnelModal) {
     btnEditPersonnelModal.style.display = isPM ? "inline-block" : "none";
   }
 
-  function renderPersonnelView() {
+  /**
+ * Renders the read-only Personnel Overview tab (Section 1).
+ */
+function renderPersonnelView() {
     personnelViewContainer.style.display = "block";
     personnelEditContainer.style.display = "none";
     personnelViewFooter.style.display = "flex";
@@ -381,7 +393,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function renderPersonCard(u, badgeHtml) {
+  /**
+ * Generates HTML card markup for a user profile in the personnel roster.
+ */
+function renderPersonCard(u, badgeHtml) {
     const fn = u.first_name || "";
     const ln = u.last_name || "";
     const un = u.username || "";
@@ -402,12 +417,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  // ── EDIT MODE STATE & RENDERING ──────────────────────────────────────────────
+  // EDIT MODE STATE & RENDERING
   let draftTeams = [];
   let draftUnassigned = [];
   let draftControllers = [];
 
-  function initEditState() {
+  /**
+ * Initializes deep copy of personnel configuration for editing.
+ */
+function initEditState() {
     draftTeams = (project.teams || []).map(t => ({
       team_id: t.team_id || `TEAM-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       name: t.name || "",
@@ -427,7 +445,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       .filter(uId => !teamMemberIds.has(uId) && uId !== pmIdStr && !controllerSet.has(uId));
   }
 
-  function renderPersonnelEdit() {
+  /**
+ * Renders interactive personnel editing interface for teams, contributors, and controllers.
+ */
+function renderPersonnelEdit() {
     personnelViewContainer.style.display = "none";
     personnelEditContainer.style.display = "block";
     personnelViewFooter.style.display = "none";
@@ -443,7 +464,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderEditControllers();
   }
 
-  function renderEditTeams() {
+  /**
+ * Renders team configuration list with add/remove member controls.
+ */
+function renderEditTeams() {
     if (draftTeams.length === 0) {
       editTeamsList.innerHTML = `<p style="font-size: 0.85rem; color: var(--muted);">No teams currently configured. Click 'Add New Team' above to create one.</p>`;
       return;
@@ -589,7 +613,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  function renderEditUnassigned() {
+  /**
+ * Renders individual contributor assignment list in personnel editor.
+ */
+function renderEditUnassigned() {
     const teamMemberIds = new Set();
     draftTeams.forEach(t => (t.member_ids || []).forEach(m => teamMemberIds.add(String(m))));
     const pmIdStr = String(project.created_by || "");
@@ -637,7 +664,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  function renderEditControllers() {
+  /**
+ * Renders project controller designation checkboxes in personnel editor.
+ */
+function renderEditControllers() {
     const pmIdStr = String(project.created_by || "");
     const controllerSet = new Set(draftControllers);
 
@@ -801,9 +831,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     personnelModal.style.display = "none";
   });
 
-  // ============================================================================
+  
   // SIDEBAR NAVIGATION ROUTING
-  // ============================================================================
   const processTitles = {
     1: "Plan Schedule Management — Policies, Procedures & Governance",
     2: "Define Activities — Work Breakdown Structure & Work Package Activities",
@@ -815,7 +844,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const navItems = navContainer.querySelectorAll(".sidebar-nav-item");
 
-  function switchView(viewIndex) {
+  /**
+ * Switches active workspace section (1: Plan, 2: Scope/WBS, 3: Sequence, 4: Estimate, 5: Control).
+ */
+function switchView(viewIndex) {
     try {
       sessionStorage.setItem("syncflow_active_view", String(viewIndex));
     } catch {}
@@ -870,9 +902,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
 
-  // ============================================================================
+  
   // VIEW 2: DEFINE ACTIVITIES & WBS (WORK BREAKDOWN STRUCTURE)
-  // ============================================================================
+  
   let activeWbsTab = "builder";
   let selectedActivityWpId = null;
   let hasUnsavedWbsChanges = false;
@@ -974,7 +1006,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Persistent auto-save helper for WBS and Activities
-  async function persistWbsAndActivities(showFeedback = true) {
+  /**
+ * Persists WBS tree and activity modifications to the MongoDB backend.
+ */
+async function persistWbsAndActivities(showFeedback = true) {
     recalculateWbsNumbers();
     if (showFeedback && btnSaveWbsActivities) {
       btnSaveWbsActivities.disabled = true;
@@ -1008,7 +1043,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   // Recursive auto-numbering of WBS nodes
-  function recalculateWbsNumbers(nodes = project.wbs, prefix = "") {
+  /**
+ * Recursively recomputes canonical hierarchical numbering for WBS nodes (e.g. 1.1, 1.2.1).
+ */
+function recalculateWbsNumbers(nodes = project.wbs, prefix = "") {
     if (!nodes || !Array.isArray(nodes)) return;
     nodes.forEach((node, idx) => {
       const num = prefix ? `${prefix}.${idx + 1}` : `${idx + 1}`;
@@ -1039,7 +1077,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Find node by ID
-  function findWbsNode(id, nodes = project.wbs) {
+  /**
+ * Recursively locates a WBS node by its ID.
+ */
+function findWbsNode(id, nodes = project.wbs) {
     if (!nodes) return null;
     for (const n of nodes) {
       if (n.id === id) return n;
@@ -1052,7 +1093,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Find parent and index of a node
-  function findWbsParent(id, nodes = project.wbs, parent = null) {
+  /**
+ * Recursively locates the parent node of a specified WBS node ID.
+ */
+function findWbsParent(id, nodes = project.wbs, parent = null) {
     if (!nodes) return null;
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].id === id) {
@@ -1067,7 +1111,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Get all container nodes (Major Deliverables & Sub-deliverables)
-  function getAllWbsContainers(nodes = project.wbs, list = []) {
+  /**
+ * Collects all intermediate container nodes (Major Deliverables and Sub-deliverables).
+ */
+function getAllWbsContainers(nodes = project.wbs, list = []) {
     if (!nodes) return list;
     nodes.forEach(n => {
       if (n.type === "major_deliverable" || n.type === "sub_deliverable" || (n.children && n.children.length > 0)) {
@@ -1081,7 +1128,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Get all leaf Work Packages
-  function getAllWorkPackages(nodes = project.wbs, list = []) {
+  /**
+ * Collects all leaf Work Package nodes eligible for activity assignment.
+ */
+function getAllWorkPackages(nodes = project.wbs, list = []) {
     if (!nodes) return list;
     nodes.forEach(n => {
       const isLeaf = !n.children || n.children.length === 0 || n.type === "work_package";
@@ -1097,7 +1147,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Get breadcrumb path for a node
-  function getWbsPath(id, nodes = project.wbs, currentPath = []) {
+  /**
+ * Computes breadcrumb hierarchy path leading to a specified WBS node.
+ */
+function getWbsPath(id, nodes = project.wbs, currentPath = []) {
     if (!nodes) return null;
     for (const n of nodes) {
       const pathWithCurrent = [...currentPath, n];
@@ -1111,7 +1164,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Mark changes dirty / saved
-  function setWbsDirty(isDirty) {
+  /**
+ * Toggles unsaved changes state and shows/hides the pending save banner.
+ */
+function setWbsDirty(isDirty) {
     hasUnsavedWbsChanges = isDirty;
     if (wbsSaveStatus) {
       if (isDirty) {
@@ -1127,7 +1183,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Tab switching
-  function switchWbsTab(tabName) {
+  /**
+ * Switches between WBS Tree hierarchy view and Define Activities tab.
+ */
+function switchWbsTab(tabName) {
     activeWbsTab = tabName;
     wbsTabButtons.forEach(btn => {
       if (btn.getAttribute("data-tab") === tabName) {
@@ -1160,7 +1219,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Recursive renderer for arbitrary depth WBS nodes
-  function renderWbsNodeHtml(node, depth = 0) {
+  /**
+ * Recursively generates HTML tree node markup for structured WBS elements.
+ */
+function renderWbsNodeHtml(node, depth = 0) {
     const isLeaf = !node.children || node.children.length === 0 || node.type === "work_package";
     const num = node.wbs_number || "";
 
@@ -1285,7 +1347,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Render Project Builder View (Tab 1)
-  function renderStructuredBuilder() {
+  /**
+ * Renders the complete structured WBS tree hierarchy view.
+ */
+function renderStructuredBuilder() {
     recalculateWbsNumbers();
     const deliverables = project.wbs || [];
 
@@ -1385,7 +1450,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (confirm(`Are you sure you want to delete "${node.name}" (${node.wbs_number}) and all its nested sub-elements?`)) {
           // Collect all work package IDs to be removed to purge orphaned activities
           const removedWpIds = new Set();
-          function collectWpIds(n) {
+          /**
+ * Collects all Work Package IDs contained within a WBS subtree.
+ */
+function collectWpIds(n) {
             if (!n) return;
             if (n.type === "work_package" || !n.children || n.children.length === 0) {
               if (n.id) removedWpIds.add(n.id);
@@ -1432,6 +1500,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // WBS Modal Helper
+  /**
+   * Opens modal dialog to create or edit a WBS Deliverable, Sub-deliverable, or Work Package.
+   */
   function openWbsModal({ mode = "add", nodeId = null, parentId = null, presetType = "sub_deliverable" }) {
     wbsEditMode.value = mode;
     wbsNodeId.value = nodeId || "";
@@ -1495,7 +1566,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputWbsName.focus();
   }
 
-  function closeWbsModal() {
+  /**
+ * Closes the WBS element modal dialog.
+ */
+function closeWbsModal() {
     wbsModal.style.display = "none";
   }
   btnCloseWbsModal.addEventListener("click", closeWbsModal);
@@ -1564,11 +1638,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       openWbsModal({ mode: "add", presetType: "major_deliverable" });
     });
   }
-
-  // ============================================================================
+  
   // TAB 3: DEFINE ACTIVITIES (PER WORK PACKAGE)
-  // ============================================================================
-  function renderDefineActivitiesTab() {
+  /**
+ * Renders the Define Activities table grouped under corresponding Work Packages.
+ */
+function renderDefineActivitiesTab() {
     recalculateWbsNumbers();
     const workPackages = getAllWorkPackages();
 
@@ -1645,9 +1720,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Appointed Controller badge
         let ctrlHtml = `<span style="font-size: 0.8rem; color: #DC2626; font-weight: 600;">⚠️ No controller appointed</span>`;
         if (act.controller_id) {
-          const ctrlUser = resolveUser(act.controller_id);
-          const isLead = String(act.controller_id) === String(project.created_by);
-          ctrlHtml = `<span class="badge" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 700; font-size: 0.78rem;">${isLead ? '⭐' : '🛡️'} Controller: ${ctrlUser.last_name || ""}, ${ctrlUser.first_name || ""} (@${ctrlUser.username || ""})</span>`;
+          const ctrlIdStr = String(act.controller_id);
+          const isLead = ctrlIdStr === String(project.created_by);
+          const isValidCtrl = isLead || (project.controllers || []).map(String).includes(ctrlIdStr);
+          if (isValidCtrl) {
+            const ctrlUser = resolveUser(act.controller_id);
+            ctrlHtml = `<span class="badge" style="background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 700; font-size: 0.78rem;">${isLead ? '⭐' : '🛡️'} Controller: ${ctrlUser.last_name || ""}, ${ctrlUser.first_name || ""} (@${ctrlUser.username || ""})</span>`;
+          } else {
+            ctrlHtml = `<span class="badge" style="background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; font-weight: 700; font-size: 0.78rem;">⚠️ Controller Not in Project (Reassign Needed)</span>`;
+          }
         }
 
         // Assigned Teams badges
@@ -1759,7 +1840,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Helper to dynamically render assignment checkboxes
-  function renderActivityAssignmentCheckboxes() {
+  /**
+ * Renders team and individual user assignment checkboxes inside activity modal.
+ */
+function renderActivityAssignmentCheckboxes() {
     // 1. Determine members in currently selected teams
     const membersInSelectedTeams = new Set();
     (project.teams || []).forEach(t => {
@@ -1861,6 +1945,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Activity Modal helpers
+  /**
+   * Opens modal dialog to create or edit an operational activity.
+   */
   function openActivityModal({ mode = "add", activityId = null, targetWpId = null }) {
     activityEditMode.value = mode;
     activityEditId.value = activityId || "";
@@ -1899,7 +1986,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       activityModalTitle.textContent = "Edit Activity";
       inputActivityName.value = act ? (act.name || "") : "";
       inputActivityDesc.value = act ? (act.description || "") : "";
-      selectActivityController.value = act && act.controller_id ? String(act.controller_id) : "";
+      const actCid = act && act.controller_id ? String(act.controller_id) : "";
+      const isLead = actCid === String(project.created_by);
+      const isValidCid = isLead || (project.controllers || []).map(String).includes(actCid);
+      selectActivityController.value = isValidCid ? actCid : "";
       const inputActivityIsMilestone = document.getElementById("input-activity-is-milestone");
       if (inputActivityIsMilestone) {
         inputActivityIsMilestone.checked = act ? Boolean(act.is_milestone || act.duration === 0) : false;
@@ -1913,7 +2003,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputActivityName.focus();
   }
 
-  function closeActivityModal() {
+  /**
+ * Closes the activity modal dialog.
+ */
+function closeActivityModal() {
     activityModal.style.display = "none";
   }
   btnCloseActivityModal.addEventListener("click", closeActivityModal);
@@ -2004,21 +2097,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   // Initial call when switching to View 2
-  function renderWbsView() {
+  /**
+ * Main render dispatcher for Section 2 (Scope & Work Breakdown Structure).
+ */
+function renderWbsView() {
     recalculateWbsNumbers();
     switchWbsTab(activeWbsTab || "builder");
   }
 
-  // ==========================================================================
+  
   // VIEW 3: SEQUENCE ACTIVITIES & SCHEDULE HEALTH ENGINE
-  // ==========================================================================
-
-  // ==========================================================================
-  // VIEW 3: SEQUENCE ACTIVITIES (SIMPLIFIED & STREAMLINED)
-  // ==========================================================================
-
   // Cycle detection on client-side graph
-  function detectScheduleCyclesClient(nodeIds, edges) {
+  /**
+ * Client-side DFS cycle detector identifying circular precedence loops.
+ */
+function detectScheduleCyclesClient(nodeIds, edges) {
     const adj = {};
     nodeIds.forEach(id => { adj[id] = []; });
     edges.forEach(e => {
@@ -2033,6 +2126,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     nodeIds.forEach(id => { visited[id] = 0; });
     const cyclePath = [];
 
+    /**
+     * Recursive depth-first search helper detecting back-edges in precedence network.
+     */
     function dfs(u, path) {
       visited[u] = 1;
       path.push(u);
@@ -2059,7 +2155,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Client-side Schedule Health Evaluation Engine
-  function evaluateScheduleHealthClient(activities, dependencies) {
+  /**
+ * Evaluates schedule network health metrics, dangling nodes, and redundant links in browser.
+ */
+function evaluateScheduleHealthClient(activities, dependencies) {
     const actIds = (activities || []).map(a => a.activity_id).filter(Boolean);
     const actIdSet = new Set(actIds);
 
@@ -2207,7 +2306,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // Render Clean Schedule Health Status Bar & Detailed Diagnostic Guidance
-  function renderScheduleHealthUI(health) {
+  /**
+ * Renders schedule health score, diagnostic indicators, and actionable error alerts.
+ */
+function renderScheduleHealthUI(health) {
     if (!health) return;
 
     const activities = project.activities || [];
@@ -2425,7 +2527,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Tab switching between Diagram and Table
-  function switchSeqTab(tab) {
+  /**
+ * Switches between Precedence Diagramming Method (PDM) Network and Dependency Table tabs.
+ */
+function switchSeqTab(tab) {
     activeSeqTab = tab;
     if (tab === "diagram") {
       tabBtnDiagram.classList.add("active");
@@ -2466,7 +2571,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   tabBtnTable.addEventListener("click", () => switchSeqTab("table"));
 
   // Real-time In-Modal Validation
-  function validateDependencyModalInput() {
+  /**
+ * Validates precedence relationship inputs, preventing self-dependencies and negative lags.
+ */
+function validateDependencyModalInput() {
     const fromId = selectDepPredecessor.value;
     const toId = selectDepSuccessor.value;
     const rawType = selectDepType.value;
@@ -2539,7 +2647,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Open Dependency Modal
-  function openAddDependencyModal(editIdx = -1) {
+  /**
+ * Opens modal dialog to create or modify an activity precedence dependency.
+ */
+function openAddDependencyModal(editIdx = -1) {
     dependencyEditIndex.value = editIdx;
     const activities = project.activities || [];
 
@@ -2579,7 +2690,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     dependencyModal.style.display = "flex";
   }
 
-  function closeDependencyModal() {
+  /**
+ * Closes the precedence dependency modal dialog.
+ */
+function closeDependencyModal() {
     dependencyModal.style.display = "none";
     dependencyModalAlert.style.display = "none";
   }
@@ -2688,7 +2802,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Auto-generate realistic logical sequence helper
-  function autoGenerateLogicalSequence() {
+  /**
+ * Automatically synthesizes sequential Finish-to-Start (FS) links connecting unlinked activities.
+ */
+function autoGenerateLogicalSequence() {
     const activities = project.activities || [];
     if (activities.length < 2) {
       alert("At least 2 activities are required.");
@@ -2742,7 +2859,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // Main Render Sequence View
-  function renderSequenceView() {
+  /**
+ * Main render dispatcher for Section 3 (Sequence Activities / Precedence Diagramming).
+ */
+function renderSequenceView() {
     const activities = project.activities || [];
     const dependencies = project.dependencies || [];
 
@@ -2870,9 +2990,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     switchSeqTab(activeSeqTab);
   }
 
-  // ==========================================================================
+  
   // VIEW 4: ESTIMATE ACTIVITY DURATION (PERT BETA DISTRIBUTION & SIMULATOR)
-  // ==========================================================================
+  
   let hasUnsavedEstimates = false;
   let activePertAnalysis = null;
   let currentTargetD = null;
@@ -2918,7 +3038,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentAnalogousTargetAid = null;
   let completedActivitiesCache = null;
 
-  async function openAnalogousPicker(aid) {
+  /**
+ * Opens modal to search and select historical completed activities for analogous duration benchmarking.
+ */
+async function openAnalogousPicker(aid) {
     currentAnalogousTargetAid = aid;
     if (analogousModal) analogousModal.style.display = "flex";
     if (analogousLoadingSpinner) analogousLoadingSpinner.style.display = "block";
@@ -3042,12 +3165,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function closeAnalogousModal() {
+  /**
+ * Closes historical analogous benchmark picker modal.
+ */
+function closeAnalogousModal() {
     if (analogousModal) analogousModal.style.display = "none";
     currentAnalogousTargetAid = null;
   }
 
-  function applyActivityDurationCalc(act, tech, { a, m, b, rate, qty, dur } = {}) {
+  /**
+ * Calculates Te and variance for an activity based on chosen estimation technique.
+ */
+function applyActivityDurationCalc(act, tech, { a, m, b, rate, qty, dur } = {}) {
     act.estimation_technique = tech;
     let te = 0, sigma = 0;
     if (tech === "three_point") {
@@ -3070,7 +3199,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     act.variance = round(sigma * sigma, 4);
   }
 
-  function applyAnalogousBenchmark(aid, benchmark) {
+  /**
+ * Applies historical benchmark duration and metadata to an activity.
+ */
+function applyAnalogousBenchmark(aid, benchmark) {
     const act = (project.activities || []).find(a => a.activity_id === aid);
     if (!act) return;
 
@@ -3109,7 +3241,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Error Function erf(x) using Abramowitz & Stegun 7.1.26
-  function erf(x) {
+  /**
+ * Numerical approximation of Gauss error function for PERT probability calculation.
+ */
+function erf(x) {
     const a1 =  0.254829592;
     const a2 = -0.284496736;
     const a3 =  1.421413741;
@@ -3125,12 +3260,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Standard Normal Cumulative Distribution Function
-  function normalCdf(z) {
+  /**
+ * Evaluates standard normal cumulative distribution function for Z-score.
+ */
+function normalCdf(z) {
     return 0.5 * (1.0 + erf(z / Math.SQRT2));
   }
 
   // High-Speed Client CPM and PERT Beta Path Computation
-  function computePertScheduleClient(activities, dependencies) {
+  /**
+ * Client-side CPM/PERT schedule engine computing ES, EF, LS, LF, and critical path.
+ */
+function computePertScheduleClient(activities, dependencies) {
     const actMap = {};
     (activities || []).forEach(a => {
       if (a.activity_id) actMap[a.activity_id] = a;
@@ -3269,7 +3410,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let activePertPreset = null;
 
-  function setActivePertPreset(probOrNull) {
+  /**
+ * Sets active confidence level preset (50%, 80%, 90%, 95%, 99%) in PERT simulator.
+ */
+function setActivePertPreset(probOrNull) {
     activePertPreset = probOrNull;
     presetButtons.forEach(btn => {
       const p = parseInt(btn.getAttribute("data-prob"), 10);
@@ -3283,7 +3427,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Update Top Banner PERT Simulator
-  function updatePertSimulator(targetD, explicitProb = undefined) {
+  /**
+ * Simulates completion probability for target project duration using Beta distribution parameters.
+ */
+function updatePertSimulator(targetD, explicitProb = undefined) {
     if (!activePertAnalysis) return;
     const { mu, stdPath, varPath, criticalPathIds, confidenceLevels } = activePertAnalysis;
 
@@ -3333,7 +3480,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Render Smart Estimation Table
-  function renderEstimateTable() {
+  /**
+ * Renders interactive Three-Point, Parametric, and Analogous duration estimation matrix.
+ */
+function renderEstimateTable() {
     const activities = project.activities || [];
     const dependencies = project.dependencies || [];
     const wpMap = getWorkPackageMap(project);
@@ -3517,7 +3667,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Row Event Listeners
-  function bindEstimateTableEvents() {
+  /**
+ * Binds live input recalculation listeners across duration estimation fields.
+ */
+function bindEstimateTableEvents() {
     const activities = project.activities || [];
 
     // Technique Selector change
@@ -3552,7 +3705,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     // Helper to recalculate a single row
-    function updateRowValues(aid) {
+    /**
+ * Recalculates expected duration and risk standard deviation for a modified table row.
+ */
+function updateRowValues(aid) {
       const act = activities.find(a => a.activity_id === aid);
       const row = estimateTableContainer.querySelector(`tr[data-row-id="${aid}"]`);
       if (!act || !row) return;
@@ -3853,7 +4009,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Main Render Estimate View function
-  function renderEstimateView() {
+  /**
+ * Main render dispatcher for Section 4 (Estimate Activity Durations).
+ */
+function renderEstimateView() {
     const activities = project.activities || [];
     const dependencies = project.dependencies || [];
 
@@ -3927,9 +4086,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 
-  // ============================================================================
+  
   // VIEW 5: DEVELOP SCHEDULE CONTROLLER
-  // ============================================================================
+  
 
   // View 5 DOM Elements
   const btnRecalculateSchedule = document.getElementById("btn-recalculate-schedule");
@@ -4008,7 +4167,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   let isScheduleInitialized = false;
   let isThresholdUserModified = false;
 
-  async function renderScheduleView() {
+  /**
+ * Main render dispatcher for Section 4 Develop Schedule (CPM, Floats, AON, AOA, Gantt, DCMA).
+ */
+async function renderScheduleView() {
     if (!project) return;
 
     const params = {};
@@ -4043,12 +4205,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function showSchedAlert(msg, type = "success") {
+  /**
+ * Displays a transient notification alert in the Develop Schedule view.
+ */
+function showSchedAlert(msg, type = "success") {
     showTransientAlert(schedAlertMsg, msg, type, 4000);
   }
 
 
-  function renderScheduleKpis(summary) {
+  /**
+ * Renders Critical Path duration, project float, and flexible activities KPI cards.
+ */
+function renderScheduleKpis(summary) {
     if (!summary) return;
 
     if (kpiSchedDuration) {
@@ -4132,7 +4300,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function renderActiveSchedTab() {
+  /**
+ * Dispatches rendering of active tab (AON Network, AOA Network, Matrix, Gantt, DCMA Quality).
+ */
+function renderActiveSchedTab() {
     if (activeSchedTab === "aon") {
       renderAonNetwork();
     } else if (activeSchedTab === "aoa") {
@@ -4146,8 +4317,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ── Tab 1: AON (CPM Network) ────────────────────────────────────────────────
-  function renderAonNetwork() {
+  // Tab 1: AON (CPM Network)
+  /**
+ * Renders Activity-on-Node (AON) Precedence Diagram with CPM blocks and red critical path.
+ */
+function renderAonNetwork() {
     if (!aonNetworkCanvas || !currentScheduleModel) return;
 
     const filterMode = schedAonFilterMode ? schedAonFilterMode.value : "all";
@@ -4202,8 +4376,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.SyncFlowNetworks["aon-network-canvas"] = aonNetworkInstance;
   }
 
-  // ── Tab 2: AOA (PERT Network) ────────────────────────────────────────────────
-  function renderAoaNetwork() {
+  // Tab 2: AOA (PERT Network)
+  /**
+ * Renders Activity-on-Arrow (AOA / PERT) Event Network with TE/TL dates and dummy arrows.
+ */
+function renderAoaNetwork() {
     if (!aoaNetworkCanvas || !currentScheduleModel) return;
 
     const filterMode = schedAoaFilterMode ? schedAoaFilterMode.value : "all";
@@ -4261,8 +4438,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.SyncFlowNetworks["aoa-network-canvas"] = aoaNetworkInstance;
   }
 
-  // ── Tab 3: Schedule Matrix ──────────────────────────────────────────────────
-  function renderScheduleMatrix() {
+  // Tab 3: Schedule Matrix
+  /**
+ * Renders comprehensive CPM mathematical table (ES, EF, LS, LF, TF, FF, Dates).
+ */
+function renderScheduleMatrix() {
     if (!schedMatrixTableContainer || !currentScheduleModel) return;
 
     const searchStr = (schedMatrixSearch ? schedMatrixSearch.value : "").trim().toLowerCase();
@@ -4350,8 +4530,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     schedMatrixTableContainer.innerHTML = html;
   }
 
-  // ── Tab 4: Schedule Timeline & Gantt ─────────────────────────────────────────
-  function renderScheduleGantt() {
+  // Tab 4: Schedule Timeline & Gantt 
+  /**
+ * Renders interactive Gantt chart displaying early/late spans and milestone diamonds.
+ */
+function renderScheduleGantt() {
     if (!schedGanttContainer || !currentScheduleModel) return;
 
     const allActivities = currentScheduleModel.activities_schedule || [];
@@ -4482,7 +4665,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     schedGanttContainer.innerHTML = html;
   }
 
-  function wireLegendToggle(btn, content, chevron) {
+  /**
+ * Wires collapsible diagram legend toggle behavior.
+ */
+function wireLegendToggle(btn, content, chevron) {
     if (!btn || !content) return;
     btn.addEventListener("click", () => {
       const isHidden = content.style.display === "none" || !content.style.display;
@@ -4491,14 +4677,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  function wireNetworkZoomControls(instanceFn, btnIn, btnOut, btnFit) {
+  /**
+ * Wires interactive zoom in, zoom out, and fit-view controls for vis-network graph.
+ */
+function wireNetworkZoomControls(instanceFn, btnIn, btnOut, btnFit) {
     if (btnIn) btnIn.addEventListener("click", () => { const inst = instanceFn(); if (inst) inst.moveTo({ scale: inst.getScale() * 1.25, animation: true }); });
     if (btnOut) btnOut.addEventListener("click", () => { const inst = instanceFn(); if (inst) inst.moveTo({ scale: inst.getScale() * 0.8, animation: true }); });
     if (btnFit) btnFit.addEventListener("click", () => { const inst = instanceFn(); if (inst) inst.fit({ animation: true }); });
   }
 
-  // ── Event Listeners for Develop Schedule ────────────────────────────────────
-  function setupScheduleEventListeners() {
+  //  Event Listeners for Develop Schedule 
+  /**
+ * Sets up event listeners for schedule recalculations, baseline freezing, and tab switching.
+ */
+function setupScheduleEventListeners() {
     wireLegendToggle(btnToggleSchedLegend, schedLegendContent, schedLegendChevron);
 
     // Tab switching
@@ -4643,8 +4835,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ── Baseline Management & Freeze Events ────────────────────────────────────
-  async function loadProjectBaselines() {
+  // Baseline Management & Freeze Events 
+  /**
+ * Loads Planned Baseline snapshot and renders variance comparisons against current schedule.
+ */
+async function loadProjectBaselines() {
     if (!selectCompareBaseline) return;
     const projId = (project && (project.id || project._id)) || projectId;
     const { data: baselines, error } = await fetchBaselines(projId);
@@ -4708,8 +4903,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ── Tab 5: DCMA 14-Point Automated Schedule Quality Diagnostic ──────────────
-  async function renderDcmaQualityAudit() {
+  // Tab 5: DCMA 14-Point Automated Schedule Quality Diagnostic 
+  /**
+ * Fetches automated DCMA 14-Point Quality Assessment and renders scorecard and metric cards.
+ */
+async function renderDcmaQualityAudit() {
     const dcmaContainer = document.getElementById("dcma-audit-container");
     if (!dcmaContainer) return;
     dcmaContainer.innerHTML = `<div style="text-align: center; padding: 2.5rem; color: var(--muted);"><span style="font-size: 1.5rem;">⚙️</span><br>Running DCMA 14-Point Automated Schedule Quality Diagnostic...</div>`;
@@ -4773,11 +4971,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 
-  // ============================================================================
   // VIEW 6: CONTROL SCHEDULE (PMBOK PROCESS 6.6)
   // Operational Monitoring, Task Execution Statuses (4 PMBOK colors),
   // Leading & Lagging Indicators, and Interactive S-Curve (Envelope & Progress)
-  // ============================================================================
 
   // State
   let currentControlModel = null;
@@ -4861,7 +5057,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   const ctrlModalVerifiedBy = document.getElementById("ctrl-modal-verified-by");
   const ctrlModalNotes = document.getElementById("ctrl-modal-notes");
 
-  async function renderControlScheduleView() {
+  // Control Time Logs & Contributor Breakdown Modal Elements
+  const btnOpenTimelogsModal = document.getElementById("btn-open-timelogs-modal");
+  const ctrlTimeLogsModal = document.getElementById("ctrl-time-logs-modal");
+  const btnCloseCtrlTimelogModal = document.getElementById("btn-close-ctrl-timelog-modal");
+  const btnCancelCtrlTimelogModal = document.getElementById("btn-cancel-ctrl-timelog-modal");
+  const ctrlTimelogTaskSelect = document.getElementById("ctrl-timelog-task-select");
+  const ctrlTimelogActTitle = document.getElementById("ctrl-timelog-act-title");
+  const ctrlTimelogActSub = document.getElementById("ctrl-timelog-act-sub");
+  const ctrlTimelogActStatusBadge = document.getElementById("ctrl-timelog-act-status-badge");
+  const ctrlTimelogKpiTotalTime = document.getElementById("ctrl-timelog-kpi-total-time");
+  const ctrlTimelogKpiSessions = document.getElementById("ctrl-timelog-kpi-sessions");
+  const ctrlTimelogKpiContributors = document.getElementById("ctrl-timelog-kpi-contributors");
+  const ctrlTimelogContributorsContainer = document.getElementById("ctrl-timelog-contributors-container");
+  const ctrlTimelogSessionsContainer = document.getElementById("ctrl-timelog-sessions-container");
+
+  /**
+ * Main render dispatcher for Section 5 Control Project (Operational Tracking, S-Curve, EVM).
+ */
+async function renderControlScheduleView() {
     if (!project) return;
     const projId = (project && (project.id || project._id)) || projectId;
     const dateVal = ctrlStatusDate && ctrlStatusDate.value ? ctrlStatusDate.value : null;
@@ -4892,12 +5106,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function showCtrlAlert(msg, type = "success") {
+  /**
+ * Displays a transient notification alert in the Control Project view.
+ */
+function showCtrlAlert(msg, type = "success") {
     showTransientAlert(ctrlAlertMsg, msg, type, 3500);
   }
 
 
-  function renderControlKpis(kpis) {
+  /**
+ * Renders operational execution KPIs (SPI, SV, Completed, Verified) in Section 5.
+ */
+function renderControlKpis(kpis) {
     if (!kpis) return;
 
     // 1. Overall Health Badge & Summary Card
@@ -5007,8 +5227,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (ctrlLagTotalEffort) ctrlLagTotalEffort.textContent = `${kpis.total_planned_effort_days.toLocaleString()} d`;
   }
 
-  // ── S-Curve Rendering (Chart.js with Resilient SVG Fallback) ─────────────────
-  function renderControlScurve(scurveData) {
+  //  S-Curve Rendering (Chart.js with Resilient SVG Fallback) ─
+  /**
+ * Renders PMBOK S-Curve progression chart with Early, Late, Actual, and Forecast curves.
+ */
+function renderControlScurve(scurveData) {
     if (!scurveData || !scurveData.points || scurveData.points.length === 0) return;
 
     const points = scurveData.points;
@@ -5130,7 +5353,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function renderScurveSvg(points, statusDay) {
+  /**
+ * Generates SVG graph markup for the PMBOK cumulative S-Curve.
+ */
+function renderScurveSvg(points, statusDay) {
     if (!ctrlScurveSvg) return;
     if (ctrlScurveCanvas) ctrlScurveCanvas.style.display = "none";
     ctrlScurveSvg.style.display = "block";
@@ -5143,7 +5369,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const maxDay = points[points.length - 1].day || 1750;
 
+    /**
+     * Maps project day offset to SVG X coordinate.
+     */
     function getX(d) { return padding.left + (d / maxDay) * chartW; }
+
+    /**
+     * Maps percentage completion to SVG Y coordinate.
+     */
     function getY(pct) { return padding.top + chartH - ((pct || 0) / 100) * chartH; }
 
     let earlyPath = "";
@@ -5203,8 +5436,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     ctrlScurveSvg.innerHTML = svgHtml;
   }
 
-  // ── Activity Execution Network Diagram (4-Color Status) ───────────────────
-  function renderControlNetworkDiagram() {
+  //  Activity Execution Network Diagram (4-Color Status) ─
+  /**
+ * Renders 4-tier task execution network graph (White, Yellow, Green, Blue).
+ */
+function renderControlNetworkDiagram() {
     if (!ctrlPdmCanvas || !currentControlModel) return;
 
     if (typeof vis === "undefined" || !vis.Network) {
@@ -5442,8 +5678,11 @@ ${act.is_critical ? '🔥 CRITICAL PATH ACTIVITY' : (act.is_near_critical ? '⚠
     });
   }
 
-  // ── Task Operational Execution & Verification Table ─────────────────────────
-  function renderControlTasksTable() {
+  //  Task Operational Execution & Verification Table ─
+  /**
+ * Renders operational tasks table with inline status toggles and time tracker inspector.
+ */
+function renderControlTasksTable() {
     if (!ctrlTasksTableContainer || !currentControlModel) return;
 
     const rawActivities = currentControlModel.activities || [];
@@ -5580,10 +5819,22 @@ ${act.is_critical ? '🔥 CRITICAL PATH ACTIVITY' : (act.is_near_critical ? '⚠
         openActivityStatusModal(act);
       });
     });
+
+    // Attach Time Logs modal buttons
+    ctrlTasksTableContainer.querySelectorAll(".btn-view-act-timelogs").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const actId = btn.getAttribute("data-act-id");
+        if (!actId) return;
+        openControlTimeLogsModal(actId);
+      });
+    });
   }
 
-  // ── PMBOK Execution Kanban Board ──────────────────────────────────────────
-  function renderControlKanbanBoard() {
+  //  PMBOK Execution Kanban Board ─
+  /**
+ * Renders 4-state operational Kanban board for real-time task progression.
+ */
+function renderControlKanbanBoard() {
     const kanbanContainer = document.getElementById("ctrl-kanban-board-container");
     if (!kanbanContainer || !currentControlModel) return;
 
@@ -5666,8 +5917,11 @@ ${act.is_critical ? '🔥 CRITICAL PATH ACTIVITY' : (act.is_near_critical ? '⚠
     });
   }
 
-  // ── Open Modal for Detailed Execution & Controller Verification ─────────────
-  function openActivityStatusModal(act) {
+  //  Open Modal for Detailed Execution & Controller Verification ─
+  /**
+ * Opens detailed activity status update and controller verification sign-off modal.
+ */
+function openActivityStatusModal(act) {
     if (!ctrlActivityModal) return;
 
     ctrlModalActId.value = act.activity_id;
@@ -5713,7 +5967,10 @@ ${act.is_critical ? '🔥 CRITICAL PATH ACTIVITY' : (act.is_near_critical ? '⚠
     ctrlActivityModal.style.display = "flex";
   }
 
-  function toggleModalVerifyGroup(status) {
+  /**
+ * Toggles visibility of controller verification fields based on chosen activity status.
+ */
+function toggleModalVerifyGroup(status) {
     if (ctrlModalVerifyGroup) {
       ctrlModalVerifyGroup.style.display = status === "verified" ? "block" : "none";
     }
@@ -5726,8 +5983,157 @@ ${act.is_critical ? '🔥 CRITICAL PATH ACTIVITY' : (act.is_near_critical ? '⚠
     }
   }
 
-  // ── Setup Control Schedule Event Listeners ──────────────────────────────────
-  function setupControlEventListeners() {
+  //  PM Control Time Logs Modal Controller 
+  /**
+ * Opens PM Time Logs Audit modal to inspect time spent and contributor breakdown by task.
+ */
+async function openControlTimeLogsModal(activityId = null) {
+    if (!ctrlTimeLogsModal || !currentControlModel) return;
+    const activities = currentControlModel.activities || [];
+    if (activities.length === 0) {
+      alert("No activities found in the project schedule.");
+      return;
+    }
+
+    // Populate dropdown with ALL tasks (whether completed, under review, or in progress or not started)
+    ctrlTimelogTaskSelect.innerHTML = activities.map(a => {
+      const statusIcon = a.status === 'verified' ? '🔵 Verified' : (a.status === 'completed' ? '🟢 Completed' : (a.status === 'in_progress' ? '🟡 In Progress' : '⚪ Not Started'));
+      const timeStr = a.total_logged_seconds ? ` (${formatDurationSeconds(a.total_logged_seconds)})` : '';
+      return `<option value="${a.activity_id}">[${a.activity_id}] ${escapeHtml(a.name)} — ${statusIcon}${timeStr}</option>`;
+    }).join("");
+
+    const targetId = activityId || activities[0].activity_id;
+    ctrlTimelogTaskSelect.value = targetId;
+
+    await loadTaskTimeLogs(targetId);
+    ctrlTimeLogsModal.style.display = "flex";
+  }
+
+  /**
+ * Loads and displays logged sessions and contributor breakdown for a specific task.
+ */
+async function loadTaskTimeLogs(actId) {
+    if (!currentControlModel) return;
+    const activities = currentControlModel.activities || [];
+    const act = activities.find(a => a.activity_id === actId);
+    if (!act) return;
+
+    // Set meta banner
+    ctrlTimelogActTitle.textContent = `${act.name} (${act.activity_id})`;
+    ctrlTimelogActSub.textContent = `WP: ${act.work_package_id || 'N/A'} | Planned Duration: ${act.duration}d | EV: ${act.ev_days.toFixed(1)}d`;
+    
+    let badgeClass = "badge-gray";
+    let badgeText = "⚪ Not Started";
+    if (act.status === "in_progress") { badgeClass = "badge-amber"; badgeText = "🟡 Work-in-Progress"; }
+    else if (act.status === "completed") { badgeClass = "badge-green"; badgeText = "🟢 Completed (Review)"; }
+    else if (act.status === "verified") { badgeClass = "badge-blue"; badgeText = "🔵 Verified & Controlled"; }
+    ctrlTimelogActStatusBadge.innerHTML = `<span class="badge ${badgeClass}" style="font-size: 0.82rem; padding: 4px 8px;">${badgeText}</span>`;
+
+    // Loading state for tables
+    ctrlTimelogContributorsContainer.innerHTML = `<p style="color: var(--muted); padding: 0.8rem 0; font-size: 0.85rem;">Loading contributor logs...</p>`;
+    ctrlTimelogSessionsContainer.innerHTML = `<p style="color: var(--muted); padding: 0.8rem 0; font-size: 0.85rem;">Loading session logs...</p>`;
+
+    const projId = (project && (project.id || project._id)) || projectId;
+    const { data, error } = await fetchActivityTimeLogs(projId, actId);
+
+    if (error || !data) {
+      ctrlTimelogContributorsContainer.innerHTML = `<div class="alert-box alert-danger">Failed to load time logs: ${error || 'Unknown error'}</div>`;
+      ctrlTimelogSessionsContainer.innerHTML = "";
+      return;
+    }
+
+    const totalSeconds = data.total_logged_seconds || 0;
+    const logs = data.time_logs || [];
+    const byUser = data.by_user || [];
+
+    // Update KPI cards
+    ctrlTimelogKpiTotalTime.textContent = formatDurationSeconds(totalSeconds);
+    ctrlTimelogKpiSessions.textContent = logs.length;
+    ctrlTimelogKpiContributors.textContent = byUser.length;
+
+    // Render Contributor Breakdown
+    if (byUser.length === 0) {
+      ctrlTimelogContributorsContainer.innerHTML = `
+        <div style="background: #F8FAFC; border: 1px dashed var(--border); border-radius: 4px; padding: 1.2rem; text-align: center; color: var(--muted); font-size: 0.85rem;">
+          No contributors have logged time on this task yet.
+        </div>
+      `;
+    } else {
+      let contribRows = byUser.map(u => {
+        const pct = totalSeconds > 0 ? ((u.total_seconds / totalSeconds) * 100).toFixed(1) : "0.0";
+        return `
+          <tr style="border-bottom: 1px solid var(--border-light);">
+            <td style="padding: 8px; font-weight: 700; color: var(--charcoal);">👤 ${escapeHtml(u.user_name || u.user_id)}</td>
+            <td style="padding: 8px; text-align: right; font-family: monospace; font-weight: 700; color: #2563EB;">${formatDurationSeconds(u.total_seconds)}</td>
+            <td style="padding: 8px; text-align: center;">${u.session_count} session${u.session_count !== 1 ? 's' : ''}</td>
+            <td style="padding: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="flex: 1; height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
+                  <div style="width: ${pct}%; height: 100%; background: #2563EB;"></div>
+                </div>
+                <span style="font-size: 0.76rem; font-weight: 700; min-width: 40px; text-align: right;">${pct}%</span>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      ctrlTimelogContributorsContainer.innerHTML = `
+        <table class="table" style="font-size: 0.82rem; width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #F1F5F9; border-bottom: 1px solid var(--border);">
+              <th style="padding: 6px 8px; text-align: left;">Team Member</th>
+              <th style="padding: 6px 8px; text-align: right;">Total Duration</th>
+              <th style="padding: 6px 8px; text-align: center;">Sessions</th>
+              <th style="padding: 6px 8px; width: 180px;">Share of Task Time</th>
+            </tr>
+          </thead>
+          <tbody>${contribRows}</tbody>
+        </table>
+      `;
+    }
+
+    // Render Session History
+    if (logs.length === 0) {
+      ctrlTimelogSessionsContainer.innerHTML = `
+        <div style="background: #F8FAFC; border: 1px dashed var(--border); border-radius: 4px; padding: 1.2rem; text-align: center; color: var(--muted); font-size: 0.85rem;">
+          No session history recorded yet. Timers logged by team members will appear here chronologically.
+        </div>
+      `;
+    } else {
+      let sessionRows = logs.map(l => {
+        const dateStr = l.start_time ? new Date(l.start_time).toLocaleString() : (l.created_at || '-');
+        return `
+          <tr style="border-bottom: 1px solid var(--border-light);">
+            <td style="padding: 6px 8px; font-size: 0.78rem; font-family: monospace; color: var(--muted);">${dateStr}</td>
+            <td style="padding: 6px 8px; font-weight: 600; color: var(--charcoal);">${escapeHtml(l.user_name || l.user_id)}</td>
+            <td style="padding: 6px 8px; text-align: right; font-family: monospace; font-weight: 700; color: #16A34A;">${formatDurationSeconds(l.duration_seconds)}</td>
+            <td style="padding: 6px 8px; font-size: 0.8rem; color: var(--slate);">${escapeHtml(l.notes || "-")}</td>
+          </tr>
+        `;
+      }).reverse().join("");
+
+      ctrlTimelogSessionsContainer.innerHTML = `
+        <table class="table" style="font-size: 0.82rem; width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #F1F5F9; border-bottom: 1px solid var(--border);">
+              <th style="padding: 6px 8px; text-align: left;">Logged At</th>
+              <th style="padding: 6px 8px; text-align: left;">Team Member</th>
+              <th style="padding: 6px 8px; text-align: right;">Duration</th>
+              <th style="padding: 6px 8px; text-align: left;">Work Notes</th>
+            </tr>
+          </thead>
+          <tbody>${sessionRows}</tbody>
+        </table>
+      `;
+    }
+  }
+
+  //  Setup Control Schedule Event Listeners 
+  /**
+ * Binds event listeners for Control Project status updates and S-Curve status date changes.
+ */
+function setupControlEventListeners() {
     // 0. Segmented Sub-Tabs Switching (PDM Network Diagram, Kanban Board, S-Curve, Matrix)
     document.querySelectorAll(".ctrl-tab-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -5920,6 +6326,26 @@ ${act.is_critical ? '🔥 CRITICAL PATH ACTIVITY' : (act.is_near_critical ? '⚠
             submitBtn.textContent = "💾 Save & Update Schedule Model";
           }
         }
+      });
+    }
+
+    // 8. Control Time Logs Modal Listeners
+    if (btnOpenTimelogsModal) {
+      btnOpenTimelogsModal.addEventListener("click", () => openControlTimeLogsModal());
+    }
+    if (btnCloseCtrlTimelogModal) {
+      btnCloseCtrlTimelogModal.addEventListener("click", () => {
+        ctrlTimeLogsModal.style.display = "none";
+      });
+    }
+    if (btnCancelCtrlTimelogModal) {
+      btnCancelCtrlTimelogModal.addEventListener("click", () => {
+        ctrlTimeLogsModal.style.display = "none";
+      });
+    }
+    if (ctrlTimelogTaskSelect) {
+      ctrlTimelogTaskSelect.addEventListener("change", (e) => {
+        loadTaskTimeLogs(e.target.value);
       });
     }
   }

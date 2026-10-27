@@ -1,5 +1,5 @@
 """
-SyncFlow – Multi-Project Executive Portfolio Router (`/syncflow/portfolio`).
+SyncFlow - Multi-Project Executive Portfolio Router (`/syncflow/portfolio`).
 Provides enterprise-wide aggregate health, Schedule Variance (SV),
 Schedule Performance Index (SPI), milestone completion, and critical delay diagnostics.
 """
@@ -16,10 +16,12 @@ router = APIRouter(prefix="/syncflow/portfolio", tags=["Executive Portfolio"])
 
 
 def _projects_col():
+    """Returns the MongoDB 'projects' collection instance."""
     return get_db()["projects"]
 
 
 def _users_col():
+    """Returns the MongoDB 'users' collection instance."""
     return get_db()["users"]
 
 

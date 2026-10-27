@@ -1,6 +1,6 @@
 """
-SyncFlow – AI NLP Router (`/syncflow/projects/{id}/nlp`).
-Exposes Google Gemini 1.5 Flash Text-to-WBS decomposition, DCMA 14-Point PERT estimating,
+SyncFlow - AI NLP Router (`/syncflow/projects/{id}/nlp`).
+Exposes Google Gemini Flash Text-to-WBS decomposition, DCMA 14-Point PERT estimating,
 and Precedence Dependency Extraction with strict JSON Schema constrained decoding.
 """
 from datetime import datetime

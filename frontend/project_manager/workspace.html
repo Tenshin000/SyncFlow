@@ -1268,6 +1268,10 @@
                   <span style="font-size: 0.8rem; color: var(--muted); margin-left: 4px;">
                     Showing: <strong id="ctrl-filter-count">41</strong> activities
                   </span>
+
+                  <button type="button" id="btn-open-timelogs-modal" class="btn btn-outline-primary btn-sm" style="font-weight: 700; display: inline-flex; align-items: center; gap: 5px; margin-left: 8px;">
+                    <span>⏱️</span> Task Time Logs &amp; Audit
+                  </button>
                 </div>
               </div>
 
@@ -1392,6 +1396,86 @@
               <button type="submit" id="btn-save-ctrl-modal" class="btn btn-primary">💾 Save &amp; Update Schedule Model</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           MODAL: TASK TIME LOGS & CONTRIBUTOR BREAKDOWN (CONTROL PROJECT)
+           ==================================================================== -->
+      <div id="ctrl-time-logs-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-dialog" style="max-width: 780px; width: 95%;">
+          <div class="modal-header" style="border-bottom: 1px solid var(--border);">
+            <div>
+              <h4 style="margin: 0; font-size: 1.15rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px;">
+                <span>⏱️</span> Task Time Logs &amp; Contributor Breakdown
+              </h4>
+              <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--muted);">
+                Select any task (completed, review, in-progress, or not started) to inspect logged hours and contributor history.
+              </p>
+            </div>
+            <button type="button" id="btn-close-ctrl-timelog-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+          </div>
+          <div class="modal-body" style="padding: 1.2rem 1.4rem; max-height: 72vh; overflow-y: auto;">
+            <!-- Task Selector -->
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+              <label for="ctrl-timelog-task-select" style="font-size: 0.85rem; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 4px;">
+                Select Project Task to Inspect:
+              </label>
+              <select id="ctrl-timelog-task-select" class="form-control" style="font-weight: 700; font-size: 0.92rem; padding: 0.5rem 0.75rem;">
+                <!-- Populated dynamically with all tasks -->
+              </select>
+            </div>
+
+            <!-- Task Meta Overview Banner -->
+            <div id="ctrl-timelog-meta-banner" style="background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.85rem 1rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong id="ctrl-timelog-act-title" style="font-size: 1rem; color: var(--charcoal);">Task Name</strong>
+                <div id="ctrl-timelog-act-sub" style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">ID: ACT-1 | Plan Duration: 5d</div>
+              </div>
+              <div id="ctrl-timelog-act-status-badge">
+                <!-- Status Badge -->
+              </div>
+            </div>
+
+            <!-- Summary KPI Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 1.4rem;">
+              <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.9rem; text-align: center;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Total Time Logged</div>
+                <div id="ctrl-timelog-kpi-total-time" style="font-size: 1.5rem; font-weight: 800; color: #2563EB; margin-top: 4px;">0h 00m</div>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.9rem; text-align: center;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Total Sessions</div>
+                <div id="ctrl-timelog-kpi-sessions" style="font-size: 1.5rem; font-weight: 800; color: var(--charcoal); margin-top: 4px;">0</div>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.9rem; text-align: center;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Contributors</div>
+                <div id="ctrl-timelog-kpi-contributors" style="font-size: 1.5rem; font-weight: 800; color: var(--charcoal); margin-top: 4px;">0</div>
+              </div>
+            </div>
+
+            <!-- Contributor Breakdown Section -->
+            <div style="margin-bottom: 1.4rem;">
+              <h5 style="margin: 0 0 0.5rem 0; font-size: 0.92rem; color: var(--charcoal); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                <span>👥</span> Breakdown by Contributor
+              </h5>
+              <div id="ctrl-timelog-contributors-container" class="table-responsive">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- Session History Section -->
+            <div>
+              <h5 style="margin: 0 0 0.5rem 0; font-size: 0.92rem; color: var(--charcoal); font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                <span>📜</span> Time Log Session History
+              </h5>
+              <div id="ctrl-timelog-sessions-container" class="table-responsive">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer" style="display: flex; justify-content: flex-end; padding: 0.8rem 1.4rem; border-top: 1px solid var(--border);">
+            <button type="button" id="btn-cancel-ctrl-timelog-modal" class="btn btn-secondary">Close</button>
+          </div>
         </div>
       </div>
 

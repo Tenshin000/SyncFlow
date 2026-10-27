@@ -1,5 +1,5 @@
 /**
- * SyncFlow – Google Gemini 1.5 Flash AI Integration Controller
+ * SyncFlow - Google Gemini Flash AI Integration Controller
  * Robust, standalone controller for:
  * 1. AI Text-to-WBS Generator (View 2)
  * 2. AI DCMA 14-Point PERT Estimator (View 4)
@@ -15,6 +15,9 @@ import {
 
 const LOCAL_STORAGE_GEMINI_KEY = "syncflow_gemini_api_key";
 
+/**
+ * Retrieves stored Gemini API key from browser localStorage.
+ */
 function getStoredGeminiKey() {
   try {
     return localStorage.getItem(LOCAL_STORAGE_GEMINI_KEY) || "";
@@ -23,6 +26,9 @@ function getStoredGeminiKey() {
   }
 }
 
+/**
+ * Persists Gemini API key into browser localStorage.
+ */
 function storeGeminiKey(key) {
   try {
     if (key && typeof key === "string" && key.trim()) {
@@ -33,6 +39,9 @@ function storeGeminiKey(key) {
   }
 }
 
+/**
+ * Resolves active project ID from URL parameters or session storage.
+ */
 function getActiveProjectId() {
   const urlParam = new URLSearchParams(window.location.search).get("project_id");
   if (urlParam) return urlParam;
@@ -45,6 +54,9 @@ function getActiveProjectId() {
 
 let activeProjectCache = null;
 
+/**
+ * Fetches and caches project details for AI modal contextual summaries.
+ */
 async function getProjectData(projectId) {
   if (!projectId) return null;
   if (activeProjectCache && String(activeProjectCache.id || activeProjectCache._id) === String(projectId)) {
@@ -62,9 +74,10 @@ async function getProjectData(projectId) {
   return null;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Dynamic Progress Sequence Helper & Flash Notification
-// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initiates a step-by-step progress ticker animation for long-running AI generation.
+ */
 function startProgressSequence(prefix, steps) {
   const container = document.getElementById(`${prefix}-loading`);
   const titleEl = document.getElementById(`${prefix}-step-title`);
@@ -104,6 +117,9 @@ function startProgressSequence(prefix, steps) {
   };
 }
 
+/**
+ * Checks for stored session flash messages and displays an inline success alert.
+ */
 export function checkAndDisplayFlashMessage() {
   const flash = sessionStorage.getItem("syncflow_ai_flash");
   if (!flash) return;
@@ -147,9 +163,12 @@ export function checkAndDisplayFlashMessage() {
   }, 6000);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+
 // 1. AI Text-to-WBS Modal Logic
-// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Opens the AI Text-to-WBS modal dialog and populates project context.
+ */
 export function openWbsModal() {
   const modal = document.getElementById("ai-wbs-modal");
   if (!modal) {
@@ -158,7 +177,7 @@ export function openWbsModal() {
     return;
   }
 
-  // 1. OPEN IMMEDIATELY — NO BLOCKING AWAITS
+  // OPEN IMMEDIATELY - NO BLOCKING AWAITS
   modal.style.setProperty("display", "flex", "important");
   modal.style.setProperty("z-index", "10000", "important");
 
@@ -174,7 +193,7 @@ export function openWbsModal() {
   if (keyInput) keyInput.value = getStoredGeminiKey();
   if (scopeInput) scopeInput.focus();
 
-  // 2. Fetch context asynchronously
+  // Fetch context asynchronously
   const projectId = getActiveProjectId();
   if (projectId) {
     getProjectData(projectId).then(proj => {
@@ -189,11 +208,17 @@ export function openWbsModal() {
   }
 }
 
+/**
+ * Closes the AI Text-to-WBS modal dialog.
+ */
 export function closeWbsModal() {
   const modal = document.getElementById("ai-wbs-modal");
   if (modal) modal.style.display = "none";
 }
 
+/**
+ * Sends scope text to Gemini AI to generate hierarchical WBS nodes and activities.
+ */
 export async function submitWbsGeneration() {
   const projectId = getActiveProjectId();
   const scopeInput = document.getElementById("ai-wbs-scope-input");
@@ -276,14 +301,17 @@ export async function submitWbsGeneration() {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+
 // 2. AI DCMA 14-Point PERT Estimator Modal Logic
-// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Opens the AI DCMA 14-Point PERT Estimator modal dialog.
+ */
 export function openEstimateModal() {
   const modal = document.getElementById("ai-estimate-modal");
   if (!modal) return;
 
-  // 1. OPEN IMMEDIATELY
+  // OPEN IMMEDIATELY
   modal.style.setProperty("display", "flex", "important");
   modal.style.setProperty("z-index", "10000", "important");
 
@@ -310,11 +338,17 @@ export function openEstimateModal() {
   }
 }
 
+/**
+ * Closes the AI DCMA 14-Point PERT Estimator modal dialog.
+ */
 export function closeEstimateModal() {
   const modal = document.getElementById("ai-estimate-modal");
   if (modal) modal.style.display = "none";
 }
 
+/**
+ * Calls Gemini AI to compute Beta PERT duration estimates (Optimistic, Likely, Pessimistic).
+ */
 export async function submitEstimateCalculation() {
   const projectId = getActiveProjectId();
   const promptInput = document.getElementById("ai-estimate-prompt-input");
@@ -378,14 +412,17 @@ export async function submitEstimateCalculation() {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+
 // 3. AI Precedence Dependency Extractor Modal Logic
-// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Opens the AI Precedence Dependency Extractor modal dialog.
+ */
 export function openDependencyModal() {
   const modal = document.getElementById("ai-dependency-modal");
   if (!modal) return;
 
-  // 1. OPEN IMMEDIATELY
+  // OPEN IMMEDIATELY
   modal.style.setProperty("display", "flex", "important");
   modal.style.setProperty("z-index", "10000", "important");
 
@@ -411,11 +448,17 @@ export function openDependencyModal() {
   }
 }
 
+/**
+ * Closes the AI Precedence Dependency Extractor modal dialog.
+ */
 export function closeDependencyModal() {
   const modal = document.getElementById("ai-dependency-modal");
   if (modal) modal.style.display = "none";
 }
 
+/**
+ * Sends workflow narrative to Gemini AI to extract topological precedence relationships.
+ */
 export async function submitDependencyExtraction() {
   const projectId = getActiveProjectId();
   const narrativeInput = document.getElementById("ai-dep-narrative-input");
@@ -484,9 +527,8 @@ export async function submitDependencyExtraction() {
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Expose on window for direct HTML inline calls & developer console access
-// ─────────────────────────────────────────────────────────────────────────────
+
 window.SyncFlowAI = {
   openWbsModal,
   closeWbsModal,
@@ -500,9 +542,9 @@ window.SyncFlowAI = {
   getActiveProjectId
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+
 // Global Event Delegation & Direct Listeners
-// ─────────────────────────────────────────────────────────────────────────────
+
 document.addEventListener("click", (e) => {
   // 1. Text-to-WBS Triggers & Actions
   if (e.target.closest("#btn-ai-text-to-wbs")) {
@@ -575,6 +617,9 @@ if (document.readyState === "loading") {
   attachDirectHandlers();
 }
 
+/**
+ * Attaches direct event listeners to AI modal buttons across workspace sections.
+ */
 function attachDirectHandlers() {
   checkAndDisplayFlashMessage();
 
