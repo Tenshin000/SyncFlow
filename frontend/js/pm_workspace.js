@@ -3549,6 +3549,7 @@ function renderEstimateTable() {
 
     filtered.forEach(act => {
       const aid = act.activity_id;
+      const isMilestone = Boolean(act.is_milestone);
       const isCrit = activePertAnalysis.criticalPathIds.includes(aid);
       const sched = activePertAnalysis.schedule[aid] || { float: 0 };
       const wpName = wpMap[act.work_package_id] || act.work_package_id || "Work Package";
@@ -3557,9 +3558,9 @@ function renderEstimateTable() {
       const a = act.optimistic !== undefined ? act.optimistic : 3.0;
       const m = act.most_likely !== undefined ? act.most_likely : 5.0;
       const b = act.pessimistic !== undefined ? act.pessimistic : 9.0;
-      const te = act.duration !== undefined ? act.duration : round((a + 4*m + b)/6, 2);
-      const sigma = act.std_dev !== undefined ? act.std_dev : round((b - a)/6, 2);
-      const varVal = act.variance !== undefined ? act.variance : round(sigma*sigma, 3);
+      const te = isMilestone ? 0.0 : (act.duration !== undefined ? act.duration : round((a + 4*m + b)/6, 2));
+      const sigma = isMilestone ? 0.0 : (act.std_dev !== undefined ? act.std_dev : round((b - a)/6, 2));
+      const varVal = isMilestone ? 0.0 : (act.variance !== undefined ? act.variance : round(sigma*sigma, 3));
 
       const pathBadge = isCrit
         ? `<span class="badge badge-rose" style="font-size: 0.72rem; padding: 2px 7px;">🔥 Critical Path (Float: 0d)</span>`
@@ -3567,7 +3568,13 @@ function renderEstimateTable() {
 
       // Inputs based on technique
       let inputsHtml = "";
-      if (tech === "three_point") {
+      if (isMilestone) {
+        inputsHtml = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="badge badge-indigo" style="font-size: 0.78rem; padding: 4px 10px;">🎯 Milestone Gate (Fixed Duration: 0.00 d)</span>
+          </div>
+        `;
+      } else if (tech === "three_point") {
         const isInvalid = !(a > 0 && a < m && m < b);
         let errDesc = "";
         if (a <= 0) errDesc = "Opt (a) must be > 0";
@@ -3704,22 +3711,37 @@ function bindEstimateTableEvents() {
       });
     });
 
+    // Helper to carefully parse numeric input with both dot and comma support
+    const parsePertNum = (str, fallback) => {
+      if (str === null || str === undefined) return fallback;
+      const s = String(str).replace(",", ".").trim();
+      if (s === "") return fallback;
+      const n = parseFloat(s);
+      return isNaN(n) ? fallback : n;
+    };
+
     // Helper to recalculate a single row
     /**
  * Recalculates expected duration and risk standard deviation for a modified table row.
  */
 function updateRowValues(aid) {
-      const act = activities.find(a => a.activity_id === aid);
+      const act = (project.activities || []).find(a => a.activity_id === aid);
       const row = estimateTableContainer.querySelector(`tr[data-row-id="${aid}"]`);
       if (!act || !row) return;
+
+      if (act.is_milestone) {
+        row.classList.remove("row-invalid-estimate");
+        delete act.has_validation_error;
+        return;
+      }
 
       const tech = (act.estimation_technique || "three_point").toLowerCase();
       const inA = row.querySelector(".pert-input-a"), inM = row.querySelector(".pert-input-m"), inB = row.querySelector(".pert-input-b");
       const inRate = row.querySelector(".pert-input-prate"), inQty = row.querySelector(".pert-input-pqty");
 
-      const a = inA ? parseFloat(inA.value || 20.0) : (act.optimistic || 20.0);
-      const m = inM ? parseFloat(inM.value || 35.0) : (act.most_likely || 35.0);
-      const b = inB ? parseFloat(inB.value || 60.0) : (act.pessimistic || 60.0);
+      const a = inA ? parsePertNum(inA.value, act.optimistic || 1.0) : (act.optimistic || 1.0);
+      const m = inM ? parsePertNum(inM.value, act.most_likely || 2.0) : (act.most_likely || 2.0);
+      const b = inB ? parsePertNum(inB.value, act.pessimistic || 3.0) : (act.pessimistic || 3.0);
 
       // Strict Ordering Check: Opt (a) < Likely (m) < Pess (b)
       if (tech === "three_point") {
@@ -3762,13 +3784,13 @@ function updateRowValues(aid) {
         applyActivityDurationCalc(act, "three_point", { a, m, b });
       } else if (tech === "parametric") {
         applyActivityDurationCalc(act, "parametric", {
-          rate: inRate ? parseFloat(inRate.value || 0.8) : 0.8,
-          qty: inQty ? parseFloat(inQty.value || m) : m
+          rate: inRate ? parsePertNum(inRate.value, 0.8) : 0.8,
+          qty: inQty ? parsePertNum(inQty.value, m) : m
         });
       } else if (tech === "analogous") {
         applyActivityDurationCalc(act, "analogous", { dur: act.analogous_actual_duration || act.duration || 75.0 });
       } else {
-        applyActivityDurationCalc(act, "single", { dur: inM ? parseFloat(inM.value || 35.0) : (act.duration || 35.0) });
+        applyActivityDurationCalc(act, "single", { dur: inM ? parsePertNum(inM.value, 35.0) : (act.duration || 35.0) });
       }
 
       // Update row cell displays
@@ -3787,17 +3809,33 @@ function updateRowValues(aid) {
       if (!hasAnyInvalid) hasUnsavedEstimates = true;
 
       // Recompute CPM client-side and update top banner live!
-      activePertAnalysis = computePertScheduleClient(activities, project.dependencies || []);
+      activePertAnalysis = computePertScheduleClient(project.activities || [], project.dependencies || []);
       updatePertSimulator();
     }
 
-    // Attach debounced change/input listeners to all inputs in table
+    // Attach direct listeners on every input
     estimateTableContainer.querySelectorAll("input").forEach(inp => {
-      inp.addEventListener("input", () => {
-        const aid = inp.getAttribute("data-id");
-        if (aid) updateRowValues(aid);
+      ["input", "change", "blur", "keyup"].forEach(evt => {
+        inp.addEventListener(evt, () => {
+          const aid = inp.getAttribute("data-id");
+          if (aid) updateRowValues(aid);
+        });
       });
     });
+
+    // Delegated container listener to guarantee capturing all edits
+    estimateTableContainer.oninput = (e) => {
+      const inp = e.target.closest("input");
+      if (inp && inp.getAttribute("data-id")) {
+        updateRowValues(inp.getAttribute("data-id"));
+      }
+    };
+    estimateTableContainer.onchange = (e) => {
+      const inp = e.target.closest("input");
+      if (inp && inp.getAttribute("data-id")) {
+        updateRowValues(inp.getAttribute("data-id"));
+      }
+    };
   }
 
   // Filter Listeners
@@ -3943,13 +3981,75 @@ function updateRowValues(aid) {
     renderEstimateView();
   });
 
+  /**
+   * Scans all rendered estimation table rows and synchronizes live user inputs into project.activities.
+   */
+  function syncAllEstimateInputsFromDom() {
+    const rows = estimateTableContainer.querySelectorAll("tr[data-row-id]");
+    const parseNum = (str, fallback) => {
+      if (str === null || str === undefined) return fallback;
+      const s = String(str).replace(",", ".").trim();
+      if (s === "") return fallback;
+      const n = parseFloat(s);
+      return isNaN(n) ? fallback : n;
+    };
+
+    rows.forEach(row => {
+      const aid = row.getAttribute("data-row-id");
+      const act = (project.activities || []).find(a => a.activity_id === aid);
+      if (!act) return;
+
+      if (act.is_milestone) {
+        act.optimistic = 0.0;
+        act.most_likely = 0.0;
+        act.pessimistic = 0.0;
+        act.duration = 0.0;
+        act.expected_time = 0.0;
+        act.std_dev = 0.0;
+        act.variance = 0.0;
+        return;
+      }
+
+      const techSel = row.querySelector(".pert-select-tech");
+      const tech = (techSel ? techSel.value : (act.estimation_technique || "three_point")).toLowerCase();
+      act.estimation_technique = tech;
+
+      const inA = row.querySelector(".pert-input-a");
+      const inM = row.querySelector(".pert-input-m");
+      const inB = row.querySelector(".pert-input-b");
+      const inRate = row.querySelector(".pert-input-prate");
+      const inQty = row.querySelector(".pert-input-pqty");
+
+      if (tech === "three_point") {
+        const a = inA ? parseNum(inA.value, act.optimistic || 1.0) : (act.optimistic || 1.0);
+        const m = inM ? parseNum(inM.value, act.most_likely || 2.0) : (act.most_likely || 2.0);
+        const b = inB ? parseNum(inB.value, act.pessimistic || 3.0) : (act.pessimistic || 3.0);
+        applyActivityDurationCalc(act, "three_point", { a, m, b });
+      } else if (tech === "parametric") {
+        const rate = inRate ? parseNum(inRate.value, act.parametric_rate || 0.8) : (act.parametric_rate || 0.8);
+        const qty = inQty ? parseNum(inQty.value, act.parametric_quantity || 1.0) : (act.parametric_quantity || 1.0);
+        applyActivityDurationCalc(act, "parametric", { rate, qty });
+      } else if (tech === "analogous") {
+        const dur = parseNum(act.analogous_actual_duration, act.duration || 10.0);
+        applyActivityDurationCalc(act, "analogous", { dur });
+      } else {
+        const dur = inM ? parseNum(inM.value, act.most_likely || act.duration || 5.0) : (act.duration || 5.0);
+        applyActivityDurationCalc(act, "single", { dur });
+      }
+    });
+  }
+
   // Save Duration Estimates
   btnSaveDurationEstimates.addEventListener("click", async () => {
     estimateAlertMsg.style.display = "none";
 
-    // Strict Pre-save Check: Opt (a) < Likely (m) < Pess (b)
+    // 1. Force synchronize all live DOM input table values into project.activities
+    syncAllEstimateInputsFromDom();
+
+    // 2. Strict Pre-save Check: Opt (a) < Likely (m) < Pess (b)
     const invalidList = [];
     (project.activities || []).forEach(act => {
+      if (act.is_milestone) return;
       const tech = (act.estimation_technique || "three_point").toLowerCase();
       if (tech === "three_point") {
         const a = parseFloat(act.optimistic);
@@ -4080,6 +4180,31 @@ function renderEstimateView() {
 
     // 3. Update simulator UI
     updatePertSimulator(currentTargetD);
+
+    // Auto-correct any legacy values that violate strict a < m < b
+    activities.forEach(act => {
+      if (act.is_milestone) return;
+      const tech = (act.estimation_technique || "three_point").toLowerCase();
+      if (tech === "three_point") {
+        let a = parseFloat(act.optimistic);
+        let m = parseFloat(act.most_likely);
+        let b = parseFloat(act.pessimistic);
+        if (!isNaN(a) && !isNaN(m) && !isNaN(b)) {
+          let adjusted = false;
+          if (a <= 0) { a = 1.0; adjusted = true; }
+          if (m <= a) { m = round(a + Math.max(1.0, a * 0.3), 1); adjusted = true; }
+          if (b <= m) { b = round(m + Math.max(1.5, m * 0.4), 1); adjusted = true; }
+          if (adjusted) {
+            act.optimistic = a;
+            act.most_likely = m;
+            act.pessimistic = b;
+            act.duration = act.expected_time = round((a + 4.0 * m + b) / 6.0, 2);
+            act.std_dev = round((b - a) / 6.0, 3);
+            act.variance = round(act.std_dev * act.std_dev, 4);
+          }
+        }
+      }
+    });
 
     // 4. Render Table
     renderEstimateTable();

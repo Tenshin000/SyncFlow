@@ -21,20 +21,21 @@ class AIActivityItem(BaseModel):
     description: str = Field(description="Activity detailed work description")
     work_package_ref: str = Field(description="WBS reference code, e.g. '1.1' or '2.1'")
     is_milestone: bool = Field(description="True if zero-duration milestone gate, false otherwise")
-    optimistic_days: float = Field(description="Optimistic duration (a) in business days (DCMA Metric 6: <= 44.0)")
-    most_likely_days: float = Field(description="Most likely duration (m) in business days (DCMA Metric 6: <= 44.0)")
-    pessimistic_days: float = Field(description="Pessimistic duration (b) in business days (DCMA Metric 6: <= 44.0)")
-    tasks: List[AITaskItem] = Field(description="Child tasks breaking down the activity")
+    optimistic_days: float = Field(description="Optimistic duration (a) in business days. STRICT CONSTRAINT: must be strictly less than most_likely_days (a < m). Minimum 0.5.")
+    most_likely_days: float = Field(description="Most likely duration (m) in business days. STRICT CONSTRAINT: must be strictly greater than optimistic_days (m > a) and strictly less than pessimistic_days (m < b).")
+    pessimistic_days: float = Field(description="Pessimistic duration (b) in business days. STRICT CONSTRAINT: must be strictly greater than most_likely_days (b > m). Maximum 44.0.")
+    tasks: List[str] = Field(description="1 to 3 key task steps breaking down the activity")
 
 class AIWorkPackageItem(BaseModel):
     wbs_number: str = Field(description="Hierarchical numbering relative to deliverable, e.g. '1.1'")
-    name: str = Field(description="Work Package title")
-    description: str = Field(description="Scope covered by this work package")
+    name: str = Field(description="Concrete, domain-specific Work Package title (e.g., 'API Gateway & Security', 'Database Persistence Layer'). NEVER use generic numbered names like 'Work Package 1.1'.")
+    description: str = Field(description="Detailed scope of components covered by this work package")
+    activities: List[AIActivityItem] = Field(description="Discrete activities belonging directly to this work package")
 
 class AIDeliverableItem(BaseModel):
     wbs_number: str = Field(description="Major Deliverable numbering, e.g. '1'")
-    name: str = Field(description="Major Deliverable title")
-    description: str = Field(description="Major Deliverable summary")
+    name: str = Field(description="Descriptive, domain-specific Major Deliverable title as a professional PMBOK noun phrase (e.g., 'System Architecture & Infrastructure', 'Core Engine & Logic Services', 'User Interface & Interactive Views', 'Quality Assurance & Production Release'). STRICTLY FORBIDDEN: generic numbered names like 'Deliverable 1', 'Deliverable 2', etc.")
+    description: str = Field(description="Comprehensive scope summary of what this major deliverable encompasses")
     work_packages: List[AIWorkPackageItem] = Field(description="Child work packages")
 
 class AIWbsDecompositionOutput(BaseModel):
@@ -44,9 +45,9 @@ class AIWbsDecompositionOutput(BaseModel):
 # DCMA 14-Point PERT Duration Estimation Schemas
 class AIEstimateItem(BaseModel):
     activity_id: str = Field(description="Target Activity ID")
-    optimistic: float = Field(description="Optimistic duration (a) in business days (DCMA Metric 6: <= 44.0)")
-    most_likely: float = Field(description="Most likely duration (m) in business days (DCMA Metric 6: <= 44.0)")
-    pessimistic: float = Field(description="Pessimistic duration (b) in business days (DCMA Metric 6: <= 44.0)")
+    optimistic: float = Field(description="Optimistic duration (a) in business days. STRICT CONSTRAINT: must be strictly less than most_likely (a < m). Minimum 0.5.")
+    most_likely: float = Field(description="Most likely duration (m) in business days. STRICT CONSTRAINT: must be strictly greater than optimistic (m > a) and strictly less than pessimistic (m < b).")
+    pessimistic: float = Field(description="Pessimistic duration (b) in business days. STRICT CONSTRAINT: must be strictly greater than most_likely (b > m). Maximum 44.0.")
     rationale: str = Field(description="Technical & risk rationale compliant with DCMA 14-Point")
 
 class AIEstimationOutput(BaseModel):
@@ -69,17 +70,20 @@ class TextToWBSRequest(BaseModel):
     custom_prompt: Optional[str] = Field(default="", description="Optional PM custom instructions or focus areas")
     mode: str = Field(default="merge", description="'merge' (append & preserve) or 'replace' (recreate fresh)")
     api_key: Optional[str] = Field(default=None, description="Optional custom Gemini API key provided by PM")
+    model: Optional[str] = Field(default="gemini-flash-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
 
 class EstimateDurationsRequest(BaseModel):
     custom_prompt: Optional[str] = Field(default="", description="Optional PM guidance on complexity or resource speed")
     target_activity_ids: Optional[List[str]] = Field(default=None, description="Specific activity IDs to estimate (defaults to missing/all)")
     api_key: Optional[str] = Field(default=None, description="Optional custom Gemini API key provided by PM")
+    model: Optional[str] = Field(default="gemini-flash-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
 
 class ExtractDependenciesRequest(BaseModel):
     narrative_text: Optional[str] = Field(default="", description="Optional narrative describing activity order or handoffs")
     workflow_narrative: Optional[str] = Field(default="", description="Alias for narrative_text")
     custom_prompt: Optional[str] = Field(default="", description="Optional PM instructions for dependency generation")
     api_key: Optional[str] = Field(default=None, description="Optional custom Gemini API key provided by PM")
+    model: Optional[str] = Field(default="gemini-flash-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
 
     def get_narrative(self) -> str:
         return (self.workflow_narrative or self.narrative_text or "").strip()

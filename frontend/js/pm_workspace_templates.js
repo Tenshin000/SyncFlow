@@ -87,6 +87,7 @@ export function renderScheduleMatrixRowHtml(r, rowClass, badgeHtml) {
  * Generates HTML table row markup for duration estimation (Beta PERT, Parametric, Analogous, Single-Point).
  */
 export function renderEstimateRowHtml({ aid, act, wpName, tech, inputsHtml, te, sigma, varVal, isCrit, pathBadge, sigmaBadgeColor }) {
+  const isMilestone = Boolean(act && act.is_milestone);
   return `
     <tr data-row-id="${aid}" style="${isCrit ? 'background: #FFFBFB;' : ''}">
       <td>
@@ -98,12 +99,16 @@ export function renderEstimateRowHtml({ aid, act, wpName, tech, inputsHtml, te, 
         <div style="font-size: 0.76rem; color: var(--slate);">${wpName}</div>
       </td>
       <td>
-        <select class="form-control pert-select-tech" data-id="${aid}" style="padding: 4px 6px; font-size: 0.8rem; font-weight: 600;">
-          <option value="three_point" ${tech === 'three_point' ? 'selected' : ''}>🎲 Three-Point (Beta)</option>
-          <option value="parametric" ${tech === 'parametric' ? 'selected' : ''}>📐 Parametric</option>
-          <option value="analogous" ${tech === 'analogous' ? 'selected' : ''}>📜 Analogous</option>
-          <option value="single_point" ${tech === 'single_point' ? 'selected' : ''}>🎯 Single-Point</option>
-        </select>
+        ${isMilestone ? `
+          <span class="badge badge-secondary" style="padding: 5px 8px; font-size: 0.78rem; font-weight: 700;">🎯 Milestone</span>
+        ` : `
+          <select class="form-control pert-select-tech" data-id="${aid}" style="padding: 4px 6px; font-size: 0.8rem; font-weight: 600;">
+            <option value="three_point" ${tech === 'three_point' ? 'selected' : ''}>🎲 Three-Point (Beta)</option>
+            <option value="parametric" ${tech === 'parametric' ? 'selected' : ''}>📐 Parametric</option>
+            <option value="analogous" ${tech === 'analogous' ? 'selected' : ''}>📜 Analogous</option>
+            <option value="single_point" ${tech === 'single_point' ? 'selected' : ''}>🎯 Single-Point</option>
+          </select>
+        `}
       </td>
       <td>${inputsHtml}</td>
       <td style="text-align: right;">

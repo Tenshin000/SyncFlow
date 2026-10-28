@@ -527,6 +527,15 @@ export async function aiVerifyKey(apiKey) {
   });
 }
 
+/**
+ * Fetches the list of allowed Gemini models configured in the system.
+ */
+export async function fetchAvailableAiModels() {
+  return await apiRequest("/syncflow/nlp/models", {
+    method: "GET"
+  });
+}
+
 // Time Tracking & Stopwatch API (Trello-Style)
 /**
  * Starts a live work timer linked strictly to an in-progress (WIP) activity assigned to user.

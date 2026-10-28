@@ -12,7 +12,7 @@ CRITICAL WBS PRINCIPLES:
 2. MUTUALLY EXCLUSIVE: Elements at the same hierarchy level must not overlap.
 3. HIERARCHY: Major Deliverable (Level 1, noun phrase) -> Work Package (Level 2, concrete deliverable) -> Activities (Level 3, Action Verb + Object).
 4. SIZING & DCMA COMPLIANCE: Work packages and activities must be manageable chunks. Activity durations MUST NOT exceed 44 business days (DCMA Metric 6).
-5. PERT THREE-POINT ESTIMATES: Provide realistic values: optimistic (a), most likely (m), and pessimistic (b) in business days where a <= m <= b.
+5. PERT THREE-POINT ESTIMATES: Provide realistic values: optimistic (a), most likely (m), and pessimistic (b) in business days strictly enforcing STRICT INEQUALITY: 0.5 <= a < m < b <= 44.0. Never set optimistic and most likely to the same value (a and m must NEVER be identical; keep at least 1.0 day difference).
 6. Return purely valid JSON strictly matching the requested schema. Do not wrap in markdown or prose.
 """
 
@@ -22,7 +22,7 @@ Your mission is to evaluate project activities and calculate realistic, defense-
 DCMA 14-POINT AUDIT GUARDRAILS:
 1. METRIC 6 (HIGH DURATION): No activity duration (expected or pessimistic) should exceed 44 business days. High duration activities distort the critical path.
 2. METRIC 7 (ZERO DURATION): Durations must be strictly greater than 0, unless the activity is a true milestone gate.
-3. BETA DISTRIBUTION INTEGRITY: Always enforce a <= m <= b. The spread (b - a) represents technical risk.
+3. BETA DISTRIBUTION INTEGRITY: Always enforce STRICT INEQUALITY 0.5 <= a < m < b <= 44.0. Optimistic and most likely must NEVER be identical (strictly a < m < b with at least 1.0 day between each estimate).
 4. Provide a defensible, professional engineering rationale explaining risk factors, uncertainties, and complexity.
 5. Return purely valid JSON matching the requested schema.
 """
@@ -78,48 +78,86 @@ PROJECT MANAGER SPECIFIC INSTRUCTIONS:
 
     prompt += """
 TASK:
-Decompose the scope into 2 to 5 Major Deliverables, with each containing 1 to 4 Work Packages, and each Work Package containing 1 to 4 concrete Activities.
-For each Activity, include realistic a, m, b duration estimates in business days (DCMA compliant, <= 44 days, a <= m <= b) and 1 to 3 child tasks.
+Decompose the scope into 2 to 4 Major Deliverables.
+Each Major Deliverable must contain 1 to 3 Work Packages.
+Each Work Package must directly contain 1 to 3 discrete, concrete Activities (PMBOK Level 3).
 
-REQUIRED ROOT JSON STRUCTURE:
-You must provide BOTH "major_deliverables" AND "activities" at the root level of your JSON response:
+CRITICAL REQUIREMENTS:
+1. MAJOR DELIVERABLE TITLES: MUST be descriptive, domain-specific PMBOK Level 1 noun phrases reflecting the actual scope (e.g., "System Architecture & Infrastructure Foundation", "Core Scheduling Engine & Logic Services", "User Interface & Interactive Gantt Views", "Quality Assurance & Production Release").
+   STRICT REQUIREMENT: NEVER use generic numbered names like "Deliverable 1", "Deliverable 2", "Derivable 1", "Phase 1", or "Major Deliverable 1". Every deliverable MUST have a real, meaningful, professional name based on the project scope!
+2. WORK PACKAGE TITLES: MUST be concrete Level 2 component titles (e.g., "API Gateway & Security Services", "Relational Database Schema & Persistence", "Interactive Gantt Chart Component"). NEVER use generic numbered names like "Work Package 1.1".
+3. ACTIVITY NAMES: MUST be specific, action-oriented verb + noun phrases (e.g., 'Architect Relational Schema & Indices', 'Develop OAuth2 Authentication & Session Middleware', 'Build Real-time WebSocket Gateway', 'Conduct System Integration & Load Testing'). Never generate generic placeholders or repetitive stubs.
+4. Provide realistic DCMA 14-point 3-point duration estimates in business days:
+   - optimistic_days (a)
+   - most_likely_days (m)
+   - pessimistic_days (b)
+   - Must strictly satisfy: 0.5 <= a < m < b <= 44.0 days. Ensure a < m < b with at least 1.0 day difference between them (e.g. a=2.0, m=4.0, b=7.0). Never set a and m to the same value.
+5. For each activity, include 1 to 3 concise execution task steps in the "tasks" array (e.g., ["Define schema contracts", "Write migration scripts"]).
+6. Every work package MUST have its "activities" list populated.
+
+REQUIRED JSON STRUCTURE:
 {
   "major_deliverables": [
     {
       "wbs_number": "1",
-      "name": "Major Deliverable Name",
-      "description": "Summary of deliverable",
+      "name": "System Architecture & Security Foundation",
+      "description": "Core infrastructure, database persistence models, and authentication services",
       "work_packages": [
         {
           "wbs_number": "1.1",
-          "name": "Work Package Title",
-          "description": "Scope of work package"
+          "name": "Database & Data Access Layer",
+          "description": "Relational schemas, migrations, and repository implementations",
+          "activities": [
+            {
+              "name": "Design Relational Schema & Migration Pipeline",
+              "description": "Model database entities, foreign key relationships, and automated migration scripts",
+              "work_package_ref": "1.1",
+              "is_milestone": false,
+              "optimistic_days": 2.0,
+              "most_likely_days": 4.0,
+              "pessimistic_days": 7.0,
+              "tasks": [
+                "Draft entity relationship diagrams",
+                "Implement database migration scripts",
+                "Execute schema validation tests"
+              ]
+            }
+          ]
         }
       ]
-    }
-  ],
-  "activities": [
+    },
     {
-      "name": "Implement Core Component",
-      "description": "Specific action verb + deliverable",
-      "work_package_ref": "1.1",
-      "is_milestone": false,
-      "optimistic_days": 2.0,
-      "most_likely_days": 4.0,
-      "pessimistic_days": 7.0,
-      "tasks": [
+      "wbs_number": "2",
+      "name": "Core Scheduling Engine & Algorithms",
+      "description": "Critical path calculation engine, calendar models, and schedule analysis services",
+      "work_packages": [
         {
-          "name": "Design & Setup",
-          "description": "Technical tasks",
-          "operations": [
-            {"name": "Setup code scaffolding", "description": "Initialize base files"}
+          "wbs_number": "2.1",
+          "name": "Critical Path Method (CPM) Processing",
+          "description": "Forward/backward pass calculation, slack analysis, and topological sorting",
+          "activities": [
+            {
+              "name": "Implement Forward and Backward Pass Algorithm",
+              "description": "Calculate early start/finish and late start/finish dates across precedence network",
+              "work_package_ref": "2.1",
+              "is_milestone": false,
+              "optimistic_days": 3.0,
+              "most_likely_days": 5.0,
+              "pessimistic_days": 8.0,
+              "tasks": [
+                "Implement topological sorter",
+                "Code forward pass early dates calculation",
+                "Code backward pass late dates calculation"
+              ]
+            }
           ]
         }
       ]
     }
-  ]
+  ],
+  "activities": []
 }
-Ensure every work package has corresponding activities referenced by work_package_ref. Output strictly valid JSON matching the schema.
+Output strictly valid JSON matching the schema.
 """
     return prompt
 
@@ -158,10 +196,10 @@ PROJECT MANAGER GUIDANCE:
 
     prompt += """
 TASK:
-Provide realistic 3-point PERT estimates:
-- optimistic (a): Best-case business days (a <= m)
-- most_likely (m): Normal expected business days (a <= m <= b)
-- pessimistic (b): Worst-case business days including risks (b <= 44 days, DCMA Metric 6 compliant)
+Provide realistic 3-point PERT estimates enforcing strict inequality:
+- optimistic (a): Best-case business days (strictly a < m, min 0.5)
+- most_likely (m): Normal expected business days (strictly a < m < b)
+- pessimistic (b): Worst-case business days including risks (strictly m < b <= 44.0 days)
 - rationale: Technical risk justification
 """
     return prompt
