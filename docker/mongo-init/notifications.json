@@ -1,0 +1,343 @@
+[
+  {
+    "_id": {
+      "$oid": "6ad22f37bcdd46aa1cb72dc9"
+    },
+    "project_id": "6acfe1433b0f53ae3b34cc2c",
+    "project_name": "Videogame Project",
+    "title": "Activity Verified (Controlled): Implement basic combat mechanics",
+    "message": "Controller confirmed activity 'Implement basic combat mechanics' as Controlled (Blue). Description: Perfect.",
+    "type": "review_confirmed",
+    "to_all": false,
+    "to_pm": true,
+    "recipient_teams": [],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd067c",
+    "sender_name": "Mark White (Controller)",
+    "read_by": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "deleted_by": [],
+    "data": {
+      "project_id": "6acfe1433b0f53ae3b34cc2c",
+      "project_name": "Videogame Project",
+      "activity_id": "ACT-1.2.2",
+      "activity_name": "Implement basic combat mechanics",
+      "status": "verified",
+      "notes": "Perfect."
+    },
+    "created_at": {
+      "$date": "2026-10-16T14:05:43.652Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad230010000000000000001"
+    },
+    "project_id": "6ad220020000000000000002",
+    "project_name": "Chronicles of Eldoria: The Shattered Crown",
+    "title": "Gold Master Certification Approved",
+    "message": "Activity ACT-4.2.2 'Release Golden Master & ESRB/PEGI Certification' has been signed off by PM Francesco Panattoni. All platform compliance checks passed with zero blockers.",
+    "type": "milestone",
+    "to_all": true,
+    "to_pm": true,
+    "recipient_teams": [],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd064f",
+    "sender_name": "Francesco Panattoni (Lead PM)",
+    "read_by": [],
+    "deleted_by": [],
+    "data": {
+      "activity_id": "ACT-4.2.2",
+      "milestone": "Gold Master"
+    },
+    "created_at": {
+      "$date": "2026-10-16T13:06:09.472Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad20b2022497582d852627a"
+    },
+    "project_id": "6acfe1433b0f53ae3b34cc2c",
+    "project_name": "Videogame Project",
+    "title": "Review Requested: Build rendering pipeline",
+    "message": "Activity 'Build rendering pipeline' has been marked as complete and requires Controller verification.",
+    "type": "review_request",
+    "to_all": false,
+    "to_pm": false,
+    "recipient_teams": [],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd0687",
+      "6acfb05eb1e16744cbcd0676"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd0653",
+    "sender_name": "Team Member",
+    "read_by": [
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "deleted_by": [],
+    "data": {
+      "project_id": "6acfe1433b0f53ae3b34cc2c",
+      "project_name": "Videogame Project",
+      "activity_id": "ACT-2.1.1",
+      "activity_name": "Build rendering pipeline",
+      "status": "completed"
+    },
+    "created_at": {
+      "$date": "2026-10-16T11:31:44.584Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad2015217b3ac512045cdcb"
+    },
+    "project_id": "6acfe1433b0f53ae3b34cc2c",
+    "project_name": "Videogame Project",
+    "title": "Activity Verified (Controlled): Develop greybox movement prototype",
+    "message": "Controller confirmed activity 'Develop greybox movement prototype' as Controlled (Blue). Description: The Activity is complete.",
+    "type": "review_confirmed",
+    "to_all": false,
+    "to_pm": true,
+    "recipient_teams": [],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd067c",
+    "sender_name": "Mark White (Controller)",
+    "read_by": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "deleted_by": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "data": {
+      "project_id": "6acfe1433b0f53ae3b34cc2c",
+      "project_name": "Videogame Project",
+      "activity_id": "ACT-1.2.1",
+      "activity_name": "Develop greybox movement prototype",
+      "status": "verified",
+      "notes": "The Activity is complete."
+    },
+    "created_at": {
+      "$date": "2026-10-16T10:49:54.667Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad1efff883079c41af4affe"
+    },
+    "project_id": "6acfe1433b0f53ae3b34cc2c",
+    "project_name": "Videogame Project",
+    "title": "Project Join Request Approved \ud83c\udf89",
+    "message": "Your request to join project 'Videogame Project' has been approved by the Project Manager. You can now access your project workspace.",
+    "type": "join_approved",
+    "to_all": false,
+    "to_pm": false,
+    "recipient_teams": [],
+    "recipient_users": [
+      "6ad1efce883079c41af4affc"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd064f",
+    "sender_name": "Project Manager",
+    "read_by": [
+      "6ad1efce883079c41af4affc"
+    ],
+    "data": {
+      "project_id": "6acfe1433b0f53ae3b34cc2c",
+      "project_name": "Videogame Project",
+      "status": "approved"
+    },
+    "created_at": {
+      "$date": "2026-10-16T09:35:59.472Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad230010000000000000003"
+    },
+    "project_id": "6ad220030000000000000003",
+    "project_name": "Galactic Odyssey: Starfighter Command",
+    "title": "64-Player Netcode Stress Test Completed",
+    "message": "Activity ACT-4.2.1 passed all simulated fleet war scenarios with under 35ms tick sync and zero packet drops.",
+    "type": "schedule_update",
+    "to_all": true,
+    "to_pm": true,
+    "recipient_teams": [
+      "GAL-TEAM-PROG",
+      "GAL-TEAM-QA"
+    ],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f",
+      "6acfb05eb1e16744cbcd0651"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd067c",
+    "sender_name": "Mark White (Controller)",
+    "read_by": [],
+    "deleted_by": [],
+    "data": {
+      "activity_id": "ACT-4.2.1"
+    },
+    "created_at": {
+      "$date": "2026-10-16T01:06:09.472Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad230010000000000000004"
+    },
+    "project_id": "6ad220040000000000000004",
+    "project_name": "Shadow of the Ronin: Blood & Cherry Blossoms",
+    "title": "Sumi-e Ink Post-Processing Locked at 60 FPS",
+    "message": "Activity ACT-4.2.1 verified by Controller Sarah Williams. Frame pacing on ultra-wide screens confirmed locked at 60 FPS without jitter.",
+    "type": "schedule_update",
+    "to_all": true,
+    "to_pm": true,
+    "recipient_teams": [
+      "RON-TEAM-ART",
+      "RON-TEAM-QA"
+    ],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd0678",
+    "sender_name": "Sarah Williams (Controller)",
+    "read_by": [],
+    "deleted_by": [],
+    "data": {
+      "activity_id": "ACT-4.2.1"
+    },
+    "created_at": {
+      "$date": "2026-10-15T12:06:09.472Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad230010000000000000006"
+    },
+    "project_id": "6ad220020000000000000002",
+    "project_name": "Chronicles of Eldoria: The Shattered Crown",
+    "title": "65-Piece Symphonic Orchestra Score Mastered",
+    "message": "Activity ACT-4.1.1 completed. Master soundtrack stem audio deliverable approved by Creative Direction and Controller James Johnson.",
+    "type": "general",
+    "to_all": true,
+    "to_pm": false,
+    "recipient_teams": [
+      "ELD-TEAM-SND"
+    ],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd0687",
+    "sender_name": "James Johnson (Controller)",
+    "read_by": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "deleted_by": [],
+    "data": {
+      "activity_id": "ACT-4.1.1"
+    },
+    "created_at": {
+      "$date": "2026-10-14T11:06:09.472Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad230010000000000000012"
+    },
+    "project_id": "6ad220020000000000000002",
+    "project_name": "Chronicles of Eldoria: The Shattered Crown",
+    "title": "End-to-End Combat Balance Verified",
+    "message": "Activity ACT-4.2.1 verified. Boss hit point tuning, stamina drain curves, and camera lock-on performance confirmed stable.",
+    "type": "schedule_update",
+    "to_all": true,
+    "to_pm": true,
+    "recipient_teams": [
+      "ELD-TEAM-QA"
+    ],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd0678",
+    "sender_name": "Sarah Williams (Controller)",
+    "read_by": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "deleted_by": [],
+    "data": {
+      "activity_id": "ACT-4.2.1"
+    },
+    "created_at": {
+      "$date": "2026-10-14T05:06:09.472Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad230010000000000000008"
+    },
+    "project_id": "6ad220030000000000000003",
+    "project_name": "Galactic Odyssey: Starfighter Command",
+    "title": "6DOF Newtonian Flight Physics Locked",
+    "message": "Activity ACT-1.1.1 'Implement 6DOF Newtonian Physics Math' signed off by Controller Mark White. Zero-gravity flight feel validated by design leads.",
+    "type": "milestone",
+    "to_all": true,
+    "to_pm": true,
+    "recipient_teams": [
+      "GAL-TEAM-PROG",
+      "GAL-TEAM-GD"
+    ],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd067c",
+    "sender_name": "Mark White (Controller)",
+    "read_by": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "deleted_by": [],
+    "data": {
+      "activity_id": "ACT-1.1.1"
+    },
+    "created_at": {
+      "$date": "2026-10-12T15:06:09.472Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad230010000000000000009"
+    },
+    "project_id": "6ad220040000000000000004",
+    "project_name": "Shadow of the Ronin: Blood & Cherry Blossoms",
+    "title": "Sengoku Era Lore Bible Approved",
+    "message": "Activity ACT-1.1.1 verified by Emily Rodriguez. Cultural historical consultation complete and clan rivalries documentation signed off.",
+    "type": "general",
+    "to_all": true,
+    "to_pm": true,
+    "recipient_teams": [
+      "RON-TEAM-GD"
+    ],
+    "recipient_users": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "sender_id": "6acfb05eb1e16744cbcd0676",
+    "sender_name": "Emily Rodriguez (Creative Director)",
+    "read_by": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "deleted_by": [],
+    "data": {
+      "activity_id": "ACT-1.1.1"
+    },
+    "created_at": {
+      "$date": "2026-10-11T15:06:09.472Z"
+    }
+  }
+]

@@ -1,0 +1,19 @@
+# Backend API Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+email-validator>=2.0.0
+
+# Database
+pymongo>=4.11.0
+
+# Data Validation & Schemas
+pydantic>=2.10.0
+
+# Security & Authentication
+bcrypt>=4.2.0
+
+# Utilities & Environment
+python-dotenv>=1.0.1
+
+# AI & NLP Engine
+google-generativeai>=0.8.6

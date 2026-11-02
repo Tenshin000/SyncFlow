@@ -1,0 +1,4221 @@
+[
+  {
+    "_id": {
+      "$oid": "6ad220020000000000000002"
+    },
+    "name": "Chronicles of Eldoria: The Shattered Crown",
+    "description": "Third-person dark fantasy action RPG featuring directional swordplay, sorcery spell combos, dynamic volumetric weather, and full symphonic orchestral score.",
+    "status": "completed",
+    "start_date": {
+      "$date": "2025-03-15T00:00:00Z"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "assigned_user_ids": [
+      "6acfb05eb1e16744cbcd064f",
+      "6acfb05eb1e16744cbcd0687",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd0676",
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd0651",
+      "6acfb05eb1e16744cbcd0652",
+      "6acfb05eb1e16744cbcd0656",
+      "6acfb05eb1e16744cbcd0657",
+      "6acfb05eb1e16744cbcd0658",
+      "6acfb05eb1e16744cbcd0659",
+      "6acfb05eb1e16744cbcd065b",
+      "6acfb05eb1e16744cbcd0663",
+      "6acfb05eb1e16744cbcd066e",
+      "6acfb05eb1e16744cbcd0671",
+      "6acfb05eb1e16744cbcd0677"
+    ],
+    "teams": [
+      {
+        "team_id": "ELD-TEAM-GD",
+        "name": "Game Design & Narrative Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0657",
+          "6acfb05eb1e16744cbcd067a",
+          "6acfb05eb1e16744cbcd067e",
+          "6acfb05eb1e16744cbcd0680"
+        ]
+      },
+      {
+        "team_id": "ELD-TEAM-PROG",
+        "name": "Core Engineering & Gameplay Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0651",
+          "6acfb05eb1e16744cbcd0652",
+          "6acfb05eb1e16744cbcd0653",
+          "6acfb05eb1e16744cbcd0661",
+          "6acfb05eb1e16744cbcd0669"
+        ]
+      },
+      {
+        "team_id": "ELD-TEAM-ART",
+        "name": "Art & Visual Effects Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0656",
+          "6acfb05eb1e16744cbcd0658",
+          "6acfb05eb1e16744cbcd0659",
+          "6acfb05eb1e16744cbcd0663",
+          "6acfb05eb1e16744cbcd0667"
+        ]
+      },
+      {
+        "team_id": "ELD-TEAM-SND",
+        "name": "Audio Engineering & Sound Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd066e",
+          "6acfb05eb1e16744cbcd0671",
+          "6acfb05eb1e16744cbcd0686"
+        ]
+      },
+      {
+        "team_id": "ELD-TEAM-QA",
+        "name": "Quality Assurance & Compliance Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd065b",
+          "6acfb05eb1e16744cbcd0677",
+          "6acfb05eb1e16744cbcd0684"
+        ]
+      }
+    ],
+    "controllers": [
+      "6acfb05eb1e16744cbcd0687",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd0676",
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "wbs": [
+      {
+        "id": "DEL-1",
+        "wbs_number": "1",
+        "name": "High Fantasy Pre-Production",
+        "description": "Establish medieval kingdom lore, magical synergy systems, and combat pacing.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-1.1",
+            "wbs_number": "1.1",
+            "name": "Mythos & Quest Scripting",
+            "description": "Eldorian royal lineage and kingdom lore bible.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-1.2",
+            "wbs_number": "1.2",
+            "name": "Swordplay & Spellcraft Design",
+            "description": "Stamina-based sword combos and elemental affinities.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-2",
+        "wbs_number": "2",
+        "name": "Combat Engine & Animation Systems",
+        "description": "Motion capture ingest, weapon hitboxes, spell VFX shaders, and enemy combat state machines.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-2.1",
+            "wbs_number": "2.1",
+            "name": "Motion Capture & Sword Animations",
+            "description": "Hema-inspired longsword animations and blending.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-2.2",
+            "wbs_number": "2.2",
+            "name": "Magic Particle Shaders & Physics",
+            "description": "Pyromancy, cryomancy, and lightning Niagara shaders.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-3",
+        "wbs_number": "3",
+        "name": "Realm Level Design & Assets",
+        "description": "Gothic fortress greyboxing, ancient dungeon ruins, and boss titan sculpts.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-3.1",
+            "wbs_number": "3.1",
+            "name": "Eldorian Fortress Level Art",
+            "description": "Medieval castle, drawbridges, and courtyard assets.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-3.2",
+            "wbs_number": "3.2",
+            "name": "Boss Creature Sculpting & Rigging",
+            "description": "High-poly dragons, corrupted knights, and titans.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-4",
+        "wbs_number": "4",
+        "name": "Symphonic Audio & Platform Release",
+        "description": "Full orchestral recording, multi-language voice acting, and release candidate sign-off.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-4.1",
+            "wbs_number": "4.1",
+            "name": "Orchestral Score & Localization",
+            "description": "65-piece orchestra live recording and voice localization.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-4.2",
+            "wbs_number": "4.2",
+            "name": "Final Certification & Day-One Patch",
+            "description": "Comprehensive stability testing and platform golden master.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      }
+    ],
+    "activities": [
+      {
+        "activity_id": "ACT-1.1.1",
+        "work_package_id": "WP-1.1",
+        "name": "Author Eldorian Lore & Royal Dynasty Bible",
+        "description": "Draft medieval lineage, forgotten pantheons, and geographical maps.",
+        "assigned_teams": [
+          "ELD-TEAM-GD"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0657"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 18.0,
+        "most_likely": 30.0,
+        "pessimistic": 50.0,
+        "duration": 31.33,
+        "expected_time": 31.33,
+        "std_dev": 5.333,
+        "variance": 28.4409,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-03-15",
+        "actual_finish_date": "2025-04-20",
+        "verified_by": "James Johnson",
+        "verified_date": "2025-04-20",
+        "notes": "Activity successfully completed and verified by James Johnson."
+      },
+      {
+        "activity_id": "ACT-1.1.2",
+        "work_package_id": "WP-1.1",
+        "name": "Main Quest Campaign & NPC Dialogue",
+        "description": "Design branching quests with consequence-heavy moral decisions.",
+        "assigned_teams": [
+          "ELD-TEAM-GD"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0657"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 22.0,
+        "most_likely": 38.0,
+        "pessimistic": 65.0,
+        "duration": 39.83,
+        "expected_time": 39.83,
+        "std_dev": 7.167,
+        "variance": 51.3659,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-04-21",
+        "actual_finish_date": "2025-06-10",
+        "verified_by": "James Johnson",
+        "verified_date": "2025-06-10",
+        "notes": "Activity successfully completed and verified by James Johnson."
+      },
+      {
+        "activity_id": "ACT-1.2.1",
+        "work_package_id": "WP-1.2",
+        "name": "Combat Stances & Elemental Affinity Rules",
+        "description": "Document parry timing windows, poise break, and spell synergies.",
+        "assigned_teams": [
+          "ELD-TEAM-GD"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 12.0,
+        "most_likely": 20.0,
+        "pessimistic": 35.0,
+        "duration": 21.17,
+        "expected_time": 21.17,
+        "std_dev": 3.833,
+        "variance": 14.6919,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-03-20",
+        "actual_finish_date": "2025-04-18",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2025-04-18",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-2.1.1",
+        "work_package_id": "WP-2.1",
+        "name": "Motion Capture Ingestion & Root Motion Blend",
+        "description": "Clean optical MoCap takes for two-handed greatswords and rapier thrusts.",
+        "assigned_teams": [
+          "ELD-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0663"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 35.0,
+        "pessimistic": 55.0,
+        "duration": 35.83,
+        "expected_time": 35.83,
+        "std_dev": 5.833,
+        "variance": 34.0239,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-04-20",
+        "actual_finish_date": "2025-06-05",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-06-05",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-2.1.2",
+        "work_package_id": "WP-2.1",
+        "name": "Precision Hitbox Detection & Parry Window",
+        "description": "Sub-frame collision geometry and dynamic camera shake on critical hits.",
+        "assigned_teams": [
+          "ELD-TEAM-PROG"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0651"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 15.0,
+        "most_likely": 26.0,
+        "pessimistic": 45.0,
+        "duration": 27.33,
+        "expected_time": 27.33,
+        "std_dev": 5.0,
+        "variance": 25.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-05-15",
+        "actual_finish_date": "2025-06-30",
+        "verified_by": "Mark White",
+        "verified_date": "2025-06-30",
+        "notes": "Activity successfully completed and verified by Mark White."
+      },
+      {
+        "activity_id": "ACT-2.2.1",
+        "work_package_id": "WP-2.2",
+        "name": "Elemental Spell Niagara VFX & Destruction",
+        "description": "Create volumetric firestorms, ice shard spikes, and terrain scorch marks.",
+        "assigned_teams": [
+          "ELD-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0659"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 25.0,
+        "most_likely": 40.0,
+        "pessimistic": 68.0,
+        "duration": 42.17,
+        "expected_time": 42.17,
+        "std_dev": 7.167,
+        "variance": 51.3659,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-06-01",
+        "actual_finish_date": "2025-07-28",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-07-28",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-3.1.1",
+        "work_package_id": "WP-3.1",
+        "name": "Gothic Castle Citadel Greybox & Dressing",
+        "description": "Model fortress towers, cobblestone textures, and ambient fog lighting.",
+        "assigned_teams": [
+          "ELD-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0658"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 30.0,
+        "most_likely": 48.0,
+        "pessimistic": 75.0,
+        "duration": 49.5,
+        "expected_time": 49.5,
+        "std_dev": 7.5,
+        "variance": 56.25,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-05-01",
+        "actual_finish_date": "2025-07-15",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2025-07-15",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-3.2.1",
+        "work_package_id": "WP-3.2",
+        "name": "Titan Dragon & Corrupted Knight Sculpting",
+        "description": "ZBrush high-poly models, PBR displacement maps, and skeletal rigging.",
+        "assigned_teams": [
+          "ELD-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0656"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 28.0,
+        "most_likely": 45.0,
+        "pessimistic": 72.0,
+        "duration": 46.67,
+        "expected_time": 46.67,
+        "std_dev": 7.333,
+        "variance": 53.7729,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-06-10",
+        "actual_finish_date": "2025-08-15",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-08-15",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-4.1.1",
+        "work_package_id": "WP-4.1",
+        "name": "Symphonic Orchestra Recording & Mixing",
+        "description": "Record 18 symphonic tracks featuring cello, choir, and lute motifs.",
+        "assigned_teams": [
+          "ELD-TEAM-SND"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd066e",
+          "6acfb05eb1e16744cbcd0671"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 32.0,
+        "pessimistic": 50.0,
+        "duration": 33.0,
+        "expected_time": 33.0,
+        "std_dev": 5.0,
+        "variance": 25.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-07-16",
+        "actual_finish_date": "2025-09-01",
+        "verified_by": "James Johnson",
+        "verified_date": "2025-09-01",
+        "notes": "Activity successfully completed and verified by James Johnson."
+      },
+      {
+        "activity_id": "ACT-4.1.2",
+        "work_package_id": "WP-4.1",
+        "name": "Multi-Language Voice Acting & Lip Sync",
+        "description": "Cast and master English, Italian, German, Japanese, and French VO takes.",
+        "assigned_teams": [
+          "ELD-TEAM-SND"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd066e"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 25.0,
+        "most_likely": 38.0,
+        "pessimistic": 60.0,
+        "duration": 39.5,
+        "expected_time": 39.5,
+        "std_dev": 5.833,
+        "variance": 34.0239,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-08-01",
+        "actual_finish_date": "2025-09-25",
+        "verified_by": "James Johnson",
+        "verified_date": "2025-09-25",
+        "notes": "Activity successfully completed and verified by James Johnson."
+      },
+      {
+        "activity_id": "ACT-4.2.1",
+        "work_package_id": "WP-4.2",
+        "name": "End-to-End Combat Balance & Performance Tuning",
+        "description": "Tune boss hit point pools, frame pacing on consoles, and memory leaks.",
+        "assigned_teams": [
+          "ELD-TEAM-QA"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd065b",
+          "6acfb05eb1e16744cbcd0677"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 34.0,
+        "pessimistic": 52.0,
+        "duration": 34.67,
+        "expected_time": 34.67,
+        "std_dev": 5.333,
+        "variance": 28.4409,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-09-26",
+        "actual_finish_date": "2025-11-15",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2025-11-15",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-4.2.2",
+        "work_package_id": "WP-4.2",
+        "name": "Release Golden Master & ESRB/PEGI Certification",
+        "description": "Final security audits, zero-crash soak tests, and physical disc mastering.",
+        "assigned_teams": [
+          "ELD-TEAM-QA"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd065b"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 10.0,
+        "most_likely": 16.0,
+        "pessimistic": 28.0,
+        "duration": 17.0,
+        "expected_time": 17.0,
+        "std_dev": 3.0,
+        "variance": 9.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-11-16",
+        "actual_finish_date": "2025-12-10",
+        "verified_by": "Francesco Panattoni",
+        "verified_date": "2025-12-10",
+        "notes": "Activity successfully completed and verified by Francesco Panattoni."
+      }
+    ],
+    "dependencies": [
+      {
+        "dependency_id": "ELD-DEP-01",
+        "from_activity_id": "ACT-1.1.1",
+        "to_activity_id": "ACT-1.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Campaign quests require dynasty lore foundations"
+      },
+      {
+        "dependency_id": "ELD-DEP-02",
+        "from_activity_id": "ACT-1.2.1",
+        "to_activity_id": "ACT-2.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "MoCap acting follows sword combat design specifications"
+      },
+      {
+        "dependency_id": "ELD-DEP-03",
+        "from_activity_id": "ACT-2.1.1",
+        "to_activity_id": "ACT-2.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Hitbox collisions are calibrated against completed MoCap animations"
+      },
+      {
+        "dependency_id": "ELD-DEP-04",
+        "from_activity_id": "ACT-1.2.1",
+        "to_activity_id": "ACT-2.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Magic VFX depends on elemental synergy design"
+      },
+      {
+        "dependency_id": "ELD-DEP-05",
+        "from_activity_id": "ACT-1.1.1",
+        "to_activity_id": "ACT-3.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Citadel architecture incorporates lore heritage motifs"
+      },
+      {
+        "dependency_id": "ELD-DEP-06",
+        "from_activity_id": "ACT-1.1.2",
+        "to_activity_id": "ACT-3.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Boss creature designs align with narrative quest climaxes"
+      },
+      {
+        "dependency_id": "ELD-DEP-07",
+        "from_activity_id": "ACT-3.1.1",
+        "to_activity_id": "ACT-4.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Orchestral mood cues are timed to environmental vistas"
+      },
+      {
+        "dependency_id": "ELD-DEP-08",
+        "from_activity_id": "ACT-1.1.2",
+        "to_activity_id": "ACT-4.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Voice recording begins after dialogue scripts are finalized"
+      },
+      {
+        "dependency_id": "ELD-DEP-09",
+        "from_activity_id": "ACT-2.1.2",
+        "to_activity_id": "ACT-4.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Combat balancing relies on calibrated hitbox detection"
+      },
+      {
+        "dependency_id": "ELD-DEP-10",
+        "from_activity_id": "ACT-3.2.1",
+        "to_activity_id": "ACT-4.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Titan boss rigs must be integrated for QA balance testing"
+      },
+      {
+        "dependency_id": "ELD-DEP-11",
+        "from_activity_id": "ACT-4.2.1",
+        "to_activity_id": "ACT-4.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Certification follows zero-crash validation"
+      }
+    ],
+    "schedule_settings": {
+      "calendar_type": "standard_5day",
+      "hours_per_day": 8.0,
+      "holidays": [
+        "2026-01-01",
+        "2026-04-06",
+        "2026-05-01",
+        "2026-06-02",
+        "2026-08-15",
+        "2026-11-01",
+        "2026-12-25",
+        "2026-12-26"
+      ],
+      "non_working_days": [
+        6,
+        7
+      ]
+    },
+    "created_at": {
+      "$date": "2025-03-10T09:30:00Z"
+    },
+    "updated_at": {
+      "$date": "2025-12-12T16:45:00Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad220030000000000000003"
+    },
+    "name": "Galactic Odyssey: Starfighter Command",
+    "description": "Next-generation 6DOF space combat simulator featuring Newtonian physics, modular starship damage modeling, procedural stellar systems, and tactical fleet command.",
+    "status": "completed",
+    "start_date": {
+      "$date": "2025-08-01T00:00:00Z"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "assigned_user_ids": [
+      "6acfb05eb1e16744cbcd064f",
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd0687",
+      "6acfb05eb1e16744cbcd0676",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd0651",
+      "6acfb05eb1e16744cbcd0652",
+      "6acfb05eb1e16744cbcd0653",
+      "6acfb05eb1e16744cbcd0661",
+      "6acfb05eb1e16744cbcd0656",
+      "6acfb05eb1e16744cbcd0663",
+      "6acfb05eb1e16744cbcd0659",
+      "6acfb05eb1e16744cbcd066e",
+      "6acfb05eb1e16744cbcd0671",
+      "6acfb05eb1e16744cbcd065b",
+      "6acfb05eb1e16744cbcd0677"
+    ],
+    "teams": [
+      {
+        "team_id": "GAL-TEAM-GD",
+        "name": "Game Design & Narrative Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0657",
+          "6acfb05eb1e16744cbcd067a",
+          "6acfb05eb1e16744cbcd067e",
+          "6acfb05eb1e16744cbcd0680"
+        ]
+      },
+      {
+        "team_id": "GAL-TEAM-PROG",
+        "name": "Core Engineering & Gameplay Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0651",
+          "6acfb05eb1e16744cbcd0652",
+          "6acfb05eb1e16744cbcd0653",
+          "6acfb05eb1e16744cbcd0661",
+          "6acfb05eb1e16744cbcd0669"
+        ]
+      },
+      {
+        "team_id": "GAL-TEAM-ART",
+        "name": "Art & Visual Effects Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0656",
+          "6acfb05eb1e16744cbcd0658",
+          "6acfb05eb1e16744cbcd0659",
+          "6acfb05eb1e16744cbcd0663",
+          "6acfb05eb1e16744cbcd0667"
+        ]
+      },
+      {
+        "team_id": "GAL-TEAM-SND",
+        "name": "Audio Engineering & Sound Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd066e",
+          "6acfb05eb1e16744cbcd0671",
+          "6acfb05eb1e16744cbcd0686"
+        ]
+      },
+      {
+        "team_id": "GAL-TEAM-QA",
+        "name": "Quality Assurance & Compliance Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd065b",
+          "6acfb05eb1e16744cbcd0677",
+          "6acfb05eb1e16744cbcd0684"
+        ]
+      }
+    ],
+    "controllers": [
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd0687",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "wbs": [
+      {
+        "id": "DEL-1",
+        "wbs_number": "1",
+        "name": "6DOF Flight Dynamics & Combat Design",
+        "description": "Newtonian physics modeling, flight control telemetry, and modular ship component design.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-1.1",
+            "wbs_number": "1.1",
+            "name": "Flight Physics Engine",
+            "description": "6-Degrees-of-freedom inertial thruster math.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-1.2",
+            "wbs_number": "1.2",
+            "name": "Starship Hardpoints & Armor",
+            "description": "Shield harmonics, kinetic armor deflection, and energy draw.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-2",
+        "wbs_number": "2",
+        "name": "Starfleet AI & Multi-Crew Netcode",
+        "description": "Squadron dogfight behavioral AI, capital ship turret tracking, and lock-free netcode.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-2.1",
+            "wbs_number": "2.1",
+            "name": "Dogfight Behavior Tree AI",
+            "description": "Energy-fighting, boom-and-zoom tactical maneuvers.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-2.2",
+            "wbs_number": "2.2",
+            "name": "Multi-Crew Networking",
+            "description": "Pilot/gunner/engineer real-time state synchronization.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-3",
+        "wbs_number": "3",
+        "name": "3D Starships & Stellar VFX",
+        "description": "Capital dreadnought meshes, interceptor cockpits, and procedural nebula shaders.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-3.1",
+            "wbs_number": "3.1",
+            "name": "Starship 3D Models & Cockpits",
+            "description": "Diegetic holographic displays and detailed hull plating.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-3.2",
+            "wbs_number": "3.2",
+            "name": "Volumetric Nebulae & Laser Shaders",
+            "description": "Raymarched volumetric dust clouds and particle beam VFX.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-4",
+        "wbs_number": "4",
+        "name": "Audio Synthesis & Gold Release",
+        "description": "Hard-hitting laser beam foley, radio chatter distortion, and flight-stick HOTAS calibration.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-4.1",
+            "wbs_number": "4.1",
+            "name": "Deep Space Audio & Foley",
+            "description": "Cockpit vibration sub-bass and comms crackle.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-4.2",
+            "wbs_number": "4.2",
+            "name": "Multiplayer Stress QA & Launch",
+            "description": "64-player server stress testing and launch candidate sign-off.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      }
+    ],
+    "activities": [
+      {
+        "activity_id": "ACT-1.1.1",
+        "work_package_id": "WP-1.1",
+        "name": "Implement 6DOF Newtonian Physics Math",
+        "description": "Program zero-gravity thruster equations, drift dampeners, and rotational inertia.",
+        "assigned_teams": [
+          "GAL-TEAM-PROG"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0661"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 15.0,
+        "most_likely": 25.0,
+        "pessimistic": 42.0,
+        "duration": 26.17,
+        "expected_time": 26.17,
+        "std_dev": 4.5,
+        "variance": 20.25,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-08-01",
+        "actual_finish_date": "2025-09-05",
+        "verified_by": "Mark White",
+        "verified_date": "2025-09-05",
+        "notes": "Activity successfully completed and verified by Mark White."
+      },
+      {
+        "activity_id": "ACT-1.1.2",
+        "work_package_id": "WP-1.1",
+        "name": "Fly-by-Wire Flight Assist & HOTAS Profiles",
+        "description": "Calibrate joystick response curves, throttle detents, and mouse flight controls.",
+        "assigned_teams": [
+          "GAL-TEAM-PROG"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0651"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 12.0,
+        "most_likely": 20.0,
+        "pessimistic": 35.0,
+        "duration": 21.17,
+        "expected_time": 21.17,
+        "std_dev": 3.833,
+        "variance": 14.6919,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-09-06",
+        "actual_finish_date": "2025-10-02",
+        "verified_by": "Mark White",
+        "verified_date": "2025-10-02",
+        "notes": "Activity successfully completed and verified by Mark White."
+      },
+      {
+        "activity_id": "ACT-1.2.1",
+        "work_package_id": "WP-1.2",
+        "name": "Modular Shield & Armor Penetration Rules",
+        "description": "Calculate kinetic ballistic dropoff, energy shield absorption, and hull breaches.",
+        "assigned_teams": [
+          "GAL-TEAM-GD"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 10.0,
+        "most_likely": 18.0,
+        "pessimistic": 30.0,
+        "duration": 18.67,
+        "expected_time": 18.67,
+        "std_dev": 3.333,
+        "variance": 11.1089,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-08-05",
+        "actual_finish_date": "2025-08-30",
+        "verified_by": "James Johnson",
+        "verified_date": "2025-08-30",
+        "notes": "Activity successfully completed and verified by James Johnson."
+      },
+      {
+        "activity_id": "ACT-2.1.1",
+        "work_package_id": "WP-2.1",
+        "name": "Wingman & Pirate Squadron Tactical AI",
+        "description": "State machine for dogfighting maneuvers: high-yo-yo, scissor turns, and target switching.",
+        "assigned_teams": [
+          "GAL-TEAM-PROG"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0653"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 35.0,
+        "pessimistic": 55.0,
+        "duration": 35.83,
+        "expected_time": 35.83,
+        "std_dev": 5.833,
+        "variance": 34.0239,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-10-03",
+        "actual_finish_date": "2025-11-20",
+        "verified_by": "Mark White",
+        "verified_date": "2025-11-20",
+        "notes": "Activity successfully completed and verified by Mark White."
+      },
+      {
+        "activity_id": "ACT-2.2.1",
+        "work_package_id": "WP-2.2",
+        "name": "Multi-Crew UDP State Synchronization",
+        "description": "Sub-50ms client prediction, snapshot interpolation, and lag compensation.",
+        "assigned_teams": [
+          "GAL-TEAM-PROG"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0652"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 25.0,
+        "most_likely": 42.0,
+        "pessimistic": 65.0,
+        "duration": 43.0,
+        "expected_time": 43.0,
+        "std_dev": 6.667,
+        "variance": 44.4489,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-09-15",
+        "actual_finish_date": "2025-11-15",
+        "verified_by": "Mark White",
+        "verified_date": "2025-11-15",
+        "notes": "Activity successfully completed and verified by Mark White."
+      },
+      {
+        "activity_id": "ACT-3.1.1",
+        "work_package_id": "WP-3.1",
+        "name": "Dreadnought & Fighter Fleet 3D Meshes",
+        "description": "Model 6 fighter classes, 2 frigates, and massive 1.5km modular battlecruiser.",
+        "assigned_teams": [
+          "GAL-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0656"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 32.0,
+        "most_likely": 50.0,
+        "pessimistic": 80.0,
+        "duration": 52.0,
+        "expected_time": 52.0,
+        "std_dev": 8.0,
+        "variance": 64.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-08-15",
+        "actual_finish_date": "2025-11-05",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-11-05",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-3.1.2",
+        "work_package_id": "WP-3.1",
+        "name": "Interactive Cockpit HUD & Telemetry",
+        "description": "Build diegetic 3D radar spheres, throttle gauges, and warning light panels.",
+        "assigned_teams": [
+          "GAL-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0663"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 18.0,
+        "most_likely": 30.0,
+        "pessimistic": 48.0,
+        "duration": 31.0,
+        "expected_time": 31.0,
+        "std_dev": 5.0,
+        "variance": 25.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-10-01",
+        "actual_finish_date": "2025-11-18",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-11-18",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-3.2.1",
+        "work_package_id": "WP-3.2",
+        "name": "Volumetric Nebula Raymarching Shaders",
+        "description": "Custom GPU shader for dense stellar gas clouds with chromatic aberration.",
+        "assigned_teams": [
+          "GAL-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0659"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 34.0,
+        "pessimistic": 52.0,
+        "duration": 34.67,
+        "expected_time": 34.67,
+        "std_dev": 5.333,
+        "variance": 28.4409,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-09-20",
+        "actual_finish_date": "2025-11-10",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2025-11-10",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-4.1.1",
+        "work_package_id": "WP-4.1",
+        "name": "Engine Roars, Void Lasers & Comms Audio",
+        "description": "Produce synthesized bass resonances, thruster hums, and military pilot VO.",
+        "assigned_teams": [
+          "GAL-TEAM-SND"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd066e",
+          "6acfb05eb1e16744cbcd0671"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 18.0,
+        "most_likely": 28.0,
+        "pessimistic": 45.0,
+        "duration": 29.17,
+        "expected_time": 29.17,
+        "std_dev": 4.5,
+        "variance": 20.25,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-11-01",
+        "actual_finish_date": "2025-12-15",
+        "verified_by": "James Johnson",
+        "verified_date": "2025-12-15",
+        "notes": "Activity successfully completed and verified by James Johnson."
+      },
+      {
+        "activity_id": "ACT-4.2.1",
+        "work_package_id": "WP-4.2",
+        "name": "64-Player Netcode Stress Test",
+        "description": "Simulate chaotic fleet engagements with maximum missiles and ship debris.",
+        "assigned_teams": [
+          "GAL-TEAM-QA"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd065b",
+          "6acfb05eb1e16744cbcd0677"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 16.0,
+        "most_likely": 26.0,
+        "pessimistic": 42.0,
+        "duration": 27.0,
+        "expected_time": 27.0,
+        "std_dev": 4.333,
+        "variance": 18.7749,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-11-21",
+        "actual_finish_date": "2026-01-10",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2026-01-10",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-4.2.2",
+        "work_package_id": "WP-4.2",
+        "name": "Platform Packaging & Gold Candidate Approval",
+        "description": "Complete anti-cheat integration, Steam cloud saves, and final release packaging.",
+        "assigned_teams": [
+          "GAL-TEAM-QA"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd065b"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 10.0,
+        "most_likely": 15.0,
+        "pessimistic": 25.0,
+        "duration": 15.83,
+        "expected_time": 15.83,
+        "std_dev": 2.5,
+        "variance": 6.25,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2026-01-11",
+        "actual_finish_date": "2026-02-05",
+        "verified_by": "Francesco Panattoni",
+        "verified_date": "2026-02-05",
+        "notes": "Activity successfully completed and verified by Francesco Panattoni."
+      }
+    ],
+    "dependencies": [
+      {
+        "dependency_id": "GAL-DEP-01",
+        "from_activity_id": "ACT-1.1.1",
+        "to_activity_id": "ACT-1.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "HOTAS calibration builds on underlying 6DOF Newtonian physics"
+      },
+      {
+        "dependency_id": "GAL-DEP-02",
+        "from_activity_id": "ACT-1.1.1",
+        "to_activity_id": "ACT-2.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "AI flight maneuvering requires established 6DOF flight physics"
+      },
+      {
+        "dependency_id": "GAL-DEP-03",
+        "from_activity_id": "ACT-1.2.1",
+        "to_activity_id": "ACT-2.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Netcode replicates damage states calculated by armor rules"
+      },
+      {
+        "dependency_id": "GAL-DEP-04",
+        "from_activity_id": "ACT-1.1.2",
+        "to_activity_id": "ACT-3.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Cockpit instruments wire to flight control inputs"
+      },
+      {
+        "dependency_id": "GAL-DEP-05",
+        "from_activity_id": "ACT-3.1.1",
+        "to_activity_id": "ACT-3.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Cockpits are integrated into completed hull meshes"
+      },
+      {
+        "dependency_id": "GAL-DEP-06",
+        "from_activity_id": "ACT-3.1.1",
+        "to_activity_id": "ACT-4.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Sound design maps thruster audio to specific engine exhausts"
+      },
+      {
+        "dependency_id": "GAL-DEP-07",
+        "from_activity_id": "ACT-2.1.1",
+        "to_activity_id": "ACT-4.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Stress testing includes high AI fighter counts"
+      },
+      {
+        "dependency_id": "GAL-DEP-08",
+        "from_activity_id": "ACT-2.2.1",
+        "to_activity_id": "ACT-4.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Stress testing benchmarks multiplayer network capacity"
+      },
+      {
+        "dependency_id": "GAL-DEP-09",
+        "from_activity_id": "ACT-3.2.1",
+        "to_activity_id": "ACT-4.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "GPU performance stress tests volumetric nebulae"
+      },
+      {
+        "dependency_id": "GAL-DEP-10",
+        "from_activity_id": "ACT-4.2.1",
+        "to_activity_id": "ACT-4.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Final packaging occurs once stress testing validates stability"
+      }
+    ],
+    "schedule_settings": {
+      "calendar_type": "standard_5day",
+      "hours_per_day": 8.0,
+      "holidays": [
+        "2026-01-01",
+        "2026-04-06",
+        "2026-05-01",
+        "2026-06-02",
+        "2026-08-15",
+        "2026-11-01",
+        "2026-12-25",
+        "2026-12-26"
+      ],
+      "non_working_days": [
+        6,
+        7
+      ]
+    },
+    "created_at": {
+      "$date": "2025-07-28T11:15:00Z"
+    },
+    "updated_at": {
+      "$date": "2026-02-10T14:20:00Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad1f024883079c41af4afff"
+    },
+    "name": "Open Community Game Engine",
+    "description": "A modular open-source engine welcoming direct community contributors.",
+    "start_date": {
+      "$date": "2026-10-20T00:00:00Z"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "assigned_user_ids": [
+      "6acfb05eb1e16744cbcd064f",
+      "6ad1efce883079c41af4affc"
+    ],
+    "teams": [
+      {
+        "team_id": "TEAM-1",
+        "name": "Core Physics (Empty)",
+        "member_ids": []
+      },
+      {
+        "team_id": "TEAM-2",
+        "name": "Rendering & Shaders (Empty)",
+        "member_ids": []
+      }
+    ],
+    "controllers": [
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "open_participation": true,
+    "allow_multiteam": true,
+    "deliverables": [],
+    "activities": [],
+    "dependencies": [],
+    "created_at": {
+      "$date": "2026-10-16T09:36:36.396Z"
+    },
+    "updated_at": {
+      "$date": "2026-10-16T09:36:45.471Z"
+    },
+    "status": "completed"
+  },
+  {
+    "_id": {
+      "$oid": "6ad220040000000000000004"
+    },
+    "name": "Shadow of the Ronin: Blood & Cherry Blossoms",
+    "description": "Cinematic feudal Japan stealth-action adventure featuring katana stance dueling, dynamic seasonal progression, and ink-wash stylized visual presentation.",
+    "status": "completed",
+    "start_date": {
+      "$date": "2025-01-10T00:00:00Z"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "assigned_user_ids": [
+      "6acfb05eb1e16744cbcd064f",
+      "6acfb05eb1e16744cbcd0676",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd0657",
+      "6acfb05eb1e16744cbcd0653",
+      "6acfb05eb1e16744cbcd0651",
+      "6acfb05eb1e16744cbcd0658",
+      "6acfb05eb1e16744cbcd0659",
+      "6acfb05eb1e16744cbcd0656",
+      "6acfb05eb1e16744cbcd066e",
+      "6acfb05eb1e16744cbcd0671",
+      "6acfb05eb1e16744cbcd065b",
+      "6acfb05eb1e16744cbcd0677"
+    ],
+    "teams": [
+      {
+        "team_id": "RON-TEAM-GD",
+        "name": "Game Design & Narrative Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0657",
+          "6acfb05eb1e16744cbcd067a",
+          "6acfb05eb1e16744cbcd067e",
+          "6acfb05eb1e16744cbcd0680"
+        ]
+      },
+      {
+        "team_id": "RON-TEAM-PROG",
+        "name": "Core Engineering & Gameplay Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0651",
+          "6acfb05eb1e16744cbcd0652",
+          "6acfb05eb1e16744cbcd0653",
+          "6acfb05eb1e16744cbcd0661",
+          "6acfb05eb1e16744cbcd0669"
+        ]
+      },
+      {
+        "team_id": "RON-TEAM-ART",
+        "name": "Art & Visual Effects Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0656",
+          "6acfb05eb1e16744cbcd0658",
+          "6acfb05eb1e16744cbcd0659",
+          "6acfb05eb1e16744cbcd0663",
+          "6acfb05eb1e16744cbcd0667"
+        ]
+      },
+      {
+        "team_id": "RON-TEAM-SND",
+        "name": "Audio Engineering & Sound Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd066e",
+          "6acfb05eb1e16744cbcd0671",
+          "6acfb05eb1e16744cbcd0686"
+        ]
+      },
+      {
+        "team_id": "RON-TEAM-QA",
+        "name": "Quality Assurance & Compliance Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd065b",
+          "6acfb05eb1e16744cbcd0677",
+          "6acfb05eb1e16744cbcd0684"
+        ]
+      }
+    ],
+    "controllers": [
+      "6acfb05eb1e16744cbcd0676",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd064f"
+    ],
+    "wbs": [
+      {
+        "id": "DEL-1",
+        "wbs_number": "1",
+        "name": "Historical Lore & Stance Mechanics",
+        "description": "Feudal Japan research, swordplay stances, and stealth assassination rules.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-1.1",
+            "wbs_number": "1.1",
+            "name": "Historical Narrative & Honor System",
+            "description": "Bushido code consequences and dialogue.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-1.2",
+            "wbs_number": "1.2",
+            "name": "Katana Stance Combat Prototyping",
+            "description": "High/Mid/Low sword stances and deflections.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-2",
+        "wbs_number": "2",
+        "name": "Stealth AI & Parkour Traversal",
+        "description": "Vision cone raycasting, acoustic sound propagation, and fluid rooftop grappling.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-2.1",
+            "wbs_number": "2.1",
+            "name": "Guard Perception AI",
+            "description": "Light levels, shadows, and alert escalation states.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-2.2",
+            "wbs_number": "2.2",
+            "name": "Rooftop Parkour & Grapple Hook",
+            "description": "Ledge climbing, tightrope balance, and silent takedowns.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-3",
+        "wbs_number": "3",
+        "name": "Feudal World Art & Aesthetics",
+        "description": "Sumi-e ink-wash aesthetic, falling cherry blossom foliage, and samurai armor sets.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-3.1",
+            "wbs_number": "3.1",
+            "name": "Shinto Shrines & Bamboo Groves",
+            "description": "Dynamic wind foliage and feudal village architecture.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-3.2",
+            "wbs_number": "3.2",
+            "name": "Traditional Armor & Weapon Sculpting",
+            "description": "Folded tamahagane steel katanas and lacquered armor.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-4",
+        "wbs_number": "4",
+        "name": "Traditional Music & Gold Sign-Off",
+        "description": "Taiko drums, shakuhachi flute, 60fps console optimization, and platform launch.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-4.1",
+            "wbs_number": "4.1",
+            "name": "Traditional Japanese Instrumentation",
+            "description": "Biwa lute, koto harp, and authentic ambient sounds.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-4.2",
+            "wbs_number": "4.2",
+            "name": "Gold Master & Final Optimization",
+            "description": "Framerate lock, ultra-wide PC support, and gold sign-off.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      }
+    ],
+    "activities": [
+      {
+        "activity_id": "ACT-1.1.1",
+        "work_package_id": "WP-1.1",
+        "name": "Draft Sengoku Era Lore & Bushido Code",
+        "description": "Research Edo/Sengoku history, clan rivalries, and honor mechanics.",
+        "assigned_teams": [
+          "RON-TEAM-GD"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0657"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 14.0,
+        "most_likely": 24.0,
+        "pessimistic": 40.0,
+        "duration": 25.0,
+        "expected_time": 25.0,
+        "std_dev": 4.333,
+        "variance": 18.7749,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-01-10",
+        "actual_finish_date": "2025-02-15",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-02-15",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-1.1.2",
+        "work_package_id": "WP-1.1",
+        "name": "Branching Infiltration & Assassination Quests",
+        "description": "Write target dossiers, scout routes, and alternative peaceful paths.",
+        "assigned_teams": [
+          "RON-TEAM-GD"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0657"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 18.0,
+        "most_likely": 32.0,
+        "pessimistic": 54.0,
+        "duration": 33.33,
+        "expected_time": 33.33,
+        "std_dev": 6.0,
+        "variance": 36.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-02-16",
+        "actual_finish_date": "2025-04-01",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-04-01",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-1.2.1",
+        "work_package_id": "WP-1.2",
+        "name": "Design High/Mid/Low Stance Combat System",
+        "description": "Stance advantages: high for heavy armor, mid for duels, low for agile ninjas.",
+        "assigned_teams": [
+          "RON-TEAM-GD"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 12.0,
+        "most_likely": 22.0,
+        "pessimistic": 36.0,
+        "duration": 22.67,
+        "expected_time": 22.67,
+        "std_dev": 4.0,
+        "variance": 16.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-01-15",
+        "actual_finish_date": "2025-02-20",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2025-02-20",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-2.1.1",
+        "work_package_id": "WP-2.1",
+        "name": "Guard Sound Propagation & Vision Cone AI",
+        "description": "Calculate guard peripheral vision in tall grass and sound footprints on gravel.",
+        "assigned_teams": [
+          "RON-TEAM-PROG"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0653"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 36.0,
+        "pessimistic": 58.0,
+        "duration": 37.0,
+        "expected_time": 37.0,
+        "std_dev": 6.333,
+        "variance": 40.1069,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-02-25",
+        "actual_finish_date": "2025-04-25",
+        "verified_by": "Mark White",
+        "verified_date": "2025-04-25",
+        "notes": "Activity successfully completed and verified by Mark White."
+      },
+      {
+        "activity_id": "ACT-2.2.1",
+        "work_package_id": "WP-2.2",
+        "name": "Grappling Hook & Rooftop Parkour Traversal",
+        "description": "Fluid ledge grabbing, sliding under temple verandas, and ceiling perch anchors.",
+        "assigned_teams": [
+          "RON-TEAM-PROG"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0651"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 22.0,
+        "most_likely": 38.0,
+        "pessimistic": 60.0,
+        "duration": 39.0,
+        "expected_time": 39.0,
+        "std_dev": 6.333,
+        "variance": 40.1069,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-03-01",
+        "actual_finish_date": "2025-05-10",
+        "verified_by": "Mark White",
+        "verified_date": "2025-05-10",
+        "notes": "Activity successfully completed and verified by Mark White."
+      },
+      {
+        "activity_id": "ACT-3.1.1",
+        "work_package_id": "WP-3.1",
+        "name": "Bamboo Groves, Tea Houses & Shinto Shrines",
+        "description": "Procedural bamboo forest with blade cutting and falling leaf particle systems.",
+        "assigned_teams": [
+          "RON-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0658"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 28.0,
+        "most_likely": 46.0,
+        "pessimistic": 75.0,
+        "duration": 47.83,
+        "expected_time": 47.83,
+        "std_dev": 7.833,
+        "variance": 61.3559,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-03-15",
+        "actual_finish_date": "2025-06-15",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-06-15",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-3.1.2",
+        "work_package_id": "WP-3.1",
+        "name": "Sumi-e Ink Wash Post-Processing Shader",
+        "description": "Custom depth buffer outlines mimicking classical Japanese calligraphy brushwork.",
+        "assigned_teams": [
+          "RON-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0659"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 16.0,
+        "most_likely": 28.0,
+        "pessimistic": 45.0,
+        "duration": 28.83,
+        "expected_time": 28.83,
+        "std_dev": 4.833,
+        "variance": 23.3579,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-04-10",
+        "actual_finish_date": "2025-05-30",
+        "verified_by": "Emily Rodriguez",
+        "verified_date": "2025-05-30",
+        "notes": "Activity successfully completed and verified by Emily Rodriguez."
+      },
+      {
+        "activity_id": "ACT-3.2.1",
+        "work_package_id": "WP-3.2",
+        "name": "Authentic Katana & Lacquered Armor 3D Models",
+        "description": "High-fidelity weapon models with ray-traced reflections on tempered blades.",
+        "assigned_teams": [
+          "RON-TEAM-ART"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd0656"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 24.0,
+        "most_likely": 38.0,
+        "pessimistic": 62.0,
+        "duration": 39.67,
+        "expected_time": 39.67,
+        "std_dev": 6.333,
+        "variance": 40.1069,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-04-01",
+        "actual_finish_date": "2025-06-20",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2025-06-20",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-4.1.1",
+        "work_package_id": "WP-4.1",
+        "name": "Live Shakuhachi Flute & Taiko Drum Score",
+        "description": "Record master Japanese instrumentalists for intense boss duel compositions.",
+        "assigned_teams": [
+          "RON-TEAM-SND"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd066e",
+          "6acfb05eb1e16744cbcd0671"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 18.0,
+        "most_likely": 30.0,
+        "pessimistic": 48.0,
+        "duration": 31.0,
+        "expected_time": 31.0,
+        "std_dev": 5.0,
+        "variance": 25.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-06-15",
+        "actual_finish_date": "2025-08-01",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2025-08-01",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-4.2.1",
+        "work_package_id": "WP-4.2",
+        "name": "60 FPS Console & Ultra-Wide PC Optimization",
+        "description": "Optimize occlusion culling, dynamic LODs, and dual-sense haptics.",
+        "assigned_teams": [
+          "RON-TEAM-QA"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd065b",
+          "6acfb05eb1e16744cbcd0677"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 32.0,
+        "pessimistic": 50.0,
+        "duration": 33.0,
+        "expected_time": 33.0,
+        "std_dev": 5.0,
+        "variance": 25.0,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-07-20",
+        "actual_finish_date": "2025-09-15",
+        "verified_by": "Sarah Williams",
+        "verified_date": "2025-09-15",
+        "notes": "Activity successfully completed and verified by Sarah Williams."
+      },
+      {
+        "activity_id": "ACT-4.2.2",
+        "work_package_id": "WP-4.2",
+        "name": "Gold Master Approval & Storefront Deployment",
+        "description": "Mastering final build, verifying achievements, and gold release candidate.",
+        "assigned_teams": [
+          "RON-TEAM-QA"
+        ],
+        "assigned_users": [
+          "6acfb05eb1e16744cbcd065b"
+        ],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 8.0,
+        "most_likely": 14.0,
+        "pessimistic": 22.0,
+        "duration": 14.33,
+        "expected_time": 14.33,
+        "std_dev": 2.333,
+        "variance": 5.4429,
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2025-09-16",
+        "actual_finish_date": "2025-10-05",
+        "verified_by": "Francesco Panattoni",
+        "verified_date": "2025-10-05",
+        "notes": "Activity successfully completed and verified by Francesco Panattoni."
+      }
+    ],
+    "dependencies": [
+      {
+        "dependency_id": "RON-DEP-01",
+        "from_activity_id": "ACT-1.1.1",
+        "to_activity_id": "ACT-1.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Infiltration quests follow Bushido code narratives"
+      },
+      {
+        "dependency_id": "RON-DEP-02",
+        "from_activity_id": "ACT-1.2.1",
+        "to_activity_id": "ACT-2.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Guard AI behavior aligns with katana combat capabilities"
+      },
+      {
+        "dependency_id": "RON-DEP-03",
+        "from_activity_id": "ACT-1.2.1",
+        "to_activity_id": "ACT-2.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Parkour takedowns build on core combat stance mechanics"
+      },
+      {
+        "dependency_id": "RON-DEP-04",
+        "from_activity_id": "ACT-1.1.1",
+        "to_activity_id": "ACT-3.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Shinto shrines reflect Sengoku architectural research"
+      },
+      {
+        "dependency_id": "RON-DEP-05",
+        "from_activity_id": "ACT-3.1.1",
+        "to_activity_id": "ACT-3.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Sumi-e shader is calibrated over completed bamboo environments"
+      },
+      {
+        "dependency_id": "RON-DEP-06",
+        "from_activity_id": "ACT-1.1.1",
+        "to_activity_id": "ACT-3.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Katana models reflect historical tamahagane metallurgy"
+      },
+      {
+        "dependency_id": "RON-DEP-07",
+        "from_activity_id": "ACT-3.1.1",
+        "to_activity_id": "ACT-4.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Instrumental recording captures mood of completed environments"
+      },
+      {
+        "dependency_id": "RON-DEP-08",
+        "from_activity_id": "ACT-2.1.1",
+        "to_activity_id": "ACT-4.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Performance optimization tests high-density guard encounters"
+      },
+      {
+        "dependency_id": "RON-DEP-09",
+        "from_activity_id": "ACT-3.1.2",
+        "to_activity_id": "ACT-4.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Sumi-e post-processing shader is profiled for 60 FPS lock"
+      },
+      {
+        "dependency_id": "RON-DEP-10",
+        "from_activity_id": "ACT-4.2.1",
+        "to_activity_id": "ACT-4.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Final gold release candidate requires verified framerate stability"
+      }
+    ],
+    "schedule_settings": {
+      "calendar_type": "standard_5day",
+      "hours_per_day": 8.0,
+      "holidays": [
+        "2026-01-01",
+        "2026-04-06",
+        "2026-05-01",
+        "2026-06-02",
+        "2026-08-15",
+        "2026-11-01",
+        "2026-12-25",
+        "2026-12-26"
+      ],
+      "non_working_days": [
+        6,
+        7
+      ]
+    },
+    "created_at": {
+      "$date": "2025-01-05T08:00:00Z"
+    },
+    "updated_at": {
+      "$date": "2025-10-10T17:30:00Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6acfe1433b0f53ae3b34cc2c"
+    },
+    "name": "Videogame Project",
+    "description": "Create a fantasy open world videogame with character creation.",
+    "start_date": {
+      "$date": "2026-10-14T00:00:00Z"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "assigned_user_ids": [
+      "6acfb05eb1e16744cbcd0687",
+      "6acfb05eb1e16744cbcd067f",
+      "6acfb05eb1e16744cbcd065b",
+      "6acfb05eb1e16744cbcd0655",
+      "6acfb05eb1e16744cbcd067b",
+      "6acfb05eb1e16744cbcd066a",
+      "6acfb05eb1e16744cbcd0659",
+      "6acfb05eb1e16744cbcd0661",
+      "6acfb05eb1e16744cbcd064f",
+      "6acfb05eb1e16744cbcd067a",
+      "6acfb05eb1e16744cbcd0664",
+      "6acfb05eb1e16744cbcd067d",
+      "6acfb05eb1e16744cbcd0663",
+      "6acfb05eb1e16744cbcd0673",
+      "6acfb05eb1e16744cbcd065d",
+      "6acfb05eb1e16744cbcd0660",
+      "6acfb05eb1e16744cbcd0685",
+      "6acfb05eb1e16744cbcd0667",
+      "6acfb05eb1e16744cbcd066f",
+      "6acfb05eb1e16744cbcd0674",
+      "6acfb05eb1e16744cbcd065f",
+      "6acfb05eb1e16744cbcd0684",
+      "6acfb05eb1e16744cbcd0681",
+      "6acfb05eb1e16744cbcd066b",
+      "6acfb05eb1e16744cbcd0651",
+      "6acfb05eb1e16744cbcd0670",
+      "6acfb05eb1e16744cbcd066e",
+      "6acfb05eb1e16744cbcd067e",
+      "6acfb05eb1e16744cbcd065c",
+      "6acfb05eb1e16744cbcd0653",
+      "6acfb05eb1e16744cbcd0669",
+      "6acfb05eb1e16744cbcd0676",
+      "6acfb05eb1e16744cbcd0656",
+      "6acfb05eb1e16744cbcd0668",
+      "6acfb05eb1e16744cbcd0677",
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd0686",
+      "6acfb05eb1e16744cbcd0680",
+      "6acfb05eb1e16744cbcd0683",
+      "6acfb05eb1e16744cbcd0675",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd0662",
+      "6acfb05eb1e16744cbcd0657",
+      "6acfb05eb1e16744cbcd0665",
+      "6acfb05eb1e16744cbcd0652",
+      "6acfb05eb1e16744cbcd0671",
+      "6acfb05eb1e16744cbcd065e",
+      "6acfb05eb1e16744cbcd0666",
+      "6acfb05eb1e16744cbcd0679",
+      "6acfb05eb1e16744cbcd0682",
+      "6acfb05eb1e16744cbcd065a",
+      "6acfb05eb1e16744cbcd0672",
+      "6acfb05eb1e16744cbcd0658",
+      "6ad1efce883079c41af4affc"
+    ],
+    "teams": [
+      {
+        "team_id": "TEAM-97806",
+        "name": "Game Design Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd067e",
+          "6acfb05eb1e16744cbcd067a",
+          "6acfb05eb1e16744cbcd0680",
+          "6acfb05eb1e16744cbcd0672",
+          "6acfb05eb1e16744cbcd067b",
+          "6acfb05eb1e16744cbcd066a",
+          "6acfb05eb1e16744cbcd0657"
+        ]
+      },
+      {
+        "team_id": "TEAM-85770",
+        "name": "Programmer Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0653",
+          "6acfb05eb1e16744cbcd066f",
+          "6acfb05eb1e16744cbcd0665",
+          "6acfb05eb1e16744cbcd0673",
+          "6acfb05eb1e16744cbcd065d",
+          "6acfb05eb1e16744cbcd0652",
+          "6acfb05eb1e16744cbcd0662",
+          "6acfb05eb1e16744cbcd065e",
+          "6acfb05eb1e16744cbcd067d",
+          "6acfb05eb1e16744cbcd0651",
+          "6acfb05eb1e16744cbcd065c",
+          "6acfb05eb1e16744cbcd0655",
+          "6acfb05eb1e16744cbcd0661",
+          "6acfb05eb1e16744cbcd066b",
+          "6acfb05eb1e16744cbcd0675",
+          "6acfb05eb1e16744cbcd0669"
+        ]
+      },
+      {
+        "team_id": "TEAM-86273",
+        "name": "Art Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0682",
+          "6acfb05eb1e16744cbcd0659",
+          "6acfb05eb1e16744cbcd0683",
+          "6acfb05eb1e16744cbcd0679",
+          "6acfb05eb1e16744cbcd0664",
+          "6acfb05eb1e16744cbcd0667",
+          "6acfb05eb1e16744cbcd0656",
+          "6acfb05eb1e16744cbcd0663",
+          "6acfb05eb1e16744cbcd0666",
+          "6acfb05eb1e16744cbcd0658",
+          "6acfb05eb1e16744cbcd0674",
+          "6acfb05eb1e16744cbcd0681",
+          "6acfb05eb1e16744cbcd065a",
+          "6acfb05eb1e16744cbcd067f",
+          "6acfb05eb1e16744cbcd065f",
+          "6acfb05eb1e16744cbcd0670",
+          "6acfb05eb1e16744cbcd0668",
+          "6acfb05eb1e16744cbcd0685"
+        ]
+      },
+      {
+        "team_id": "TEAM-64029",
+        "name": "Sound Design Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd066e",
+          "6acfb05eb1e16744cbcd0671",
+          "6acfb05eb1e16744cbcd0686"
+        ]
+      },
+      {
+        "team_id": "TEAM-77417",
+        "name": "Testing Team",
+        "member_ids": [
+          "6acfb05eb1e16744cbcd0684",
+          "6acfb05eb1e16744cbcd0677",
+          "6acfb05eb1e16744cbcd065b"
+        ]
+      }
+    ],
+    "controllers": [
+      "6acfb05eb1e16744cbcd064f",
+      "6acfb05eb1e16744cbcd0678",
+      "6acfb05eb1e16744cbcd067c",
+      "6acfb05eb1e16744cbcd0687",
+      "6acfb05eb1e16744cbcd0676"
+    ],
+    "activities": [
+      {
+        "activity_id": "ACT-1.1.1",
+        "work_package_id": "WP-1.1",
+        "name": "Draft game pitch document",
+        "description": "Synthesize core high-concept hooks and target market demographics.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 35.0,
+        "pessimistic": 60.0,
+        "duration": 36.67,
+        "expected_time": 36.67,
+        "std_dev": 6.667,
+        "variance": 44.4489,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Draft game pitch document and market positioning",
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2026-10-14",
+        "actual_finish_date": "2026-12-15",
+        "verified_by": "Emily Rodriguez (Creative Controller)",
+        "verified_date": "2026-12-18",
+        "notes": "Concept & Vision deliverables approved and verified by Creative Controller."
+      },
+      {
+        "activity_id": "ACT-1.1.2",
+        "work_package_id": "WP-1.1",
+        "name": "Define core gameplay loop",
+        "description": "Specify the moment-to-moment interactions and reward structures.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 30.0,
+        "most_likely": 50.0,
+        "pessimistic": 80.0,
+        "duration": 51.67,
+        "expected_time": 51.67,
+        "std_dev": 8.333,
+        "variance": 69.4389,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Define core gameplay loop and combat systems",
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2026-10-14",
+        "actual_finish_date": "2026-12-15",
+        "verified_by": "Emily Rodriguez (Creative Controller)",
+        "verified_date": "2026-12-18",
+        "notes": "Concept & Vision deliverables approved and verified by Creative Controller."
+      },
+      {
+        "activity_id": "ACT-1.1.3",
+        "work_package_id": "WP-1.1",
+        "name": "Create narrative synopsis",
+        "description": "Outline main story beats, protagonist arc, and dialogue bibles.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 25.0,
+        "most_likely": 45.0,
+        "pessimistic": 75.0,
+        "duration": 46.67,
+        "expected_time": 46.67,
+        "std_dev": 8.333,
+        "variance": 69.4389,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Create narrative synopsis, world lore, and dialogue bibles",
+        "status": "verified",
+        "progress_pct": 100.0,
+        "actual_start_date": "2026-10-14",
+        "actual_finish_date": "2026-12-15",
+        "verified_by": "Emily Rodriguez (Creative Controller)",
+        "verified_date": "2026-12-18",
+        "notes": "Concept & Vision deliverables approved and verified by Creative Controller."
+      },
+      {
+        "activity_id": "ACT-1.2.1",
+        "work_package_id": "WP-1.2",
+        "name": "Develop greybox movement prototype",
+        "description": "Code and calibrate character movement parameters, velocity, and jump feel.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 45.0,
+        "most_likely": 75.0,
+        "pessimistic": 120.0,
+        "duration": 77.5,
+        "expected_time": 77.5,
+        "std_dev": 12.5,
+        "variance": 156.25,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Develop greybox movement prototype in engine",
+        "status": "completed",
+        "progress_pct": 100.0,
+        "actual_start_date": "2026-12-20",
+        "actual_finish_date": "2027-03-10",
+        "verified_by": null,
+        "verified_date": null,
+        "notes": "Initial prototyping completed by engineering team."
+      },
+      {
+        "activity_id": "ACT-1.2.2",
+        "work_package_id": "WP-1.2",
+        "name": "Implement basic combat mechanics",
+        "description": "Test weapon hit detection, evasion rolls, and stamina cost.",
+        "assigned_teams": [
+          "TEAM-85770",
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 60.0,
+        "most_likely": 100.0,
+        "pessimistic": 160.0,
+        "duration": 103.33,
+        "expected_time": 103.33,
+        "std_dev": 16.667,
+        "variance": 277.7889,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Implement basic combat mechanics and hitbox collision",
+        "status": "completed",
+        "progress_pct": 100.0,
+        "actual_start_date": "2026-12-20",
+        "actual_finish_date": "2027-03-10",
+        "verified_by": null,
+        "verified_date": null,
+        "notes": "Initial prototyping completed by engineering team.",
+        "verification_checklist": [
+          {
+            "id": "crit_req",
+            "text": "Deliverable scope and technical specifications fully satisfied",
+            "checked": true
+          },
+          {
+            "id": "crit_qa",
+            "text": "Quality assurance tests passed and acceptance criteria verified",
+            "checked": true
+          },
+          {
+            "id": "crit_docs",
+            "text": "Technical documentation, user guides, or build assets verified",
+            "checked": true
+          },
+          {
+            "id": "crit_signoff",
+            "text": "Formal Controller audit sign-off confirmed",
+            "checked": true
+          }
+        ]
+      },
+      {
+        "activity_id": "ACT-1.3.1",
+        "work_package_id": "WP-1.3",
+        "name": "Create environment mood boards",
+        "description": "Collect reference imagery, color palettes, and lighting directions.",
+        "assigned_teams": [
+          "TEAM-86273"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 35.0,
+        "pessimistic": 60.0,
+        "duration": 36.67,
+        "expected_time": 36.67,
+        "std_dev": 6.667,
+        "variance": 44.4489,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Create environment mood boards and visual target lighting",
+        "status": "in_progress",
+        "progress_pct": 65.0,
+        "actual_start_date": "2027-03-15",
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": "WIP: asset creation and engine pipeline in active progress."
+      },
+      {
+        "activity_id": "ACT-1.3.2",
+        "work_package_id": "WP-1.3",
+        "name": "Draw main character concept art",
+        "description": "Create turnarounds and hero costume illustrations for 3D modeling.",
+        "assigned_teams": [
+          "TEAM-86273"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 30.0,
+        "most_likely": 50.0,
+        "pessimistic": 85.0,
+        "duration": 52.5,
+        "expected_time": 52.5,
+        "std_dev": 9.167,
+        "variance": 84.0339,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Draw main character concept art and orthographic model sheets",
+        "status": "in_progress",
+        "progress_pct": 65.0,
+        "actual_start_date": "2027-03-15",
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": "WIP: asset creation and engine pipeline in active progress."
+      },
+      {
+        "activity_id": "ACT-1.4.1",
+        "work_package_id": "WP-1.4",
+        "name": "Prepare financial breakdown presentation",
+        "description": "Compile runway estimates, software licenses, and team burn rate forecasts.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 15.0,
+        "most_likely": 30.0,
+        "pessimistic": 50.0,
+        "duration": 30.83,
+        "expected_time": 30.83,
+        "std_dev": 5.833,
+        "variance": 34.0239,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Prepare financial breakdown presentation and milestone budget",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-1.4.2",
+        "work_package_id": "WP-1.4",
+        "name": "Pitch project to executive board",
+        "description": "Deliver formal proposal to publisher executives and secure greenlight signoff.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 10.0,
+        "most_likely": 15.0,
+        "pessimistic": 30.0,
+        "duration": 16.67,
+        "expected_time": 16.67,
+        "std_dev": 3.333,
+        "variance": 11.1089,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Pitch project to executive board for 4-year greenlight",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-2.1.1",
+        "work_package_id": "WP-2.1",
+        "name": "Build rendering pipeline",
+        "description": "Configure deferred lighting, shadow passes, and HDR tone mapping.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 110.0,
+        "most_likely": 180.0,
+        "pessimistic": 280.0,
+        "duration": 185.0,
+        "expected_time": 185.0,
+        "std_dev": 28.333,
+        "variance": 802.7589,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Build rendering pipeline, compute shaders, and dynamic lighting",
+        "status": "in_progress",
+        "progress_pct": 65.0,
+        "actual_start_date": "2027-03-15",
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": "WIP: asset creation and engine pipeline in active progress."
+      },
+      {
+        "activity_id": "ACT-2.1.2",
+        "work_package_id": "WP-2.1",
+        "name": "Implement physics subsystem",
+        "description": "Integrate rigid body simulations, collision hulls, and surface friction.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 160.0,
+        "most_likely": 200.0,
+        "pessimistic": 365.0,
+        "duration": 220.83,
+        "expected_time": 220.83,
+        "std_dev": 34.167,
+        "variance": 1167.3839,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Implement physics subsystem, ragdolls, and character controller",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-2.2.1",
+        "work_package_id": "WP-2.2",
+        "name": "Model main character assets",
+        "description": "High-poly digital sculpting, retopology, and deformation rigging.",
+        "assigned_teams": [
+          "TEAM-86273"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 90.0,
+        "most_likely": 150.0,
+        "pessimistic": 240.0,
+        "duration": 155.0,
+        "expected_time": 155.0,
+        "std_dev": 25.0,
+        "variance": 625.0,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Model and rig main character assets, facial blendshapes, LODs",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-2.2.2",
+        "work_package_id": "WP-2.2",
+        "name": "Texture environment props",
+        "description": "Bake normal maps and author 4K PBR material variations in Substance.",
+        "assigned_teams": [
+          "TEAM-86273"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "parametric",
+        "optimistic": 75.0,
+        "most_likely": 124.0,
+        "pessimistic": 190.0,
+        "duration": 124.0,
+        "expected_time": 124.0,
+        "std_dev": 12.4,
+        "variance": 153.76,
+        "parametric_rate": 0.8,
+        "parametric_quantity": 155.0,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Texture environment props (155 props @ 0.8 days/prop)",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-2.3.1",
+        "work_package_id": "WP-2.3",
+        "name": "Block out first explorable zone",
+        "description": "Assemble geometry volumes to establish sightlines, pacing, and landmarks.",
+        "assigned_teams": [
+          "TEAM-97806",
+          "TEAM-86273"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 60.0,
+        "most_likely": 100.0,
+        "pessimistic": 160.0,
+        "duration": 103.33,
+        "expected_time": 103.33,
+        "std_dev": 16.667,
+        "variance": 277.7889,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Block out first explorable zone greybox and level streaming",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-2.3.2",
+        "work_package_id": "WP-2.3",
+        "name": "Script NPC patrol routes",
+        "description": "Program waypoint navigation logic and AI alertness states.",
+        "assigned_teams": [
+          "TEAM-85770",
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 50.0,
+        "most_likely": 80.0,
+        "pessimistic": 130.0,
+        "duration": 83.33,
+        "expected_time": 83.33,
+        "std_dev": 13.333,
+        "variance": 177.7689,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Script interactive environment triggers, encounters, and AI patrol",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-2.4.1",
+        "work_package_id": "WP-2.4",
+        "name": "Compose main theme track",
+        "description": "Orchestrate, record, and master dynamic adaptive musical suite.",
+        "assigned_teams": [
+          "TEAM-64029"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 40.0,
+        "most_likely": 65.0,
+        "pessimistic": 110.0,
+        "duration": 68.33,
+        "expected_time": 68.33,
+        "std_dev": 11.667,
+        "variance": 136.1189,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Compose main theme orchestral score and dynamic combat layers",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-2.4.2",
+        "work_package_id": "WP-2.4",
+        "name": "Record foley sound effects",
+        "description": "Capture custom footstep surfaces, fabric swishes, and environmental ambience.",
+        "assigned_teams": [
+          "TEAM-64029"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 30.0,
+        "most_likely": 50.0,
+        "pessimistic": 85.0,
+        "duration": 52.5,
+        "expected_time": 52.5,
+        "std_dev": 9.167,
+        "variance": 84.0339,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Record ambient foley sound effects, weapon audio, and mixdown",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-3.1.1",
+        "work_package_id": "WP-3.1",
+        "name": "Merge combat and inventory systems",
+        "description": "Wire equipment loadouts directly to weapon stat modifiers and UI.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 30.0,
+        "most_likely": 50.0,
+        "pessimistic": 80.0,
+        "duration": 51.67,
+        "expected_time": 51.67,
+        "std_dev": 8.333,
+        "variance": 69.4389,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Merge feature branches and lock alpha milestone integration",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-3.1.2",
+        "work_package_id": "WP-3.1",
+        "name": "Lock all UI/UX layouts",
+        "description": "Finalize HUD gauges, pause menus, inventory grids, and typography.",
+        "assigned_teams": [
+          "TEAM-86273",
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 15.0,
+        "most_likely": 25.0,
+        "pessimistic": 45.0,
+        "duration": 26.67,
+        "expected_time": 26.67,
+        "std_dev": 5.0,
+        "variance": 25.0,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Conduct internal playtest sessions across campaign loop",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-3.2.1",
+        "work_package_id": "WP-3.2",
+        "name": "Execute test plan for core loop",
+        "description": "Complete full playthrough passes from tutorial to climax.",
+        "assigned_teams": [
+          "TEAM-77417"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 20.0,
+        "most_likely": 35.0,
+        "pessimistic": 60.0,
+        "duration": 36.67,
+        "expected_time": 36.67,
+        "std_dev": 6.667,
+        "variance": 44.4489,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Log bug reports in tracker and reproduce gameplay issues",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-3.2.2",
+        "work_package_id": "WP-3.2",
+        "name": "Log critical blocking bugs",
+        "description": "Catalog crashes, soft-locks, and regression defects into Jira database.",
+        "assigned_teams": [
+          "TEAM-77417"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 25.0,
+        "most_likely": 45.0,
+        "pessimistic": 75.0,
+        "duration": 46.67,
+        "expected_time": 46.67,
+        "std_dev": 8.333,
+        "variance": 69.4389,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Verify gameplay balance metrics, difficulty curves, pacing",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-4.1.1",
+        "work_package_id": "WP-4.1",
+        "name": "Optimize frame rate in dense areas",
+        "description": "Implement occlusion culling, level of detail (LOD) cascades, and shader passes.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "single_point",
+        "optimistic": 45.0,
+        "most_likely": 75.0,
+        "pessimistic": 120.0,
+        "duration": 75.0,
+        "expected_time": 75.0,
+        "std_dev": 0.0,
+        "variance": 0.0,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": "6acf99990001aaaaaaaa0001",
+        "analogous_project_name": "Legacy Fantasy RPG: Realms of Aethelgard",
+        "analogous_activity_id": "PAST-ACT-105",
+        "analogous_activity_name": "Multi-Language Text & Voice Localization Integration",
+        "analogous_actual_duration": 75.0,
+        "analogous_controller_name": "Sarah Williams (Controller)",
+        "analogous_approval_date": "2023-06-18",
+        "analogous_source": "Legacy Fantasy RPG: Realms of Aethelgard: Multi-Language Text & Voice Localization Integration",
+        "estimation_notes": "Multi-language localization strings integration",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-4.1.2",
+        "work_package_id": "WP-4.1",
+        "name": "Refine character combat animations",
+        "description": "Clean up root motion transitions, attack anticipation, and recovery frames.",
+        "assigned_teams": [
+          "TEAM-86273"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 60.0,
+        "most_likely": 100.0,
+        "pessimistic": 160.0,
+        "duration": 103.33,
+        "expected_time": 103.33,
+        "std_dev": 16.667,
+        "variance": 277.7889,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Optimize shader cache, memory footprint, and frame stability",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-4.2.1",
+        "work_package_id": "WP-4.2",
+        "name": "Resolve all priority 1 and 2 issues",
+        "description": "Squash game-breaking bugs and fatal memory leaks before certification.",
+        "assigned_teams": [
+          "TEAM-85770",
+          "TEAM-77417"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 40.0,
+        "most_likely": 70.0,
+        "pessimistic": 110.0,
+        "duration": 71.67,
+        "expected_time": 71.67,
+        "std_dev": 11.667,
+        "variance": 136.1189,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Triage critical blocker defects and memory leak hotfixes",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-4.2.2",
+        "work_package_id": "WP-4.2",
+        "name": "Fix collision detection glitches",
+        "description": "Patch geometry gaps and player clipping in complex environment assets.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 30.0,
+        "most_likely": 50.0,
+        "pessimistic": 85.0,
+        "duration": 52.5,
+        "expected_time": 52.5,
+        "std_dev": 9.167,
+        "variance": 84.0339,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Deploy regression hotfixes to internal QA validation steam branch",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-5.1.1",
+        "work_package_id": "WP-5.1",
+        "name": "Verify hardware compatibility matrix",
+        "description": "Benchmark gameplay across varying configurations of Intel, AMD, and NVIDIA hardware.",
+        "assigned_teams": [
+          "TEAM-77417",
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 25.0,
+        "most_likely": 40.0,
+        "pessimistic": 70.0,
+        "duration": 42.5,
+        "expected_time": 42.5,
+        "std_dev": 7.5,
+        "variance": 56.25,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Run PC compatibility suite across multiple GPU/CPU drivers",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-5.1.2",
+        "work_package_id": "WP-5.1",
+        "name": "Test ultrawide resolutions support",
+        "description": "Ensure 21:9 and 32:9 aspect ratios render without UI cropping or distortion.",
+        "assigned_teams": [
+          "TEAM-77417"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 15.0,
+        "most_likely": 25.0,
+        "pessimistic": 40.0,
+        "duration": 25.83,
+        "expected_time": 25.83,
+        "std_dev": 4.167,
+        "variance": 17.3639,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Submit master candidate to digital storefronts (Steam, Epic)",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-5.2.1",
+        "work_package_id": "WP-5.2",
+        "name": "Run PlayStation TRC compliance checks",
+        "description": "Validate account switching, DualSense haptics, and suspend/resume cycles.",
+        "assigned_teams": [
+          "TEAM-77417",
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 50.0,
+        "most_likely": 80.0,
+        "pessimistic": 130.0,
+        "duration": 83.33,
+        "expected_time": 83.33,
+        "std_dev": 13.333,
+        "variance": 177.7689,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": "6acf99990001aaaaaaaa0001",
+        "analogous_project_name": "Legacy Fantasy RPG: Realms of Aethelgard",
+        "analogous_activity_id": "PAST-ACT-106",
+        "analogous_activity_name": "First-Party Console Compliance Certification (TRC & XR)",
+        "analogous_actual_duration": 80.0,
+        "analogous_controller_name": "Sarah Williams (Controller)",
+        "analogous_approval_date": "2024-01-22",
+        "analogous_source": "Legacy Fantasy RPG: Realms of Aethelgard: First-Party Console Compliance Certification (TRC & XR)",
+        "estimation_notes": "First-party console compliance certification passes (TRC & XR)",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-5.2.2",
+        "work_package_id": "WP-5.2",
+        "name": "Run Xbox XR compliance checks",
+        "description": "Audit profile sign-out flows, Quick Resume state, and achievement triggers.",
+        "assigned_teams": [
+          "TEAM-77417",
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0687",
+        "estimation_technique": "three_point",
+        "optimistic": 30.0,
+        "most_likely": 50.0,
+        "pessimistic": 90.0,
+        "duration": 53.33,
+        "expected_time": 53.33,
+        "std_dev": 10.0,
+        "variance": 100.0,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Address certification failure tickets and submit final release binary",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-6.1.1",
+        "work_package_id": "WP-6.1",
+        "name": "Build final distribution package",
+        "description": "Compile release executable, sign binaries, and pack encrypted game packages.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 15.0,
+        "most_likely": 25.0,
+        "pessimistic": 45.0,
+        "duration": 26.67,
+        "expected_time": 26.67,
+        "std_dev": 5.0,
+        "variance": 25.0,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Generate day-one release candidate build and encrypt retail payloads",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-6.1.2",
+        "work_package_id": "WP-6.1",
+        "name": "Perform final sanity check",
+        "description": "Execute dry-run smoke test on clean test machine environments.",
+        "assigned_teams": [
+          "TEAM-77417"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 10.0,
+        "most_likely": 15.0,
+        "pessimistic": 30.0,
+        "duration": 16.67,
+        "expected_time": 16.67,
+        "std_dev": 3.333,
+        "variance": 11.1089,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Validate zero-day install package integrity and cryptographic signatures",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-6.2.1",
+        "work_package_id": "WP-6.2",
+        "name": "Deploy day-one patch",
+        "description": "Upload zero-day hotfixes to platform distribution backends.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 5.0,
+        "most_likely": 8.0,
+        "pessimistic": 15.0,
+        "duration": 8.67,
+        "expected_time": 8.67,
+        "std_dev": 1.667,
+        "variance": 2.7789,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Push day-one patch to public distribution CDN servers",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-6.2.2",
+        "work_package_id": "WP-6.2",
+        "name": "Monitor server stability on launch",
+        "description": "Observe telemetry graphs, matchmaking latency, and load distribution.",
+        "assigned_teams": [
+          "TEAM-85770"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd067c",
+        "estimation_technique": "three_point",
+        "optimistic": 25.0,
+        "most_likely": 40.0,
+        "pessimistic": 65.0,
+        "duration": 41.67,
+        "expected_time": 41.67,
+        "std_dev": 6.667,
+        "variance": 44.4489,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Monitor live player concurrency, server telemetry, and crash reports",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-7.1.1",
+        "work_package_id": "WP-7.1",
+        "name": "Review weekly sprint burndown charts",
+        "description": "Evaluate story point completion rates and adjust sprint backlogs.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 120.0,
+        "most_likely": 200.0,
+        "pessimistic": 320.0,
+        "duration": 206.67,
+        "expected_time": 206.67,
+        "std_dev": 33.333,
+        "variance": 1111.0889,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Track daily sprint burndown progress and resolve cross-discipline blockers",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-7.1.2",
+        "work_package_id": "WP-7.1",
+        "name": "Track team velocity metrics",
+        "description": "Analyze cross-functional throughput to optimize delivery schedules.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 80.0,
+        "most_likely": 140.0,
+        "pessimistic": 220.0,
+        "duration": 143.33,
+        "expected_time": 143.33,
+        "std_dev": 23.333,
+        "variance": 544.4289,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Conduct weekly stakeholder progress reviews and EVM variance tracking",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-7.2.1",
+        "work_package_id": "WP-7.2",
+        "name": "Draft monthly investor update report",
+        "description": "Summarize financial burn, milestone progress, and risk mitigation strategies.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 60.0,
+        "most_likely": 100.0,
+        "pessimistic": 160.0,
+        "duration": 103.33,
+        "expected_time": 103.33,
+        "std_dev": 16.667,
+        "variance": 277.7889,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Publish monthly executive summary for publisher financial governance",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-7.2.2",
+        "work_package_id": "WP-7.2",
+        "name": "Host executive steering committee meeting",
+        "description": "Present milestone status demos and roadmap revisions to stakeholders.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 50.0,
+        "most_likely": 80.0,
+        "pessimistic": 130.0,
+        "duration": 83.33,
+        "expected_time": 83.33,
+        "std_dev": 13.333,
+        "variance": 177.7689,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Manage external co-development partner contracts and licensing milestones",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-7.3.1",
+        "work_package_id": "WP-7.3",
+        "name": "Publish community development blog",
+        "description": "Author behind-the-scenes deep dive showcasing art benchmarks and sound design.",
+        "assigned_teams": [
+          "TEAM-86273"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0678",
+        "estimation_technique": "three_point",
+        "optimistic": 35.0,
+        "most_likely": 60.0,
+        "pessimistic": 95.0,
+        "duration": 61.67,
+        "expected_time": 61.67,
+        "std_dev": 10.0,
+        "variance": 100.0,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Plan post-launch live-ops roadmap and scheduled content drop cadence",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-7.3.2",
+        "work_package_id": "WP-7.3",
+        "name": "Send internal milestone newsletter",
+        "description": "Highlight top contributor accomplishments and project milestones company-wide.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 25.0,
+        "most_likely": 45.0,
+        "pessimistic": 75.0,
+        "duration": 46.67,
+        "expected_time": 46.67,
+        "std_dev": 8.333,
+        "variance": 69.4389,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Review community feature requests and triage quality-of-life updates",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-7.4.1",
+        "work_package_id": "WP-7.4",
+        "name": "Brainstorm post-launch content roadmap",
+        "description": "Explore expansions, seasonal cosmetics, and community requested features.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd0676",
+        "estimation_technique": "three_point",
+        "optimistic": 40.0,
+        "most_likely": 65.0,
+        "pessimistic": 110.0,
+        "duration": 68.33,
+        "expected_time": 68.33,
+        "std_dev": 11.667,
+        "variance": 136.1189,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Estimate resource requirements for Year 1 major expansion pack",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      },
+      {
+        "activity_id": "ACT-7.4.2",
+        "work_package_id": "WP-7.4",
+        "name": "Allocate initial budget for first expansion",
+        "description": "Model production budgets, contractor staffing, and marketing timelines.",
+        "assigned_teams": [
+          "TEAM-97806"
+        ],
+        "assigned_users": [],
+        "controller_id": "6acfb05eb1e16744cbcd064f",
+        "estimation_technique": "three_point",
+        "optimistic": 35.0,
+        "most_likely": 55.0,
+        "pessimistic": 90.0,
+        "duration": 57.5,
+        "expected_time": 57.5,
+        "std_dev": 9.167,
+        "variance": 84.0339,
+        "parametric_rate": null,
+        "parametric_quantity": null,
+        "analogous_project_id": null,
+        "analogous_project_name": null,
+        "analogous_activity_id": null,
+        "analogous_activity_name": null,
+        "analogous_actual_duration": null,
+        "analogous_controller_name": null,
+        "analogous_approval_date": null,
+        "analogous_source": null,
+        "estimation_notes": "Draft post-launch DLC concept proposals and executive greenlight pitch",
+        "status": "not_started",
+        "progress_pct": 0.0,
+        "actual_start_date": null,
+        "actual_finish_date": null,
+        "verified_by": null,
+        "verified_date": null,
+        "notes": ""
+      }
+    ],
+    "dependencies": [
+      {
+        "dependency_id": "DEP-001",
+        "from_activity_id": "ACT-1.1.1",
+        "to_activity_id": "ACT-1.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Core gameplay loop requires approved game pitch document"
+      },
+      {
+        "dependency_id": "DEP-002",
+        "from_activity_id": "ACT-1.1.2",
+        "to_activity_id": "ACT-1.1.3",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Narrative synopsis aligns with core gameplay loop"
+      },
+      {
+        "dependency_id": "DEP-003",
+        "from_activity_id": "ACT-1.1.2",
+        "to_activity_id": "ACT-1.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Movement prototype implements gameplay loop specifications"
+      },
+      {
+        "dependency_id": "DEP-004",
+        "from_activity_id": "ACT-1.2.1",
+        "to_activity_id": "ACT-1.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Combat mechanics layer on top of movement controller"
+      },
+      {
+        "dependency_id": "DEP-005",
+        "from_activity_id": "ACT-1.1.3",
+        "to_activity_id": "ACT-1.3.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Art mood boards reflect narrative tone and world lore"
+      },
+      {
+        "dependency_id": "DEP-006",
+        "from_activity_id": "ACT-1.3.1",
+        "to_activity_id": "ACT-1.3.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Character concepts match environment art direction"
+      },
+      {
+        "dependency_id": "DEP-007",
+        "from_activity_id": "ACT-1.2.2",
+        "to_activity_id": "ACT-1.4.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Financial estimates incorporate combat prototype scope"
+      },
+      {
+        "dependency_id": "DEP-008",
+        "from_activity_id": "ACT-1.3.2",
+        "to_activity_id": "ACT-1.4.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Visual assets included in executive financial breakdown"
+      },
+      {
+        "dependency_id": "DEP-009",
+        "from_activity_id": "ACT-1.4.1",
+        "to_activity_id": "ACT-1.4.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Pitch deck delivered to board following financial preparation"
+      },
+      {
+        "dependency_id": "DEP-010",
+        "from_activity_id": "ACT-1.4.2",
+        "to_activity_id": "ACT-2.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Engine pipeline development commences upon greenlight approval"
+      },
+      {
+        "dependency_id": "DEP-011",
+        "from_activity_id": "ACT-2.1.1",
+        "to_activity_id": "ACT-2.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Physics engine hooks directly into custom rendering pipeline"
+      },
+      {
+        "dependency_id": "DEP-012",
+        "from_activity_id": "ACT-2.1.1",
+        "to_activity_id": "ACT-2.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "3D character meshes target rendering pipeline shaders"
+      },
+      {
+        "dependency_id": "DEP-013",
+        "from_activity_id": "ACT-2.2.1",
+        "to_activity_id": "ACT-2.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "PBR texturing applied to 3D environment assets"
+      },
+      {
+        "dependency_id": "DEP-014",
+        "from_activity_id": "ACT-2.1.2",
+        "to_activity_id": "ACT-2.3.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Level greybox utilizes verified physics volumes"
+      },
+      {
+        "dependency_id": "DEP-015",
+        "from_activity_id": "ACT-2.2.2",
+        "to_activity_id": "ACT-2.3.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Environment props populate blocked-out exploration zone"
+      },
+      {
+        "dependency_id": "DEP-016",
+        "from_activity_id": "ACT-2.3.1",
+        "to_activity_id": "ACT-2.3.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "NPC waypoint navigation paths plotted within blocked zone"
+      },
+      {
+        "dependency_id": "DEP-017",
+        "from_activity_id": "ACT-1.3.1",
+        "to_activity_id": "ACT-2.4.1",
+        "type": "SS",
+        "lag_days": 1.0,
+        "description": "Soundtrack composition starts alongside art mood board finalization"
+      },
+      {
+        "dependency_id": "DEP-018",
+        "from_activity_id": "ACT-2.4.1",
+        "to_activity_id": "ACT-2.4.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Foley SFX design follows dynamic adaptive music orchestration"
+      },
+      {
+        "dependency_id": "DEP-019",
+        "from_activity_id": "ACT-2.3.2",
+        "to_activity_id": "ACT-3.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Alpha integration combines AI patrol mechanics with combat engine"
+      },
+      {
+        "dependency_id": "DEP-020",
+        "from_activity_id": "ACT-3.1.1",
+        "to_activity_id": "ACT-3.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "HUD/UI locked after combat and inventory wiring is verified"
+      },
+      {
+        "dependency_id": "DEP-021",
+        "from_activity_id": "ACT-3.1.2",
+        "to_activity_id": "ACT-3.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "QA playthrough passes begin on complete Alpha build"
+      },
+      {
+        "dependency_id": "DEP-022",
+        "from_activity_id": "ACT-2.4.2",
+        "to_activity_id": "ACT-3.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Audio passes incorporated into first round QA testing"
+      },
+      {
+        "dependency_id": "DEP-023",
+        "from_activity_id": "ACT-3.2.1",
+        "to_activity_id": "ACT-3.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Defect triage catalogs gameplay crashes and soft-locks"
+      },
+      {
+        "dependency_id": "DEP-024",
+        "from_activity_id": "ACT-3.2.2",
+        "to_activity_id": "ACT-4.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Performance profiling addresses identified dense zone frame drops"
+      },
+      {
+        "dependency_id": "DEP-025",
+        "from_activity_id": "ACT-3.2.2",
+        "to_activity_id": "ACT-4.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Combat animation frame data refined based on QA feedback"
+      },
+      {
+        "dependency_id": "DEP-026",
+        "from_activity_id": "ACT-4.1.1",
+        "to_activity_id": "ACT-4.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Priority 1 bug squashing executes during Beta sprint"
+      },
+      {
+        "dependency_id": "DEP-027",
+        "from_activity_id": "ACT-4.1.2",
+        "to_activity_id": "ACT-4.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Collision mesh gaps patched before certification submission"
+      },
+      {
+        "dependency_id": "DEP-028",
+        "from_activity_id": "ACT-4.2.1",
+        "to_activity_id": "ACT-5.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Hardware matrix verification starts once critical bugs resolved"
+      },
+      {
+        "dependency_id": "DEP-029",
+        "from_activity_id": "ACT-5.1.1",
+        "to_activity_id": "ACT-5.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Aspect ratio testing completes PC certification package"
+      },
+      {
+        "dependency_id": "DEP-030",
+        "from_activity_id": "ACT-4.2.2",
+        "to_activity_id": "ACT-5.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "PlayStation TRC compliance testing initiated"
+      },
+      {
+        "dependency_id": "DEP-031",
+        "from_activity_id": "ACT-5.2.1",
+        "to_activity_id": "ACT-5.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Xbox XR certification runs following PlayStation submission"
+      },
+      {
+        "dependency_id": "DEP-032",
+        "from_activity_id": "ACT-5.1.2",
+        "to_activity_id": "ACT-6.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Gold release executable built after PC cert sign-off"
+      },
+      {
+        "dependency_id": "DEP-033",
+        "from_activity_id": "ACT-5.2.2",
+        "to_activity_id": "ACT-6.1.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Gold executable incorporates console certified binaries"
+      },
+      {
+        "dependency_id": "DEP-034",
+        "from_activity_id": "ACT-6.1.1",
+        "to_activity_id": "ACT-6.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Sanity smoke tests run on clean golden master image"
+      },
+      {
+        "dependency_id": "DEP-035",
+        "from_activity_id": "ACT-6.1.2",
+        "to_activity_id": "ACT-6.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Day-one patch uploaded to platform distribution channels"
+      },
+      {
+        "dependency_id": "DEP-036",
+        "from_activity_id": "ACT-6.2.1",
+        "to_activity_id": "ACT-6.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Server telemetry monitored live as public game launches"
+      },
+      {
+        "dependency_id": "DEP-037",
+        "from_activity_id": "ACT-1.4.2",
+        "to_activity_id": "ACT-7.1.1",
+        "type": "SS",
+        "lag_days": 0.0,
+        "description": "Sprint burndown tracking begins with project kickoff"
+      },
+      {
+        "dependency_id": "DEP-038",
+        "from_activity_id": "ACT-7.1.1",
+        "to_activity_id": "ACT-7.1.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Velocity analytics tracking follows sprint burndown review"
+      },
+      {
+        "dependency_id": "DEP-039",
+        "from_activity_id": "ACT-7.1.2",
+        "to_activity_id": "ACT-7.2.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Monthly investor report drafts incorporate velocity data"
+      },
+      {
+        "dependency_id": "DEP-040",
+        "from_activity_id": "ACT-7.2.1",
+        "to_activity_id": "ACT-7.2.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Executive steering committee review follows investor report"
+      },
+      {
+        "dependency_id": "DEP-041",
+        "from_activity_id": "ACT-7.2.2",
+        "to_activity_id": "ACT-7.3.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Community development blog published following stakeholder milestones"
+      },
+      {
+        "dependency_id": "DEP-042",
+        "from_activity_id": "ACT-7.3.1",
+        "to_activity_id": "ACT-7.3.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Internal newsletter distributes milestone highlights"
+      },
+      {
+        "dependency_id": "DEP-043",
+        "from_activity_id": "ACT-6.2.2",
+        "to_activity_id": "ACT-7.4.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "DLC brainstorming begins after public launch telemetry stabilizes"
+      },
+      {
+        "dependency_id": "DEP-044",
+        "from_activity_id": "ACT-7.3.2",
+        "to_activity_id": "ACT-7.4.1",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Post-launch roadmap integrates community feedback"
+      },
+      {
+        "dependency_id": "DEP-045",
+        "from_activity_id": "ACT-7.4.1",
+        "to_activity_id": "ACT-7.4.2",
+        "type": "FS",
+        "lag_days": 0.0,
+        "description": "Initial DLC budget allocated based on roadmap scope"
+      }
+    ],
+    "created_at": {
+      "$date": "2026-10-14T20:08:35.608Z"
+    },
+    "updated_at": {
+      "$date": "2026-10-16T15:35:21.521Z"
+    },
+    "deliverables": [
+      {
+        "deliverable_id": "DEL-1",
+        "name": "Pre-production",
+        "description": "Initial game scoping and design documents.",
+        "sub_deliverables": [
+          {
+            "sub_deliverable_id": "SUB-1.1",
+            "name": "Concept & Vision",
+            "description": "Core game vision and mechanics.",
+            "work_packages": [
+              {
+                "work_package_id": "WP-1.1.1",
+                "name": "GDD Draft Document",
+                "description": "Full gameplay breakdown."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "wbs": [
+      {
+        "id": "DEL-1",
+        "wbs_number": "1",
+        "name": "Pre-production",
+        "description": "Initial game concept, technical prototyping, art direction, and stakeholder sign-off.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-1.1",
+            "wbs_number": "1.1",
+            "name": "Concept & Vision",
+            "description": "Core mechanics, pitch documentation, and narrative framework.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-1.2",
+            "wbs_number": "1.2",
+            "name": "Initial Prototyping",
+            "description": "Interactive greybox prototypes testing movement and core mechanics.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-1.3",
+            "wbs_number": "1.3",
+            "name": "Art Style Concept",
+            "description": "Visual benchmark mood boards and key character concept art.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-1.4",
+            "wbs_number": "1.4",
+            "name": "Budget/Sponsor Approval",
+            "description": "Executive pitch deck and financial projection sign-off.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-2",
+        "wbs_number": "2",
+        "name": "Production",
+        "description": "Engine development, asset creation, level building, and audio production.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-2.1",
+            "wbs_number": "2.1",
+            "name": "Core Engine Development",
+            "description": "Engine low-level rendering pipelines and physics simulation subsystems.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-2.2",
+            "wbs_number": "2.2",
+            "name": "3D/2D Asset Creation",
+            "description": "Character models, environment assets, and PBR textures.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-2.3",
+            "wbs_number": "2.3",
+            "name": "Level Design",
+            "description": "Playable zone layout blockouts and scripting logic.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-2.4",
+            "wbs_number": "2.4",
+            "name": "Sound Design & OST",
+            "description": "Original musical soundtrack and interactive sound effect recording.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-3",
+        "wbs_number": "3",
+        "name": "Alpha",
+        "description": "Feature completeness, core system integration, and early QA testing.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-3.1",
+            "wbs_number": "3.1",
+            "name": "Feature Complete & Integration",
+            "description": "Gameplay systems merged and user interface layouts locked.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-3.2",
+            "wbs_number": "3.2",
+            "name": "First Round of QA",
+            "description": "Initial test pass on the complete loop and bug tracking.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-4",
+        "wbs_number": "4",
+        "name": "Beta",
+        "description": "Content completeness, polish, frame-rate optimization, and intensive bug fixing.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-4.1",
+            "wbs_number": "4.1",
+            "name": "Content Complete & Polishing",
+            "description": "Performance profiling, visual polish, and animation smoothing.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-4.2",
+            "wbs_number": "4.2",
+            "name": "Intensive Bug Fixing",
+            "description": "Fixing high priority blocking issues and collision anomalies.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-5",
+        "wbs_number": "5",
+        "name": "Gold",
+        "description": "Platform compliance, certifications, and master disc/build creation.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-5.1",
+            "wbs_number": "5.1",
+            "name": "PC Certification",
+            "description": "Hardware compatibility validation across multiple GPUs and displays.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-5.2",
+            "wbs_number": "5.2",
+            "name": "Console Certification",
+            "description": "PlayStation TRC and Xbox XR technical requirements compliance passes.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-6",
+        "wbs_number": "6",
+        "name": "Launch",
+        "description": "Release candidate deployment, zero-day patching, and public rollout.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-6.1",
+            "wbs_number": "6.1",
+            "name": "Release Candidate",
+            "description": "Building gold master installer and final sanity validation.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-6.2",
+            "wbs_number": "6.2",
+            "name": "Release",
+            "description": "Public day-one deployment and live server infrastructure monitoring.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "DEL-7",
+        "wbs_number": "7",
+        "name": "Management and Control",
+        "description": "Ongoing governance, metrics tracking, communications, and live DLC planning.",
+        "type": "major_deliverable",
+        "children": [
+          {
+            "id": "WP-7.1",
+            "wbs_number": "7.1",
+            "name": "Progress Monitoring",
+            "description": "Sprint tracking, burndown audits, and team velocity analysis.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-7.2",
+            "wbs_number": "7.2",
+            "name": "Stakeholder Management",
+            "description": "Investor reporting and monthly steering committee sessions.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-7.3",
+            "wbs_number": "7.3",
+            "name": "Updates",
+            "description": "Community outreach blogs and company-wide progress publications.",
+            "type": "work_package",
+            "children": []
+          },
+          {
+            "id": "WP-7.4",
+            "wbs_number": "7.4",
+            "name": "DLC Planning",
+            "description": "Post-launch expansion roadmap and financial resource allocation.",
+            "type": "work_package",
+            "children": []
+          }
+        ]
+      }
+    ],
+    "schedule_settings": {
+      "imposed_deadline_date": null,
+      "imposed_deadline_days": null,
+      "near_critical_threshold_days": 35.0,
+      "diagram_mode": "aon",
+      "notes": "Threshold 45 test",
+      "updated_at": "2026-10-16 11:38:10"
+    },
+    "status": "in_progress"
+  }
+]

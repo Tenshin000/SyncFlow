@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyncFlow | Member Workspace</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Vis-Network for interactive graph & tree visualizations -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <!-- Chart.js for S-Curve cumulative progress visualization -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sticky Member Sidebar Navigation -->
+    <aside class="sidebar sidebar-blue" id="workspace-sidebar" style="display: flex; flex-direction: column; height: 100vh;">
+      <!-- Profile Mini-Header -->
+      <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 1rem; margin-bottom: 1rem; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div id="member-sidebar-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; flex-shrink: 0;">
+            U
+          </div>
+          <div style="min-width: 0; overflow: hidden;">
+            <h4 id="member-sidebar-name" style="margin: 0; font-size: 1rem; color: #FFFFFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Member</h4>
+            <span id="member-sidebar-username" style="font-size: 0.78rem; color: #93C5FD; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@username</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #93C5FD; margin-bottom: 0.5rem; flex-shrink: 0;">
+        Workplace Navigation
+      </div>
+
+      <!-- Member Navigation Menu Items -->
+      <nav id="workspace-nav" style="display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto;">
+        <div class="sidebar-nav-item active" data-view="projects">📁 Projects</div>
+        <div class="sidebar-nav-item" data-view="search-projects">🔍 Search Projects</div>
+        <div class="sidebar-nav-item" data-view="assigned-tasks">📋 Assigned Tasks Table</div>
+        <div class="sidebar-nav-item" data-view="notifications" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>🔔 Notifications</span>
+          <span id="sidebar-notif-badge" class="badge badge-danger" style="display: none; font-size: 0.7rem; padding: 2px 6px;">0</span>
+        </div>
+        <div class="sidebar-nav-item" data-view="profile">👤 Profile</div>
+      </nav>
+
+      <!-- Sticky Bottom Action Buttons Container -->
+      <div class="sidebar-bottom-actions" style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 0.85rem; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; position: sticky; bottom: 0; background: var(--dark-blue); z-index: 10;">
+        <button id="btn-workspace-logout" class="btn btn-secondary btn-block btn-sm" style="background: rgba(255, 255, 255, 0.15); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.25); font-weight: 600;">
+          Log Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Content View -->
+    <main class="main-content">
+      <div class="brand-header">
+        <div class="brand-logo-group">
+          <span class="brand-icon">⚡</span>
+          <div>
+            <div class="brand-title">SyncFlow</div>
+            <div class="brand-subtitle" id="workspace-header-subtitle">
+              Team Member Workspace &amp; Operational Management
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="member-workspace-notification-bell-container"></div>
+          <div id="workspace-user-badge"></div>
+        </div>
+      </div>
+
+      <!-- ================================================================
+           VIEW 1: PROJECTS (LIST OF PARTICIPATING / ACCESSIBLE PROJECTS)
+           ================================================================ -->
+      <section id="view-projects" class="workspace-view active">
+        <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-left: 5px solid var(--primary); border-radius: var(--radius-md); padding: 1.5rem 1.8rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <h2 id="projects-welcome-title" style="margin: 0; font-size: 1.45rem; color: var(--charcoal); font-weight: 700;">
+              📁 My Projects
+            </h2>
+            <p style="margin: 0.35rem 0 0 0; font-size: 0.95rem; color: var(--slate); line-height: 1.5;">
+              Select any project from the portfolio below to view its schedule and your assigned tasks.
+            </p>
+          </div>
+          <button id="btn-goto-search-projects" class="btn btn-primary" style="padding: 0.65rem 1.3rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            🔍 Search &amp; Join New Projects
+          </button>
+        </div>
+
+        <!-- Participating Projects Grid Container (Direct In-Page Selection) -->
+        <div id="member-my-projects-container">
+          <p style="color: var(--muted); text-align: center; padding: 2.5rem 0;">Loading your participating projects...</p>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 2: SEARCH PROJECTS (DISCOVERY & PARTICIPATION)
+           ================================================================ -->
+      <section id="view-search-projects" class="workspace-view" style="display: none;">
+        <!-- Visual Discovery Header Card -->
+        <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.6rem 1.8rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
+          <div style="margin-bottom: 1.2rem;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <span style="font-size: 1.5rem;">🔍</span>
+              <h2 style="margin: 0; font-size: 1.4rem; color: var(--charcoal); font-weight: 800;">
+                Discover &amp; Join Projects
+              </h2>
+            </div>
+            <p style="margin: 0; font-size: 0.92rem; color: var(--slate);">
+              Browse all project workspaces across the system. Open projects allow immediate participation without delay; projects requiring approval will notify the Project Manager for access.
+            </p>
+          </div>
+
+          <!-- Search Input Bar & Controls -->
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 1.2rem;">
+            <div style="position: relative; flex: 1; min-width: 280px;">
+              <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--muted);">🔍</span>
+              <input type="text" id="input-member-search-query" placeholder="Search by project name, description, or project manager..." style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.6rem; font-size: 0.95rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+            </div>
+            <button id="btn-exec-search" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-weight: 700;">
+              Search
+            </button>
+            <button id="btn-clear-member-search" class="btn btn-secondary" style="padding: 0.75rem 1.2rem;">
+              Clear
+            </button>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="search-filter-pills">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--muted); margin-right: 4px;">Filter by:</span>
+            <button type="button" class="search-filter-pill active" data-filter="all">All Projects</button>
+            <button type="button" class="search-filter-pill" data-filter="open">🌐 Open Participation</button>
+            <button type="button" class="search-filter-pill" data-filter="approval">🛡️ Approval Required</button>
+            <button type="button" class="search-filter-pill" data-filter="joined">✓ My Projects</button>
+            <span id="search-results-count-badge" style="margin-left: auto; font-size: 0.8rem; color: var(--muted); font-weight: 600;"></span>
+          </div>
+        </div>
+
+        <!-- Available Projects Cards Grid -->
+        <div id="member-search-results-container">
+          <p style="color: var(--muted); text-align: center; padding: 2.5rem 0;">Loading project catalog...</p>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 3: ASSIGNED TASKS TABLE (PERSONAL OPERATIONAL AGENDA)
+           ================================================================ -->
+      <section id="view-assigned-tasks" class="workspace-view" style="display: none;">
+        <!-- In-Page Direct Project Selector Bar -->
+        <div class="inpage-project-selector-bar">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="font-size: 1.2rem;">📁</span>
+            <div>
+              <span style="font-size: 0.75rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block;">Active Project</span>
+              <strong class="inpage-active-project-name" style="font-size: 1.15rem; color: var(--charcoal);">Project</strong>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 0.8rem; color: var(--muted); font-weight: 600;">Switch Project:</span>
+            <div class="inpage-project-pills">
+              <!-- Dynamically populated with user's projects -->
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm btn-inpage-view-all-projects" style="padding: 4px 10px; font-size: 0.8rem;">
+              📁 View All Projects
+            </button>
+          </div>
+        </div>
+        <!-- KPI Metrics Grid -->
+        <div class="kpi-grid" style="margin-bottom: 1.5rem;">
+          <div class="kpi-card">
+            <div class="kpi-title">📋 Total Operations</div>
+            <div class="kpi-value" id="kpi-agenda-total">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">⚡ In Progress</div>
+            <div class="kpi-value" id="kpi-agenda-wip">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">✅ Finished</div>
+            <div class="kpi-value" id="kpi-agenda-finished">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">⏳ Not Started</div>
+            <div class="kpi-value" id="kpi-agenda-not-started">0</div>
+          </div>
+        </div>
+
+        <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.5rem 1.8rem; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="margin: 0; font-size: 1.2rem; color: var(--charcoal);">Assigned Tasks Table</h3>
+              <p style="margin: 0.2rem 0 0 0; font-size: 0.86rem; color: var(--muted);">
+                Update operation status directly.
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" id="btn-agenda-view-table" class="btn btn-primary btn-sm" style="font-weight: 700;">
+                📋 List View
+              </button>
+              <button type="button" id="btn-agenda-view-kanban" class="btn btn-secondary btn-sm" style="font-weight: 600;">
+                📌 Kanban Board
+              </button>
+              <button id="btn-refresh-agenda" class="btn btn-secondary btn-sm">
+                🔄 Refresh
+              </button>
+            </div>
+          </div>
+
+          <div id="agenda-tasks-container">
+            <p style="color: var(--muted); padding: 1.5rem 0; text-align: center;">Loading assigned operations...</p>
+          </div>
+          <div id="agenda-kanban-container" style="display: none;"></div>
+        </div>
+      </section>
+
+
+      <!-- ================================================================
+           VIEW 4: NOTIFICATIONS LOG
+           ================================================================ -->
+      <section id="view-notifications" class="workspace-view" style="display: none;">
+        <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.5rem 1.8rem; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h2 style="margin: 0; font-size: 1.35rem; color: var(--charcoal);">🔔 Project Notifications &amp; Audit Logs</h2>
+              <p style="margin: 0.2rem 0 0 0; font-size: 0.88rem; color: var(--muted);">
+                Audit log of all project events, approvals, and team announcements. Read notifications remain preserved in the log.
+              </p>
+            </div>
+            <button id="btn-tab-mark-all-read" class="btn btn-outline-primary btn-sm">
+              ✓ Mark All as Read
+            </button>
+          </div>
+
+          <div id="full-notifications-container">
+            <p style="color: var(--muted); text-align: center; padding: 2rem 0;">Loading notifications...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           VIEW 5: PROFILE SETTINGS
+           ================================================================ -->
+      <section id="view-profile" class="workspace-view" style="display: none;">
+        <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.8rem 2rem; max-width: 650px; box-shadow: var(--shadow-sm);">
+          <h2 style="margin: 0 0 0.3rem 0; font-size: 1.35rem; color: var(--charcoal);">👤 User Profile</h2>
+          <p style="margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--muted);">
+            Manage your personal profile information. (The Controller role is assigned exclusively by the Project Manager).
+          </p>
+
+          <div id="member-profile-form-container">
+            <!-- Profile form injected dynamically by auth.js -->
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Activity Execution & Sign-off Modal (for Controller verification or progress update) -->
+  <div id="member-activity-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-act-name-display" style="margin: 0; font-size: 1.2rem;">Activity Execution</h3>
+          <span id="modal-act-id" style="font-size: 0.8rem; color: var(--muted); font-weight: 700;">ACT-1</span>
+        </div>
+        <button id="btn-close-member-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="member-activity-form">
+          <div id="modal-act-info-display" style="background: #F8FAFC; border: 1px solid var(--border-light); padding: 0.85rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.88rem;"></div>
+
+          <div class="form-group">
+            <label for="modal-act-status">Execution Status*</label>
+            <select id="modal-act-status" required>
+              <option value="not_started">⚪ Not Started</option>
+              <option value="in_progress">🟡 Work-in-Progress (WIP)</option>
+              <option value="completed">🟢 Completed</option>
+              <option value="verified" id="modal-opt-verified">🔵 Completed &amp; Verified (Controller Sign-off)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Progress Percentage: <strong id="modal-act-progress-num">0%</strong></label>
+            <input type="range" id="modal-act-progress-range" min="0" max="100" value="0" style="width: 100%;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label for="modal-act-start-date">Actual Start Date</label>
+              <input type="date" id="modal-act-start-date">
+            </div>
+            <div class="form-group">
+              <label for="modal-act-finish-date">Actual Finish Date</label>
+              <input type="date" id="modal-act-finish-date">
+            </div>
+          </div>
+
+          <!-- Controller Sign-off Section -->
+          <div id="modal-controller-signoff-box" style="display: none; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 0.85rem; margin-top: 0.8rem;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #1E40AF; cursor: pointer;">
+              <input type="checkbox" id="modal-signoff-check">
+              <span>🛡️ Sign-off as Designated Project Controller</span>
+            </label>
+            <span id="modal-signoff-user" style="display: block; font-size: 0.8rem; color: #3B82F6; margin-top: 4px;"></span>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.4rem;">
+            <button type="button" id="btn-cancel-member-modal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Execution State</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controller Review Action Modal -->
+  <div id="controller-review-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-review-title" style="margin: 0; font-size: 1.2rem; color: var(--charcoal);">🛡️ Controller Activity Review</h3>
+          <span id="modal-review-subtitle" style="font-size: 0.8rem; color: var(--muted); font-weight: 700;">ACT-1</span>
+        </div>
+        <button id="btn-close-review-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="controller-review-form">
+          <div id="modal-review-info" style="background: #F8FAFC; border: 1px solid var(--border-light); padding: 0.85rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.88rem;"></div>
+
+          <!-- Deliverable Evidence / Member Completion Proof Display -->
+          <div id="modal-review-proof-container" style="display: none; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.85rem; margin-bottom: 1rem;">
+            <label style="font-size: 0.82rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
+              <span>📝</span> Deliverable Evidence (Submitted by Member):
+            </label>
+            <div id="modal-review-proof-text" class="proof-box"></div>
+          </div>
+
+          <!-- Structured Verification Checklist -->
+          <div id="modal-review-checklist-group" style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 0.85rem; margin-bottom: 1rem;">
+            <label style="font-size: 0.84rem; font-weight: 700; color: #1E40AF; display: block; margin-bottom: 6px;">
+              ☑️ Structured Verification Checklist (Itemized Acceptance): *
+            </label>
+            <div id="modal-review-checklist-items" class="checklist-group"></div>
+            <div id="modal-review-checklist-warning" style="display: none; color: #DC2626; font-size: 0.76rem; font-weight: 600; margin-top: 6px;">
+              ⚠️ All acceptance criteria must be checked before confirming Controlled (Blue) sign-off.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="modal-review-action">Decision Action*</label>
+            <select id="modal-review-action" required style="width: 100%; padding: 0.6rem; font-size: 0.95rem; font-weight: 700;">
+              <option value="verified">🔵 Confirm Review Complete (Controlled - Blue)</option>
+              <option value="in_progress">🔙 Return to WIP (Yellow - Needs Revisions)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top: 1rem;">
+            <label for="modal-review-description">
+              Review Notes / Justification (Mandatory)*:
+            </label>
+            <textarea id="modal-review-description" rows="3" required placeholder="Provide inspection notes, verification confirmation, or detailed revision feedback for the Project Manager and assigned team..." style="width: 100%; padding: 0.6rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem; font-family: inherit;"></textarea>
+            <span style="font-size: 0.76rem; color: var(--muted); display: block; margin-top: 3px;">
+              This description will be sent as an official audit notification to the Project Manager and recorded in the project schedule.
+            </span>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.4rem;">
+            <button type="button" id="btn-cancel-review-modal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" id="btn-submit-review" class="btn btn-primary" style="font-weight: 700;">Submit Controller Decision</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Completion Proof / Review Request Modal -->
+  <div id="member-completion-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-complete-title" style="margin: 0; font-size: 1.2rem; color: var(--charcoal);">
+            ✅ Mark Activity Complete &amp; Request Review
+          </h3>
+          <span id="modal-complete-subtitle" style="font-size: 0.8rem; color: var(--muted); font-weight: 700;">ACT-1</span>
+        </div>
+        <button id="btn-close-complete-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="member-completion-form">
+          <div id="modal-complete-info" style="background: #F8FAFC; border: 1px solid var(--border-light); padding: 0.85rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.88rem;"></div>
+
+          <div class="form-group">
+            <label for="input-completion-proof" style="font-size: 0.88rem; font-weight: 700; color: #1E293B;">
+              📝 Deliverable Evidence / Completion Proof: *
+            </label>
+            <textarea id="input-completion-proof" rows="4" required placeholder="Describe the tangible deliverables produced, validation results, or operational evidence completed (e.g. Completed high-poly character topology, baked normal maps, and passed vertex count budget)..." style="width: 100%; padding: 0.65rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.88rem; font-family: inherit;"></textarea>
+            <span style="font-size: 0.76rem; color: var(--muted); display: block; margin-top: 3px;">
+              Provide clear text evidence or deliverable descriptions. This proof will be submitted directly to the Controller for verification.
+            </span>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1.4rem;">
+            <button type="button" id="btn-cancel-complete-modal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" id="btn-submit-complete" class="btn btn-primary" style="font-weight: 700; background: #16A34A; border-color: #15803D;">
+              🚀 Submit Deliverable &amp; Request Review
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="center-error-container"></div>
+
+  <script type="module" src="/js/member_workspace.js"></script>
+</body>
+</html>

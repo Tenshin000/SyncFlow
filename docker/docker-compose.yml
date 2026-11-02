@@ -1,0 +1,119 @@
+services:
+  # ============================================================================
+  # 1. MongoDB Database Server (Pre-instantiated with $jsonSchema validation)
+  # ============================================================================
+  mongodb:
+    image: mongo:7.0
+    container_name: syncflow-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-syncflow_admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-syncflow_password123}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-syncflow_db}
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - syncflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --username $${MONGO_INITDB_ROOT_USERNAME} --password $${MONGO_INITDB_ROOT_PASSWORD} --authenticationDatabase admin --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ============================================================================
+  # 2. FastAPI Backend Service (REST API & Auth CRUD)
+  # ============================================================================
+  backend:
+    container_name: syncflow-backend
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - public.env
+    environment:
+      PYTHONPATH: /app
+      MONGO_URI: ${MONGO_URI:-mongodb://syncflow_admin:syncflow_password123@mongodb:27017/syncflow_db?authSource=admin}
+    volumes:
+      - ..:/app
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8000/syncflow/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - syncflow-network
+    command: ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  # ============================================================================
+  # 3. SyncFlow Web Frontend Service (Vanilla JS / HTML / CSS)
+  # ============================================================================
+  frontend:
+    container_name: syncflow-frontend
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-${STREAMLIT_SERVER_PORT:-8501}}:8501"
+    env_file:
+      - public.env
+    environment:
+      PYTHONPATH: /app
+      MONGO_URI: ${MONGO_URI:-mongodb://syncflow_admin:syncflow_password123@mongodb:27017/syncflow_db?authSource=admin}
+      BACKEND_API_URL: http://backend:8000
+    volumes:
+      - ..:/app
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8501 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - syncflow-network
+    command: ["python", "-m", "http.server", "8501", "--directory", "frontend"]
+
+  # ============================================================================
+  # 4. Mongo Express Web Administration GUI
+  # ============================================================================
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: syncflow-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME:-syncflow_admin}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-syncflow_password123}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME:-admin}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD:-admin}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - syncflow-network
+
+volumes:
+  mongo_data:
+    name: syncflow_mongo_data
+
+networks:
+  syncflow-network:
+    name: syncflow_network
+    driver: bridge

@@ -1,0 +1,971 @@
+[
+  {
+    "username": "f.panattoni2",
+    "password": "Mhanz0_0",
+    "first_name": "Francesco",
+    "last_name": "Panattoni",
+    "gender": "Male",
+    "date_of_birth": {
+      "$date": "1998-02-04T04:44:44Z"
+    },
+    "is_admin": false,
+    "role": "Project Manager",
+    "email": "f.panattoni2@studenti.unipi.it",
+    "mobile_phone": "3334444444",
+    "created_at": {
+      "$date": "2010-07-19T04:44:44Z"
+    }
+  },
+  {
+    "username": "a.vance",
+    "password": "Mhanz0_0",
+    "first_name": "Alice",
+    "last_name": "Vance",
+    "gender": "Female",
+    "date_of_birth": {
+      "$date": "1988-05-14T00:00:00Z"
+    },
+    "is_admin": true,
+    "role": "Project Manager",
+    "email": "a.vance@company.com",
+    "mobile_phone": "+1-555-0144",
+    "created_at": {
+      "$date": "2026-10-14T10:48:37.447Z"
+    }
+  },
+  {
+    "username": "b.miller",
+    "password": "Mhanz0_0",
+    "first_name": "Bob",
+    "last_name": "Miller",
+    "gender": "Male",
+    "date_of_birth": {
+      "$date": "1994-09-21T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "bob.miller@company.com",
+    "mobile_phone": "+1-555-0178",
+    "created_at": {
+      "$date": "2026-10-14T10:48:37.447Z"
+    }
+  },
+  {
+    "username": "c.danvers",
+    "password": "Mhanz0_0",
+    "first_name": "Carol",
+    "last_name": "Danvers",
+    "gender": "Female",
+    "date_of_birth": {
+      "$date": "1991-12-03T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "carol.danvers@syncflow.com",
+    "mobile_phone": "+1-555-0192",
+    "created_at": {
+      "$date": "2026-10-14T10:48:37.447Z"
+    }
+  },
+  {
+    "first_name": "Sarah",
+    "last_name": "Connor",
+    "gender": "Female",
+    "username": "s.connor",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1992-08-15T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "AI Programmer",
+    "email": "sarah.connor@syncflow.com",
+    "mobile_phone": "+1-555-0199",
+    "created_at": {
+      "$date": "2026-10-14T10:50:19.098Z"
+    }
+  },
+  {
+    "first_name": "Roberto",
+    "last_name": "Pezzato",
+    "gender": "Male",
+    "username": "r.pezzato",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1996-10-14T00:00:00Z"
+    },
+    "is_admin": true,
+    "role": "Project Manager",
+    "email": "r.pezzato@syncflow.com",
+    "mobile_phone": "4444444444",
+    "created_at": {
+      "$date": "2026-10-14T10:54:48.849Z"
+    }
+  },
+  {
+    "first_name": "Giacomo",
+    "last_name": "Verdi",
+    "gender": "Male",
+    "username": "g.verdi",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1996-10-14T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "g.verdi@syncflow.com",
+    "mobile_phone": "3333333333",
+    "created_at": {
+      "$date": "2026-10-14T13:26:30.727Z"
+    }
+  },
+  {
+    "first_name": "David",
+    "last_name": "Williams",
+    "gender": "Male",
+    "username": "d.williams",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1985-04-08T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Character Artist",
+    "email": "david.williams@syncflow.com",
+    "mobile_phone": "+1-555-7618",
+    "created_at": {
+      "$date": "2026-10-09T08:09:24.000Z"
+    }
+  },
+  {
+    "first_name": "Thomas",
+    "last_name": "Hernandez",
+    "gender": "Male",
+    "username": "t.hernandez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1983-08-07T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Narrative Designer",
+    "email": "thomas.hernandez@syncflow.com",
+    "mobile_phone": "+1-555-5797",
+    "created_at": {
+      "$date": "2026-10-10T23:29:24.000Z"
+    }
+  },
+  {
+    "first_name": "Patricia",
+    "last_name": "Bianchi",
+    "gender": "Female",
+    "username": "p.bianchi",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1976-06-26T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Environment Artist",
+    "email": "patricia.bianchi@syncflow.com",
+    "mobile_phone": "+1-555-9783",
+    "created_at": {
+      "$date": "2026-10-11T12:50:24.000Z"
+    }
+  },
+  {
+    "first_name": "Michael",
+    "last_name": "Ricci",
+    "gender": "Male",
+    "username": "m.ricci",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1997-06-19T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "VFX Artist",
+    "email": "michael.ricci@syncflow.com",
+    "mobile_phone": "+1-555-1708",
+    "created_at": {
+      "$date": "2026-10-13T01:27:24.000Z"
+    }
+  },
+  {
+    "first_name": "Patricia",
+    "last_name": "Russo",
+    "gender": "Female",
+    "username": "p.russo",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1990-06-08T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Environment Artist",
+    "email": "patricia.russo@syncflow.com",
+    "mobile_phone": "+1-555-9609",
+    "created_at": {
+      "$date": "2026-10-13T10:21:24.000Z"
+    }
+  },
+  {
+    "first_name": "Margaret",
+    "last_name": "Rodriguez",
+    "gender": "Female",
+    "username": "m.rodriguez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1986-11-29T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "QA Tester",
+    "email": "margaret.rodriguez@syncflow.com",
+    "mobile_phone": "+1-555-2059",
+    "created_at": {
+      "$date": "2026-10-07T21:34:24.000Z"
+    }
+  },
+  {
+    "first_name": "Joshua",
+    "last_name": "Russo",
+    "gender": "Male",
+    "username": "j.russo",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1996-12-11T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "joshua.russo@syncflow.com",
+    "mobile_phone": "+1-555-5781",
+    "created_at": {
+      "$date": "2026-10-11T03:16:24.000Z"
+    }
+  },
+  {
+    "first_name": "Joshua",
+    "last_name": "Colombo",
+    "gender": "Male",
+    "username": "j.colombo",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1995-09-18T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "joshua.colombo@syncflow.com",
+    "mobile_phone": "+1-555-5925",
+    "created_at": {
+      "$date": "2026-10-11T10:05:24.000Z"
+    }
+  },
+  {
+    "first_name": "Nancy",
+    "last_name": "Lopez",
+    "gender": "Female",
+    "username": "n.lopez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1983-05-19T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "nancy.lopez@syncflow.com",
+    "mobile_phone": "+1-555-8825",
+    "created_at": {
+      "$date": "2026-10-12T20:46:24.000Z"
+    }
+  },
+  {
+    "first_name": "Matteo",
+    "last_name": "Miller",
+    "gender": "Male",
+    "username": "m.miller",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1999-08-10T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Animator",
+    "email": "matteo.miller@syncflow.com",
+    "mobile_phone": "+1-555-1949",
+    "created_at": {
+      "$date": "2026-10-13T14:24:24.000Z"
+    }
+  },
+  {
+    "first_name": "Matteo",
+    "last_name": "Martin",
+    "gender": "Male",
+    "username": "m.martin",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1995-08-24T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Executive Producer",
+    "email": "matteo.martin@syncflow.com",
+    "mobile_phone": "+1-555-6508",
+    "created_at": {
+      "$date": "2026-10-08T12:56:24.000Z"
+    }
+  },
+  {
+    "first_name": "David",
+    "last_name": "Davis",
+    "gender": "Male",
+    "username": "d.davis",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1986-05-08T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Engine Programmer",
+    "email": "david.davis@syncflow.com",
+    "mobile_phone": "+1-555-6733",
+    "created_at": {
+      "$date": "2026-10-10T00:44:24.000Z"
+    }
+  },
+  {
+    "first_name": "Margaret",
+    "last_name": "Ferrari",
+    "gender": "Female",
+    "username": "m.ferrari",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1989-11-20T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "margaret.ferrari@syncflow.com",
+    "mobile_phone": "+1-555-5946",
+    "created_at": {
+      "$date": "2026-10-10T08:21:24.000Z"
+    }
+  },
+  {
+    "first_name": "Jessica",
+    "last_name": "Perez",
+    "gender": "Female",
+    "username": "j.perez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1979-08-24T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Technical Artist",
+    "email": "jessica.perez@syncflow.com",
+    "mobile_phone": "+1-555-5151",
+    "created_at": {
+      "$date": "2026-10-08T06:52:24.000Z"
+    }
+  },
+  {
+    "first_name": "Donald",
+    "last_name": "Johnson",
+    "gender": "Male",
+    "username": "d.johnson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1989-05-05T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Character Artist",
+    "email": "donald.johnson@syncflow.com",
+    "mobile_phone": "+1-555-4442",
+    "created_at": {
+      "$date": "2026-10-09T01:18:24.000Z"
+    }
+  },
+  {
+    "first_name": "Chiara",
+    "last_name": "Russo",
+    "gender": "Female",
+    "username": "c.russo",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1978-04-26T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "AI Programmer",
+    "email": "chiara.russo@syncflow.com",
+    "mobile_phone": "+1-555-3343",
+    "created_at": {
+      "$date": "2026-10-11T12:52:24.000Z"
+    }
+  },
+  {
+    "first_name": "James",
+    "last_name": "Smith",
+    "gender": "Male",
+    "username": "j.smith",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1992-12-15T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Technical Artist",
+    "email": "james.smith@syncflow.com",
+    "mobile_phone": "+1-555-1749",
+    "created_at": {
+      "$date": "2026-10-14T08:41:24.000Z"
+    }
+  },
+  {
+    "first_name": "Nancy",
+    "last_name": "Taylor",
+    "gender": "Female",
+    "username": "n.taylor",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1992-10-23T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Character Artist",
+    "email": "nancy.taylor@syncflow.com",
+    "mobile_phone": "+1-555-4447",
+    "created_at": {
+      "$date": "2026-10-12T19:17:24.000Z"
+    }
+  },
+  {
+    "first_name": "Nancy",
+    "last_name": "Thompson",
+    "gender": "Female",
+    "username": "n.thompson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1982-11-22T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Animator",
+    "email": "nancy.thompson@syncflow.com",
+    "mobile_phone": "+1-555-2059",
+    "created_at": {
+      "$date": "2026-10-10T03:08:24.000Z"
+    }
+  },
+  {
+    "first_name": "Michael",
+    "last_name": "Wilson",
+    "gender": "Male",
+    "username": "m.wilson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1997-11-02T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Engine Programmer",
+    "email": "michael.wilson@syncflow.com",
+    "mobile_phone": "+1-555-6995",
+    "created_at": {
+      "$date": "2026-10-12T09:23:24.000Z"
+    }
+  },
+  {
+    "first_name": "William",
+    "last_name": "Lee",
+    "gender": "Male",
+    "username": "w.lee",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1987-03-01T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Level Designer",
+    "email": "william.lee@syncflow.com",
+    "mobile_phone": "+1-555-6192",
+    "created_at": {
+      "$date": "2026-10-09T04:47:24.000Z"
+    }
+  },
+  {
+    "first_name": "Jessica",
+    "last_name": "Jackson",
+    "gender": "Female",
+    "username": "j.jackson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1988-06-20T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Engine Programmer",
+    "email": "jessica.jackson@syncflow.com",
+    "mobile_phone": "+1-555-6381",
+    "created_at": {
+      "$date": "2026-10-11T04:18:24.000Z"
+    }
+  },
+  {
+    "first_name": "Lisa",
+    "last_name": "Miller",
+    "gender": "Female",
+    "username": "l.miller",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1987-09-15T00:00:00Z"
+    },
+    "is_admin": true,
+    "role": "Project Manager",
+    "email": "lisa.miller@syncflow.com",
+    "mobile_phone": "+1-555-1615",
+    "created_at": {
+      "$date": "2026-10-14T03:02:24.000Z"
+    }
+  },
+  {
+    "first_name": "Matteo",
+    "last_name": "Jackson",
+    "gender": "Male",
+    "username": "m.jackson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1993-02-11T00:00:00Z"
+    },
+    "is_admin": true,
+    "role": "Project Manager",
+    "email": "matteo.jackson@syncflow.com",
+    "mobile_phone": "+1-555-7827",
+    "created_at": {
+      "$date": "2026-10-11T08:45:24.000Z"
+    }
+  },
+  {
+    "first_name": "Mark",
+    "last_name": "Anderson",
+    "gender": "Male",
+    "username": "m.anderson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1980-11-14T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Sound Designer",
+    "email": "mark.anderson@syncflow.com",
+    "mobile_phone": "+1-555-3018",
+    "created_at": {
+      "$date": "2026-10-10T21:39:24.000Z"
+    }
+  },
+  {
+    "first_name": "Giulia",
+    "last_name": "Gonzalez",
+    "gender": "Female",
+    "username": "g.gonzalez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1999-01-11T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "AI Programmer",
+    "email": "giulia.gonzalez@syncflow.com",
+    "mobile_phone": "+1-555-8852",
+    "created_at": {
+      "$date": "2026-10-14T11:53:24.000Z"
+    }
+  },
+  {
+    "first_name": "Richard",
+    "last_name": "Taylor",
+    "gender": "Male",
+    "username": "r.taylor",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1983-04-15T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Animator",
+    "email": "richard.taylor@syncflow.com",
+    "mobile_phone": "+1-555-7961",
+    "created_at": {
+      "$date": "2026-10-13T18:29:24.000Z"
+    }
+  },
+  {
+    "first_name": "Michelle",
+    "last_name": "Johnson",
+    "gender": "Female",
+    "username": "m.johnson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1987-01-03T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Sound Designer",
+    "email": "michelle.johnson@syncflow.com",
+    "mobile_phone": "+1-555-2388",
+    "created_at": {
+      "$date": "2026-10-09T19:42:24.000Z"
+    }
+  },
+  {
+    "first_name": "Andrew",
+    "last_name": "Rodriguez",
+    "gender": "Male",
+    "username": "a.rodriguez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1989-07-11T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Game Designer",
+    "email": "andrew.rodriguez@syncflow.com",
+    "mobile_phone": "+1-555-5865",
+    "created_at": {
+      "$date": "2026-10-07T23:00:24.000Z"
+    }
+  },
+  {
+    "first_name": "Matthew",
+    "last_name": "Brown",
+    "gender": "Male",
+    "username": "m.brown",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1994-12-25T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "matthew.brown@syncflow.com",
+    "mobile_phone": "+1-555-2384",
+    "created_at": {
+      "$date": "2026-10-09T17:40:24.000Z"
+    }
+  },
+  {
+    "first_name": "Lisa",
+    "last_name": "Greco",
+    "gender": "Female",
+    "username": "l.greco",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1976-02-06T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Environment Artist",
+    "email": "lisa.greco@syncflow.com",
+    "mobile_phone": "+1-555-4033",
+    "created_at": {
+      "$date": "2026-10-09T15:42:24.000Z"
+    }
+  },
+  {
+    "first_name": "Chiara",
+    "last_name": "Rossi",
+    "gender": "Female",
+    "username": "c.rossi",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "2001-08-30T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Engine Programmer",
+    "email": "chiara.rossi@syncflow.com",
+    "mobile_phone": "+1-555-6294",
+    "created_at": {
+      "$date": "2026-10-08T14:54:24.000Z"
+    }
+  },
+  {
+    "first_name": "Emily",
+    "last_name": "Rodriguez",
+    "gender": "Female",
+    "username": "e.rodriguez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1978-04-23T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Creative Director",
+    "email": "emily.rodriguez@syncflow.com",
+    "mobile_phone": "+1-555-5930",
+    "created_at": {
+      "$date": "2026-10-09T03:26:24.000Z"
+    }
+  },
+  {
+    "first_name": "Jennifer",
+    "last_name": "Hernandez",
+    "gender": "Female",
+    "username": "j.hernandez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1977-04-18T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "QA Tester",
+    "email": "jennifer.hernandez@syncflow.com",
+    "mobile_phone": "+1-555-7327",
+    "created_at": {
+      "$date": "2026-10-12T20:13:24.000Z"
+    }
+  },
+  {
+    "first_name": "Sarah",
+    "last_name": "Williams",
+    "gender": "Female",
+    "username": "s.williams",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1982-06-30T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Controller",
+    "email": "sarah.williams@syncflow.com",
+    "mobile_phone": "+1-555-3039",
+    "created_at": {
+      "$date": "2026-10-14T09:53:24.000Z"
+    }
+  },
+  {
+    "first_name": "Nancy",
+    "last_name": "Romano",
+    "gender": "Female",
+    "username": "n.romano",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1994-02-22T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Concept Artist",
+    "email": "nancy.romano@syncflow.com",
+    "mobile_phone": "+1-555-9109",
+    "created_at": {
+      "$date": "2026-10-14T14:36:24.000Z"
+    }
+  },
+  {
+    "first_name": "Matthew",
+    "last_name": "Gonzalez",
+    "gender": "Male",
+    "username": "m.gonzalez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1991-01-05T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Game Designer",
+    "email": "matthew.gonzalez@syncflow.com",
+    "mobile_phone": "+1-555-2837",
+    "created_at": {
+      "$date": "2026-10-11T06:26:24.000Z"
+    }
+  },
+  {
+    "first_name": "Jennifer",
+    "last_name": "Anderson",
+    "gender": "Female",
+    "username": "j.anderson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "2001-05-16T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Level Designer",
+    "email": "jennifer.anderson@syncflow.com",
+    "mobile_phone": "+1-555-1561",
+    "created_at": {
+      "$date": "2026-10-10T04:10:24.000Z"
+    }
+  },
+  {
+    "first_name": "Mark",
+    "last_name": "White",
+    "gender": "Male",
+    "username": "m.white",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1986-11-28T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Controller",
+    "email": "mark.white@syncflow.com",
+    "mobile_phone": "+1-555-6131",
+    "created_at": {
+      "$date": "2026-10-10T11:09:24.000Z"
+    }
+  },
+  {
+    "first_name": "John",
+    "last_name": "Marino",
+    "gender": "Male",
+    "username": "j.marino",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1999-06-26T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Programmer",
+    "email": "john.marino@syncflow.com",
+    "mobile_phone": "+1-555-9959",
+    "created_at": {
+      "$date": "2026-10-12T18:36:24.000Z"
+    }
+  },
+  {
+    "first_name": "Emily",
+    "last_name": "Brown",
+    "gender": "Female",
+    "username": "e.brown",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1984-06-23T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Game Designer",
+    "email": "emily.brown@syncflow.com",
+    "mobile_phone": "+1-555-5763",
+    "created_at": {
+      "$date": "2026-10-10T05:18:24.000Z"
+    }
+  },
+  {
+    "first_name": "David",
+    "last_name": "Hernandez",
+    "gender": "Male",
+    "username": "d.hernandez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1999-05-12T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Animator",
+    "email": "david.hernandez@syncflow.com",
+    "mobile_phone": "+1-555-3263",
+    "created_at": {
+      "$date": "2026-10-11T05:32:24.000Z"
+    }
+  },
+  {
+    "first_name": "Susan",
+    "last_name": "Martinez",
+    "gender": "Female",
+    "username": "s.martinez",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1988-03-11T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Game Designer",
+    "email": "susan.martinez@syncflow.com",
+    "mobile_phone": "+1-555-3700",
+    "created_at": {
+      "$date": "2026-10-08T16:53:24.000Z"
+    }
+  },
+  {
+    "first_name": "Martina",
+    "last_name": "Russo",
+    "gender": "Female",
+    "username": "m.russo",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "2002-12-25T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Environment Artist",
+    "email": "martina.russo@syncflow.com",
+    "mobile_phone": "+1-555-5375",
+    "created_at": {
+      "$date": "2026-10-09T12:27:24.000Z"
+    }
+  },
+  {
+    "first_name": "Andrew",
+    "last_name": "Ferrari",
+    "gender": "Male",
+    "username": "a.ferrari",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1992-02-02T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "VFX Artist",
+    "email": "andrew.ferrari@syncflow.com",
+    "mobile_phone": "+1-555-4088",
+    "created_at": {
+      "$date": "2026-10-13T10:46:24.000Z"
+    }
+  },
+  {
+    "first_name": "Margaret",
+    "last_name": "Johnson",
+    "gender": "Female",
+    "username": "m.johnson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "2001-07-24T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Concept Artist",
+    "email": "margaret.johnson@syncflow.com",
+    "mobile_phone": "+1-555-7646",
+    "created_at": {
+      "$date": "2026-10-10T14:15:24.000Z"
+    }
+  },
+  {
+    "first_name": "Sandra",
+    "last_name": "Colombo",
+    "gender": "Female",
+    "username": "s.colombo",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1986-12-25T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "QA Tester",
+    "email": "sandra.colombo@syncflow.com",
+    "mobile_phone": "+1-555-3360",
+    "created_at": {
+      "$date": "2026-10-08T18:48:24.000Z"
+    }
+  },
+  {
+    "first_name": "Karen",
+    "last_name": "Rossi",
+    "gender": "Female",
+    "username": "k.rossi",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1980-03-19T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Environment Artist",
+    "email": "karen.rossi@syncflow.com",
+    "mobile_phone": "+1-555-2653",
+    "created_at": {
+      "$date": "2026-10-12T04:50:24.000Z"
+    }
+  },
+  {
+    "first_name": "Sandra",
+    "last_name": "Wilson",
+    "gender": "Female",
+    "username": "s.wilson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1992-05-24T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Sound Designer",
+    "email": "sandra.wilson@syncflow.com",
+    "mobile_phone": "+1-555-4934",
+    "created_at": {
+      "$date": "2026-10-13T22:45:24.000Z"
+    }
+  },
+  {
+    "first_name": "James",
+    "last_name": "Johnson",
+    "gender": "Male",
+    "username": "j.johnson",
+    "password": "Mhanz0_0",
+    "date_of_birth": {
+      "$date": "1975-11-21T00:00:00Z"
+    },
+    "is_admin": false,
+    "role": "Controller",
+    "email": "james.johnson@syncflow.com",
+    "mobile_phone": "+1-555-3030",
+    "created_at": {
+      "$date": "2026-10-12T22:29:24.000Z"
+    }
+  }
+] 
