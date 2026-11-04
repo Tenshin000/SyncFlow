@@ -1,9 +1,8 @@
 """
-SyncFlow – Gemini 1.5 Flash Prompt Engineering & DCMA Guardrails.
+SyncFlow – Gemini Flash Prompt Engineering & DCMA Guardrails.
 Constructs precision prompts with context injection, few-shot examples, and DCMA 14-point audit compliance.
 """
 from typing import Dict, Any, List, Optional
-
 
 WBS_SYSTEM_INSTRUCTION = """You are an elite PMI-certified Project Management Professional (PMP) and Work Breakdown Structure (WBS) architect.
 Your objective is to ingest unstructured project charter narratives, scopes, and notes, and decompose them into a formal, PMBOK-compliant Work Breakdown Structure.

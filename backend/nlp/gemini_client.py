@@ -33,7 +33,6 @@ PREFERRED_FLASH_MODELS = [
     "gemini-1.5-pro",
 ]
 
-
 def resolve_gemini_api_key(custom_key: Optional[str] = None) -> str:
     """
     Resolves Gemini API key with priority:

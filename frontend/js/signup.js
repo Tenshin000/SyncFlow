@@ -1,5 +1,5 @@
 /**
- * SyncFlow Frontend – Signup Controller
+ * SyncFlow Frontend - Signup Controller
  */
 
 import { signupUser } from "./api.js";
@@ -35,6 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
   dobInput.max = todayStr;
   dobInput.min = minDob;
 
+  /**
+   * Displays an error alert banner and scrolls it into view.
+   */
   function showError(msg) {
     errorAlert.textContent = msg;
     errorAlert.style.display = "block";
@@ -42,6 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
     errorAlert.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
+  /**
+   * Displays a success alert banner and scrolls it into view.
+   */
   function showSuccess(msg) {
     successAlert.textContent = msg;
     successAlert.style.display = "block";
@@ -49,6 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
     successAlert.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
+  /**
+   * Hides all alert banners.
+   */
   function clearAlerts() {
     errorAlert.style.display = "none";
     successAlert.style.display = "none";
@@ -70,6 +79,14 @@ document.addEventListener("DOMContentLoaded", () => {
       roleInput.style.backgroundColor = "#FFFFFF";
       roleInput.placeholder = "e.g. Developer, Data Analyst, Controller";
       pmRoleInfo.style.display = "none";
+    }
+  });
+
+  // Prevent entering "Project Manager" if user answered "No"
+  roleInput.addEventListener("input", () => {
+    if (selectIsPM.value === "no" && roleInput.value.trim().toLowerCase() === "project manager") {
+      showError("You answered 'No' to being a Project Manager. You cannot enter 'Project Manager' in the Role field.");
+      roleInput.value = "";
     }
   });
 
@@ -102,6 +119,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!rl) {
       showError("Please specify your functional role.");
+      return;
+    }
+
+    if (!isPM && rl.toLowerCase() === "project manager") {
+      showError("You answered 'No' to being a Project Manager. You cannot enter 'Project Manager' in the Role field.");
+      roleInput.focus();
       return;
     }
 

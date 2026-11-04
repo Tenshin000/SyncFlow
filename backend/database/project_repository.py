@@ -10,7 +10,6 @@ class ProjectRepository:
     Supports atomic WBS replacements (for LLM Text-to-WBS engine)
     and granular nested array updates via MongoDB arrayFilters.
     """
-
     def __init__(self):
         self.db = get_db()
         self.collection = self.db["projects"]
@@ -47,9 +46,7 @@ class ProjectRepository:
         """Returns all projects with optional field projection."""
         return list(self.collection.find({}, projection).sort("updated_at", -1))
 
-    # ==========================================================================
     # LLM TEXT-TO-WBS ATOMIC UPDATE
-    # ==========================================================================
     def update_wbs_and_dependencies(
         self,
         project_id: str,
@@ -75,9 +72,7 @@ class ProjectRepository:
         result = self.collection.update_one(filter_query, update_query)
         return result.modified_count > 0 or result.matched_count > 0
 
-    # ==========================================================================
     # GRANULAR NESTED WBS MUTATIONS (Using MongoDB Array Operators)
-    # ==========================================================================
     def add_activity(self, project_id: str, activity: Dict[str, Any]) -> bool:
         """Appends a new Level 1 Activity to the project."""
         try:

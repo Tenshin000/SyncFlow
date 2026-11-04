@@ -1,8 +1,6 @@
-"""
-SyncFlow – Notifications API Router (`/syncflow/notifications`).
+"""SyncFlow - Notifications API Router (`/syncflow/notifications`).
 Handles project-scoped notifications, recipient resolution, unread tracking,
-and interactive actions (e.g. project join request approvals).
-"""
+and interactive actions (e.g. project join request approvals)."""
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from bson import ObjectId
@@ -24,18 +22,22 @@ router = APIRouter(prefix="/syncflow/notifications", tags=["Project Notification
 
 
 def _notifications_col():
+    """Returns the MongoDB 'notifications' collection instance."""
     return get_db()["notifications"]
 
 
 def _projects_col():
+    """Returns the MongoDB 'projects' collection instance."""
     return get_db()["projects"]
 
 
 def _users_col():
+    """Returns the MongoDB 'users' collection instance."""
     return get_db()["users"]
 
 
 def _format_notification(doc: Dict[str, Any], current_user_id: str) -> NotificationResponse:
+    """Formats a raw MongoDB notification document into a NotificationResponse schema for the given recipient."""
     nid = str(doc.get("_id", ""))
     read_by = [str(u) for u in doc.get("read_by", [])]
     is_read = current_user_id in read_by

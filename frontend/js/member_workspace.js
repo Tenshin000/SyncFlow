@@ -1,11 +1,11 @@
 /**
- * SyncFlow Frontend – Member Workspace Controller
+ * SyncFlow Frontend - Member Workspace Controller
  * Implements the required non-PM workspace navigation:
- * 1. "Projects" – Grid of participating / accessible projects with in-page selection.
- * 2. "Search Projects" – Visually appealing project discovery, indicating Open vs Approval Required,
+ * 1. "Projects" - Grid of participating / accessible projects with in-page selection.
+ * 2. "Search Projects" - Visually appealing project discovery, indicating Open vs Approval Required,
  *    identifying joined projects, and allowing immediate join or PM approval request.
- * 3. "Schedule" – Displays tasks the user is assigned to or involved in, with direct in-page project switching.
- * 4. "Notifications" & "Profile" – Audit logs and role governance.
+ * 3. "Schedule" - Displays tasks the user is assigned to or involved in, with direct in-page project switching.
+ * 4. "Notifications" & "Profile" - Audit logs and role governance.
  */
 
 import {
@@ -20,7 +20,14 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   deleteNotification,
-  fetchUserProfile
+  fetchUserProfile,
+  fetchAllUsers,
+  startActivityTimer,
+  stopActivityTimer,
+  fetchActivityTimeLogs,
+  updateActivityTimeLog,
+  deleteActivityTimeLog,
+  fetchUserTimeLogs
 } from "./api.js";
 import { getLoggedUser, logout, setLoggedUser, renderProfileSidebar } from "./auth.js";
 import { initNotificationBell } from "./notifications.js";
@@ -32,6 +39,8 @@ import {
   getUserActivityPermission as getUserActivityPermissionUtil,
   getInitials,
   formatTime,
+  formatDurationSeconds,
+  formatTimerDigits,
   getNotificationMeta,
   CONTROLLER_CHECKLIST
 } from "./utility.js";
@@ -100,6 +109,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   const kpiAgendaFinished = document.getElementById("kpi-agenda-finished");
   const kpiAgendaNotStarted = document.getElementById("kpi-agenda-not-started");
 
+  // Stopwatch Elements (Trello-Style Live Timer)
+  const stopwatchWidgetContainer = document.getElementById("stopwatch-widget-container");
+  const stopwatchStatusBadge = document.getElementById("stopwatch-status-badge");
+  const stopwatchDigits = document.getElementById("stopwatch-digits");
+  const stopwatchLiveLabel = document.getElementById("stopwatch-live-label");
+  const stopwatchTaskSelect = document.getElementById("stopwatch-task-select");
+  const stopwatchNotes = document.getElementById("stopwatch-notes");
+  const btnStopwatchToggle = document.getElementById("btn-stopwatch-toggle");
+  const stopwatchMsgBanner = document.getElementById("stopwatch-msg-banner");
+
+  // Edit Timer Modal Elements
+  const editTimerModal = document.getElementById("edit-timer-modal");
+  const editTimerForm = document.getElementById("edit-timer-form");
+  const editTimerLogId = document.getElementById("edit-timer-log-id");
+  const editTimerSourceActId = document.getElementById("edit-timer-source-act-id");
+  const editTimerDurationDisplay = document.getElementById("edit-timer-duration-display");
+  const editTimerTargetAct = document.getElementById("edit-timer-target-act");
+  const editTimerNotes = document.getElementById("edit-timer-notes");
+  const btnCloseEditTimerModal = document.getElementById("btn-close-edit-timer-modal");
+  const btnCancelEditTimerModal = document.getElementById("btn-cancel-edit-timer-modal");
+
   // Modal Elements
   const memberActivityModal = document.getElementById("member-activity-modal");
   const memberActivityForm = document.getElementById("member-activity-form");
@@ -138,6 +168,43 @@ document.addEventListener("DOMContentLoaded", async () => {
   let selectedReviewAct = null;
   let selectedCompleteAct = null;
   let selectedModalAct = null;
+  let stopwatchTimerInterval = null;
+  let activeTimerState = null; // { projectId, activityId, activityName, startTimeMs, notes }
+  let allUsers = [];
+  const userMap = new Map();
+
+  /**
+   * Resolves a user object by ID, username, or display name from cached roster.
+   */
+  function resolveUser(uidOrHandle) {
+    const key = String(uidOrHandle || "");
+    if (userMap.has(key)) return userMap.get(key);
+    const byUn = allUsers.find(u => u.username === key);
+    if (byUn) return byUn;
+    return {
+      first_name: "Contributor",
+      last_name: key,
+      role: "Member",
+      email: "—",
+      username: key
+    };
+  }
+
+  /**
+   * Fetches and caches project/system users for resolving activity staff names.
+   */
+  async function ensureUsersLoaded() {
+    if (userMap.size > 0) return;
+    try {
+      const res = await fetchAllUsers();
+      if (res && res.data) {
+        allUsers = res.data;
+        allUsers.forEach(u => userMap.set(String(u.id || u._id), u));
+      }
+    } catch (err) {
+      console.warn("Could not load users map:", err);
+    }
+  }
 
   // Render User Information
   const fn = user.first_name || "Team Member";
@@ -167,7 +234,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   bellCtrl = initNotificationBell("#member-workspace-notification-bell-container", user, null);
 
   // Refresh sidebar unread count badge
-  async function refreshSidebarBadge() {
+  /**
+ * Updates sidebar badge count for pending controller reviews and assigned WIP tasks.
+ */
+async function refreshSidebarBadge() {
     const { data } = await fetchUnreadNotificationsCount(userId);
     const count = data ? (data.unread_count || 0) : 0;
     if (count > 0) {
@@ -188,7 +258,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     "profile": "Member Account & Governance Settings"
   };
 
-  function switchMainView(viewKey) {
+  /**
+ * Switches the active main view (Agenda, Projects, Explore, Notifications, Profile).
+ */
+function switchMainView(viewKey) {
     navItems.forEach(item => {
       if (item.dataset.view === viewKey) item.classList.add("active");
       else item.classList.remove("active");
@@ -230,10 +303,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     btnLogout.addEventListener("click", () => logout());
   }
 
-  // ============================================================================
   // VIEW 1: PROJECTS (PARTICIPATING / ACCESSIBLE PROJECTS LIST)
-  // ============================================================================
-  async function loadParticipatingProjects() {
+  /**
+ * Loads all projects where the current user is a team member, contributor, or controller.
+ */
+async function loadParticipatingProjects() {
     myProjectsContainer.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 2.5rem 0;">Loading your projects...</p>`;
 
     // Query projects with membership_status computed
@@ -332,7 +406,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Directly selects project and switches to Assigned Tasks view
-  async function selectProjectDirectly(pid) {
+  /**
+ * Sets the active project context and reloads assigned tasks for the agenda.
+ */
+async function selectProjectDirectly(pid) {
     activeProjectId = pid;
     sessionStorage.setItem("active_project_id", pid);
     renderInpageProjectPills();
@@ -340,7 +417,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Renders the in-page project selection pills across views
-  function renderInpageProjectPills() {
+  /**
+ * Renders interactive project selection pills in the top header of the workspace.
+ */
+function renderInpageProjectPills() {
     const pillContainers = document.querySelectorAll(".inpage-project-pills");
     const nameDisplays = document.querySelectorAll(".inpage-active-project-name");
 
@@ -387,13 +467,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // ============================================================================
   // VIEW 2: SEARCH PROJECTS (DISCOVERY, POLICIES & JOINING)
-  // ============================================================================
-  async function loadSearchProjects(query = "") {
+  /**
+ * Searches all available projects across the system matching an optional query string.
+ */
+async function loadSearchProjects(query = "") {
     searchResultsContainer.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 2.5rem 0;">Searching available projects...</p>`;
     const { data: list, error } = await searchAvailableProjects(userId, query);
-
     if (error) {
       searchResultsContainer.innerHTML = `<div class="alert-box alert-danger">Project search failed: ${error}</div>`;
       return;
@@ -403,7 +483,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderSearchResults();
   }
 
-  function renderSearchResults() {
+  /**
+ * Renders search results with project cards, PM information, and interactive join buttons.
+ */
+function renderSearchResults() {
     let filtered = allSearchProjects;
     if (currentSearchFilter === "open") filtered = filtered.filter(p => Boolean(p.open_participation));
     else if (currentSearchFilter === "approval") filtered = filtered.filter(p => !Boolean(p.open_participation));
@@ -543,10 +626,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // ============================================================================
+  
   // VIEW 3: ASSIGNED TASKS (OPERATIONAL AGENDA)
-  // ============================================================================
-  async function loadAssignedTasksPage() {
+  /**
+ * Main loader for Member Workspace: fetches project schedule, activities, and time trackers.
+ */
+async function loadAssignedTasksPage() {
     if (!activeProjectId) {
       if (participatingProjects.length > 0) {
         activeProjectId = participatingProjects[0].id;
@@ -581,19 +666,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadAgendaTasks();
   }
 
-  // ── Activity & Controller Permission Helpers ──────────────────────────────
+  // Activity & Controller Permission Helpers
+  /**
+   * Determines whether the current user holds controller permissions for the project or activity.
+   * If an activity is provided, only the Project Manager (Lead Controller) or the specifically appointed
+   * controller for that activity holds controller permissions.
+   */
   function isUserController(act = null) {
+    const isLeadPM = Boolean(activeProject && String(activeProject.created_by) === String(userId)) || Boolean(user.is_admin);
     const isProjController = Boolean(activeProject && (activeProject.controllers || []).map(String).includes(String(userId)));
+
     if (act) {
-      const isActSpecificCtrl = String(act.controller_id || "") === String(userId);
-      return isProjController || isActSpecificCtrl || isController;
+      if (isLeadPM) return true;
+      return isProjController && String(act.controller_id || "") === String(userId);
     }
-    return isProjController || isController;
+    return isLeadPM || isProjController;
   }
 
   const getUserActivityPermission = (act) => getUserActivityPermissionUtil(act, user, activeProject);
 
+  /**
+   * Evaluates whether an activity is assigned to the current user directly, via team membership, or as appointed Controller.
+   * Integrates the Controller as an active member of the activity staff.
+   */
   function isActAssignedToUser(act) {
+    if (!act) return false;
+
+    // 1. Appointed Controller for this activity (Controller is part of the activity staff)
+    if (isUserController(act)) {
+      return true;
+    }
+
+    // 2. Direct individual assignment
     const assignedUsers = (act.assigned_users || []).map(String);
     if (assignedUsers.includes(String(userId)) || (user.username && assignedUsers.includes(user.username))) {
       return true;
@@ -601,7 +705,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const myTeamIds = new Set();
     if (activeProject && activeProject.teams) {
       activeProject.teams.forEach(t => {
-        if ((t.member_ids || []).map(String).includes(String(userId))) {
+        const mIds = (t.member_ids || []).map(String);
+        const isLead = String(t.lead_id || "") === String(userId);
+        if (mIds.includes(String(userId)) || isLead) {
           myTeamIds.add(String(t.team_id || ""));
           myTeamIds.add(String(t.name || ""));
         }
@@ -614,7 +720,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     return false;
   }
 
-  // ── Controller Review Modal Elements & Handlers ───────────────────────────
+  /**
+   * Evaluates whether an activity is assigned to the current user for timer tracking.
+   * Considers direct individual assignment, assigned team membership/lead, appointed activity controller, or PM.
+   */
+  function isActAssignedForTimer(act) {
+    if (!act) return false;
+
+    // 1. Direct individual assignment
+    const assignedUsers = (act.assigned_users || []).map(String);
+    if (assignedUsers.includes(String(userId)) || (user.username && assignedUsers.includes(user.username))) {
+      return true;
+    }
+
+    // 2. Team membership & Team Lead on assigned teams
+    if (activeProject && activeProject.teams) {
+      const assignedTeams = (act.assigned_teams || []).map(String);
+      for (const t of activeProject.teams) {
+        const tId = String(t.team_id || "");
+        const tName = String(t.name || "");
+        if (assignedTeams.includes(tId) || assignedTeams.includes(tName)) {
+          const mIds = (t.member_ids || []).map(String);
+          if (mIds.includes(String(userId))) return true;
+          if (t.lead_id && String(t.lead_id) === String(userId)) return true;
+        }
+      }
+    }
+
+    // 3. Appointed Activity Controller or PM / Lead Controller
+    if (isUserController(act)) {
+      return true;
+    }
+
+    // 4. Open collaboration if task is completely unassigned
+    if (!assignedUsers.length && !(act.assigned_teams || []).length && !act.controller_id) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Controller Review Modal Elements & Handlers
   const controllerReviewModal = document.getElementById("controller-review-modal");
   const btnCloseReviewModal = document.getElementById("btn-close-review-modal");
   const btnCancelReviewModal = document.getElementById("btn-cancel-review-modal");
@@ -625,15 +771,42 @@ document.addEventListener("DOMContentLoaded", async () => {
   const modalReviewAction = document.getElementById("modal-review-action");
   const modalReviewDescription = document.getElementById("modal-review-description");
 
-  function openControllerReviewModal(act, defaultAction = "verified") {
+  /**
+ * Opens the Controller Review & Sign-Off modal dialog.
+ */
+function openControllerReviewModal(act, defaultAction = "verified") {
     selectedReviewAct = act;
     if (modalReviewTitle) modalReviewTitle.textContent = `🛡️ Controller Review: ${act.name}`;
     if (modalReviewSubtitle) modalReviewSubtitle.textContent = act.activity_id;
     if (modalReviewInfo) {
+      let teamsDisplay = (act.assigned_teams || []).join(", ") || "None";
+      if (activeProject && activeProject.teams && act.assigned_teams && act.assigned_teams.length > 0) {
+        teamsDisplay = act.assigned_teams.map(tId => {
+          const tm = activeProject.teams.find(t => String(t.team_id) === String(tId) || String(t.name) === String(tId));
+          return tm ? tm.name : tId;
+        }).join(", ");
+      }
+      let usersDisplay = (act.assigned_users || []).join(", ") || "None";
+      if (act.assigned_users && act.assigned_users.length > 0) {
+        usersDisplay = act.assigned_users.map(uId => {
+          const u = resolveUser(uId);
+          return u.username ? `${u.first_name || ""} ${u.last_name || ""} (@${u.username})`.trim() : uId;
+        }).join(", ");
+      }
+      let ctrlDisplay = "None appointed";
+      if (act.controller_id) {
+        const cu = resolveUser(act.controller_id);
+        ctrlDisplay = cu.username ? `${cu.first_name || ""} ${cu.last_name || ""} (@${cu.username})`.trim() : act.controller_id;
+      }
+
       modalReviewInfo.innerHTML = `
         <strong>Activity:</strong> ${act.name} (${act.activity_id})<br>
         <strong>Plan Duration:</strong> ${act.duration} days | <strong>Status:</strong> 🟢 Completed (Awaiting Controller Review)<br>
-        <strong>Assigned Teams:</strong> ${(act.assigned_teams || []).join(", ") || "None"} | <strong>Contributors:</strong> ${(act.assigned_users || []).join(", ") || "None"}
+        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #BFDBFE;">
+          <strong>Activity Staff:</strong><br>
+          &bull; <strong>Assigned Teams:</strong> ${teamsDisplay} | <strong>Contributors:</strong> ${usersDisplay}<br>
+          &bull; <strong>Appointed Controller:</strong> ${ctrlDisplay}
+        </div>
       `;
     }
 
@@ -677,7 +850,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (controllerReviewModal) controllerReviewModal.style.display = "flex";
   }
 
-  function closeControllerReviewModal() {
+  /**
+ * Closes the Controller Review modal dialog.
+ */
+function closeControllerReviewModal() {
     if (controllerReviewModal) controllerReviewModal.style.display = "none";
     selectedReviewAct = null;
   }
@@ -744,7 +920,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ── Member Completion Proof Modal Elements & Handlers ───────────────────────
+  // Member Completion Proof Modal Elements & Handlers
   const memberCompletionModal = document.getElementById("member-completion-modal");
   const btnCloseCompleteModal = document.getElementById("btn-close-complete-modal");
   const btnCancelCompleteModal = document.getElementById("btn-cancel-complete-modal");
@@ -754,7 +930,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const modalCompleteInfo = document.getElementById("modal-complete-info");
   const inputCompletionProof = document.getElementById("input-completion-proof");
 
-  function openMemberCompletionModal(act) {
+  /**
+ * Opens the Task Completion & Deliverable Evidence modal dialog.
+ */
+function openMemberCompletionModal(act) {
     selectedCompleteAct = act;
     if (modalCompleteTitle) modalCompleteTitle.textContent = `✅ Mark Complete: ${act.name}`;
     if (modalCompleteSubtitle) modalCompleteSubtitle.textContent = act.activity_id;
@@ -770,7 +949,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (inputCompletionProof) inputCompletionProof.focus();
   }
 
-  function closeMemberCompletionModal() {
+  /**
+ * Closes the Task Completion modal dialog.
+ */
+function closeMemberCompletionModal() {
     if (memberCompletionModal) memberCompletionModal.style.display = "none";
     selectedCompleteAct = null;
   }
@@ -823,10 +1005,312 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ── Perspective 1: My Operational Agenda & Tasks ───────────────────────────
-  async function loadAgendaTasks() {
+  // Perspective 1: My Operational Agenda & Tasks
+  // Trello-Style Time Tracker Controller
+  /**
+ * Displays a transient status or error message within the stopwatch widget.
+ */
+function showStopwatchMessage(text, type = "info") {
+    if (!stopwatchMsgBanner) return;
+    stopwatchMsgBanner.textContent = text;
+    stopwatchMsgBanner.style.display = "block";
+    if (type === "success") {
+      stopwatchMsgBanner.style.background = "#DCFCE7";
+      stopwatchMsgBanner.style.color = "#15803D";
+      stopwatchMsgBanner.style.border = "1px solid #86EFAC";
+    } else if (type === "danger") {
+      stopwatchMsgBanner.style.background = "#FEE2E2";
+      stopwatchMsgBanner.style.color = "#DC2626";
+      stopwatchMsgBanner.style.border = "1px solid #FCA5A5";
+    } else {
+      stopwatchMsgBanner.style.background = "#EFF6FF";
+      stopwatchMsgBanner.style.color = "#1E40AF";
+      stopwatchMsgBanner.style.border = "1px solid #BFDBFE";
+    }
+    setTimeout(() => {
+      if (stopwatchMsgBanner) stopwatchMsgBanner.style.display = "none";
+    }, 6000);
+  }
+
+  /**
+   * Populates stopwatch dropdown with activities currently in progress (WIP) and assigned to user
+   * (considering Lead and Controller roles as assigned).
+   */
+  function updateStopwatchWipOptions(activities) {
+    if (!stopwatchTaskSelect) return;
+    const wipActs = (activities || []).filter(a => a.status === "in_progress" && isActAssignedForTimer(a));
+    const currentVal = stopwatchTaskSelect.value;
+
+    if (wipActs.length === 0) {
+      stopwatchTaskSelect.innerHTML = `<option value="" disabled selected>⚠️ No activities assigned to you currently in progress (WIP) — start an activity first</option>`;
+      if (!activeTimerState && btnStopwatchToggle) {
+        btnStopwatchToggle.disabled = true;
+      }
+      return;
+    }
+
+    if (!activeTimerState && btnStopwatchToggle) {
+      btnStopwatchToggle.disabled = false;
+    }
+
+    let opts = `<option value="">-- Select an In-Progress (WIP) Activity to Track --</option>`;
+    wipActs.forEach(a => {
+      const logged = a.total_logged_seconds ? ` (${formatDurationSeconds(a.total_logged_seconds)})` : "";
+      opts += `<option value="${a.activity_id}">[${a.activity_id}] ${escapeHtml(a.name)}${logged}</option>`;
+    });
+    stopwatchTaskSelect.innerHTML = opts;
+
+    if (activeTimerState && activeTimerState.activityId) {
+      stopwatchTaskSelect.value = activeTimerState.activityId;
+      stopwatchTaskSelect.disabled = true;
+    } else if (currentVal && wipActs.some(a => a.activity_id === currentVal)) {
+      stopwatchTaskSelect.value = currentVal;
+    }
+  }
+
+  /**
+ * Initiates local timer ticker updating stopwatch digital display every second.
+ */
+function startStopwatchTicker(startTimeMs) {
+    if (stopwatchTimerInterval) clearInterval(stopwatchTimerInterval);
+    const updateTick = () => {
+      const elapsedSec = Math.max(0, Math.floor((Date.now() - startTimeMs) / 1000));
+      if (stopwatchDigits) stopwatchDigits.textContent = formatTimerDigits(elapsedSec);
+    };
+    updateTick();
+    stopwatchTimerInterval = setInterval(updateTick, 1000);
+  }
+
+  /**
+ * Restores active stopwatch state from localStorage or checks backend timer status.
+ */
+function restoreOrSyncActiveTimer() {
+    try {
+      const raw = localStorage.getItem("syncflow_active_timer");
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved && saved.projectId === activeProjectId) {
+        activeTimerState = saved;
+        if (stopwatchWidgetContainer) stopwatchWidgetContainer.classList.add("active-tracking");
+        if (stopwatchStatusBadge) {
+          stopwatchStatusBadge.textContent = "● TRACKING ACTIVE";
+          stopwatchStatusBadge.style.background = "#DCFCE7";
+          stopwatchStatusBadge.style.color = "#15803D";
+        }
+        if (stopwatchLiveLabel) stopwatchLiveLabel.style.display = "inline-flex";
+        if (stopwatchTaskSelect) {
+          stopwatchTaskSelect.value = saved.activityId;
+          stopwatchTaskSelect.disabled = true;
+        }
+        if (stopwatchNotes && saved.notes) stopwatchNotes.value = saved.notes;
+        if (btnStopwatchToggle) {
+          btnStopwatchToggle.textContent = "⏹ Stop & Log Time";
+          btnStopwatchToggle.className = "btn btn-danger";
+          btnStopwatchToggle.disabled = false;
+        }
+        startStopwatchTicker(saved.startTimeMs);
+      }
+    } catch (e) {
+      console.warn("Failed to restore timer from storage:", e);
+    }
+  }
+
+  /**
+ * Initiates a live timer for an assigned WIP activity via the backend API.
+ */
+async function handleStartTimer(targetActivityId, optionalNotes = "") {
+    if (!activeProjectId) {
+      showStopwatchMessage("No active project selected.", "danger");
+      return;
+    }
+
+    if (!targetActivityId) {
+      showStopwatchMessage("⚠️ Before starting a timer, it must be linked to an Activity currently in progress (WIP).", "danger");
+      return;
+    }
+
+    // Verify WIP status
+    const allActs = (currentControlModel && currentControlModel.activities) || [];
+    const act = allActs.find(a => a.activity_id === targetActivityId);
+    if (!act || act.status !== "in_progress") {
+      showStopwatchMessage(`⚠️ Activity [${targetActivityId}] is not in progress. Timers can only be run on WIP activities.`, "danger");
+      return;
+    }
+
+    if (!isActAssignedForTimer(act)) {
+      showStopwatchMessage("⚠️ The Activity to which you attach the timer must also be assigned to you. Otherwise, you cannot select it.", "danger");
+      return;
+    }
+
+    const userName = `${fn} ${ln}`.trim() || user.username || "Team Member";
+    if (btnStopwatchToggle) {
+      btnStopwatchToggle.disabled = true;
+      btnStopwatchToggle.textContent = "Starting...";
+    }
+
+    const { data, error } = await startActivityTimer(activeProjectId, targetActivityId, {
+      user_id: userId,
+      user_name: userName,
+      notes: optionalNotes
+    });
+
+    if (error) {
+      if (btnStopwatchToggle) {
+        btnStopwatchToggle.disabled = false;
+        btnStopwatchToggle.textContent = "▶ Start Timer";
+      }
+      showStopwatchMessage(`Failed to start timer: ${error}`, "danger");
+      return;
+    }
+
+    const now = Date.now();
+    activeTimerState = {
+      projectId: activeProjectId,
+      activityId: targetActivityId,
+      activityName: act.name,
+      startTimeMs: now,
+      notes: optionalNotes
+    };
+    try {
+      localStorage.setItem("syncflow_active_timer", JSON.stringify(activeTimerState));
+    } catch (e) {}
+
+    if (stopwatchWidgetContainer) stopwatchWidgetContainer.classList.add("active-tracking");
+    if (stopwatchStatusBadge) {
+      stopwatchStatusBadge.textContent = "● TRACKING ACTIVE";
+      stopwatchStatusBadge.style.background = "#DCFCE7";
+      stopwatchStatusBadge.style.color = "#15803D";
+    }
+    if (stopwatchLiveLabel) stopwatchLiveLabel.style.display = "inline-flex";
+    if (stopwatchTaskSelect) {
+      stopwatchTaskSelect.value = targetActivityId;
+      stopwatchTaskSelect.disabled = true;
+    }
+    if (btnStopwatchToggle) {
+      btnStopwatchToggle.disabled = false;
+      btnStopwatchToggle.textContent = "⏹ Stop & Log Time";
+      btnStopwatchToggle.className = "btn btn-danger";
+    }
+
+    startStopwatchTicker(now);
+    showStopwatchMessage(`⏱️ Timer started for [${targetActivityId}]! Tracking session live.`, "success");
+  }
+
+  /**
+ * Stops active stopwatch timer, commits elapsed seconds, and refreshes project schedule.
+ */
+async function handleStopTimer() {
+    if (!activeTimerState || !activeProjectId) return;
+    const elapsedSec = Math.max(1, Math.floor((Date.now() - activeTimerState.startTimeMs) / 1000));
+    const userName = `${fn} ${ln}`.trim() || user.username || "Team Member";
+    const notes = (stopwatchNotes && stopwatchNotes.value.trim()) || activeTimerState.notes || "";
+
+    if (btnStopwatchToggle) {
+      btnStopwatchToggle.disabled = true;
+      btnStopwatchToggle.textContent = "Saving session...";
+    }
+
+    const { data, error } = await stopActivityTimer(activeProjectId, activeTimerState.activityId, {
+      user_id: userId,
+      user_name: userName,
+      duration_seconds: elapsedSec,
+      notes: notes
+    });
+
+    if (stopwatchTimerInterval) {
+      clearInterval(stopwatchTimerInterval);
+      stopwatchTimerInterval = null;
+    }
+    try {
+      localStorage.removeItem("syncflow_active_timer");
+    } catch (e) {}
+
+    const loggedActId = activeTimerState.activityId;
+    activeTimerState = null;
+
+    if (stopwatchWidgetContainer) stopwatchWidgetContainer.classList.remove("active-tracking");
+    if (stopwatchStatusBadge) {
+      stopwatchStatusBadge.textContent = "IDLE";
+      stopwatchStatusBadge.style.background = "#F1F5F9";
+      stopwatchStatusBadge.style.color = "#64748B";
+    }
+    if (stopwatchLiveLabel) stopwatchLiveLabel.style.display = "none";
+    if (stopwatchDigits) stopwatchDigits.textContent = "00:00:00";
+    if (stopwatchTaskSelect) stopwatchTaskSelect.disabled = false;
+    if (stopwatchNotes) stopwatchNotes.value = "";
+    if (btnStopwatchToggle) {
+      btnStopwatchToggle.disabled = false;
+      btnStopwatchToggle.textContent = "▶ Start Timer";
+      btnStopwatchToggle.className = "btn btn-primary";
+    }
+
+    if (error) {
+      showStopwatchMessage(`Session stopped with warning: ${error}`, "danger");
+    } else {
+      showStopwatchMessage(`✅ Successfully logged ${formatDurationSeconds(elapsedSec)} on [${loggedActId}]!`, "success");
+    }
+
+    await loadAgendaTasks();
+  }
+
+  /**
+ * Shortcut to select a task and immediately start tracking time on it.
+ */
+async function selectAndStartTaskTimer(targetActId) {
+    if (!currentControlModel) return;
+    const act = (currentControlModel.activities || []).find(a => a.activity_id === targetActId);
+    if (!act) return;
+
+    if (act.status !== "in_progress") {
+      alert(`⚠️ Cannot start timer on [${targetActId}]: Activity must be in progress (WIP). Current status is "${(act.status || '').replace('_', ' ')}".`);
+      return;
+    }
+
+    if (!isActAssignedForTimer(act)) {
+      alert(`⚠️ The Activity to which you attach the timer must also be assigned to you. Otherwise, you cannot select it.`);
+      return;
+    }
+
+    if (activeTimerState) {
+      if (activeTimerState.activityId === targetActId) {
+        showStopwatchMessage(`⏱️ Timer is already tracking [${targetActId}].`, "info");
+        if (stopwatchWidgetContainer) stopwatchWidgetContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      const confirmSwitch = confirm(`A timer is already active on [${activeTimerState.activityId}]. Stop it and switch to [${targetActId}]?`);
+      if (!confirmSwitch) return;
+      await handleStopTimer();
+    }
+
+    if (stopwatchTaskSelect) {
+      stopwatchTaskSelect.value = targetActId;
+    }
+    await handleStartTimer(targetActId, stopwatchNotes ? stopwatchNotes.value.trim() : "");
+    if (stopwatchWidgetContainer) {
+      stopwatchWidgetContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  if (btnStopwatchToggle) {
+    btnStopwatchToggle.addEventListener("click", () => {
+      if (activeTimerState) {
+        handleStopTimer();
+      } else {
+        const selId = stopwatchTaskSelect ? stopwatchTaskSelect.value : "";
+        const notes = stopwatchNotes ? stopwatchNotes.value.trim() : "";
+        handleStartTimer(selId, notes);
+      }
+    });
+  }
+
+  /**
+ * Loads and categorizes tasks assigned to the user into operational states.
+ */
+async function loadAgendaTasks() {
     if (!activeProjectId) return;
     agendaTasksContainer.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 1.5rem 0;">Loading activities...</p>`;
+
+    await ensureUsersLoaded();
 
     const { data: ctrlData, error } = await fetchControlSchedule(activeProjectId);
     if (error || !ctrlData) {
@@ -842,10 +1326,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const myAssignedActivities = activities.filter(a => isActAssignedToUser(a));
 
     updateAgendaKPIs(myAssignedActivities);
+    updateStopwatchWipOptions(activities);
+    restoreOrSyncActiveTimer();
     renderAgendaActivities(ctrlActivities, myAssignedActivities);
   }
 
-  function updateAgendaKPIs(assignedActs) {
+  /**
+ * Updates agenda summary counter cards (WIP, Completed, Verified, Total Assigned).
+ */
+function updateAgendaKPIs(assignedActs) {
     const total = assignedActs.length;
     const wip = assignedActs.filter(a => a.status === "in_progress").length;
     const fin = assignedActs.filter(a => a.status === "completed" || a.status === "verified").length;
@@ -857,19 +1346,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (kpiAgendaNotStarted) kpiAgendaNotStarted.textContent = ns;
   }
 
-  function renderAgendaRow(act, isController) {
+  /**
+ * Generates HTML table row markup for an assigned activity in the Agenda list view.
+ */
+function renderAgendaRow(act, isController) {
     const actId = act.activity_id;
     const status = act.status || "not_started";
     const sv = act.sv_days !== undefined ? act.sv_days : 0;
     const perm = getUserActivityPermission(act);
+    const isCtrl = isController !== undefined && isController !== null ? isController : Boolean(perm.isController && !perm.canComplete);
 
     let actionCell = `
       <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
         <button type="button" class="btn btn-sm btn-outline-secondary btn-member-open-modal" data-act-id="${actId}" style="font-weight: 600; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
           📋 Details
         </button>
+        ${status === "in_progress" && isActAssignedForTimer(act) ? `
+          <button type="button" class="btn btn-sm btn-outline-primary btn-track-time-task" data-act-id="${actId}" style="font-weight: 700; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Link and start timer on this WIP task">
+            ⏱️ Track Time
+          </button>
+        ` : ''}
     `;
-    if (isController) {
+    if (isCtrl) {
       if (status === "completed") {
         actionCell += `
           <button type="button" class="btn btn-sm btn-warning btn-ctrl-return-wip" data-act-id="${actId}" style="background: #F59E0B; color: #FFFFFF; border: none; font-weight: 700; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
@@ -904,7 +1402,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td><a href="javascript:void(0)" class="btn-member-open-modal" data-act-id="${actId}" style="font-weight: 700; color: var(--primary); text-decoration: underline;">${actId}</a></td>
         <td>
           <strong><a href="javascript:void(0)" class="btn-member-open-modal" data-act-id="${actId}" style="color: inherit; text-decoration: none;">${act.name}</a></strong>
-          ${!isController && perm.isLead ? `<span class="badge badge-amber" style="margin-left: 4px; font-size: 0.7rem;">👑 Team Lead</span>` : ''}
+          ${perm.isController ? `<span class="badge badge-blue" style="margin-left: 4px; font-size: 0.7rem;">🛡️ Controller</span>` : ''}
+          ${!isCtrl && perm.isLead ? `<span class="badge badge-amber" style="margin-left: 4px; font-size: 0.7rem;">👑 Team Lead</span>` : ''}
+          <div style="font-size: 0.75rem; margin-top: 3px;">
+            <span class="time-log-badge ${(act.total_logged_seconds || 0) > 0 ? 'has-time' : ''}" title="Total time tracked on this task">
+              ⏱️ ${formatDurationSeconds(act.total_logged_seconds || 0)}
+            </span>
+          </div>
         </td>
         <td>${act.duration}d</td>
         <td>${getStatusBadge(status)}</td>
@@ -914,7 +1418,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  function renderAgendaActivities(ctrlActivities, myAssignedActivities) {
+  /**
+ * Renders the filterable activities list, including the My Trackers time management screen.
+ */
+function renderAgendaActivities(ctrlActivities, myAssignedActivities) {
     let containerHtml = "";
 
     // 1. Controller Review Queue (if user is Controller)
@@ -947,12 +1454,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // 2. Member Assigned Activities Section
+    const allActivities = (currentControlModel && currentControlModel.activities) || [];
+    const myTimers = [];
+    allActivities.forEach(a => {
+      (a.time_logs || []).forEach(log => {
+        if (String(log.user_id) === String(userId)) {
+          myTimers.push({
+            ...log,
+            activity_id: a.activity_id,
+            activity_name: a.name || a.activity_id,
+            activity_status: a.status || "not_started"
+          });
+        }
+      });
+    });
+    myTimers.sort((a, b) => new Date(b.start_time || b.created_at || 0) - new Date(a.start_time || a.created_at || 0));
+
     let displayedActivities = myAssignedActivities;
     if (agendaFilter === "active") displayedActivities = myAssignedActivities.filter(a => a.status === "in_progress" || a.status === "completed");
     else if (agendaFilter === "wip") displayedActivities = myAssignedActivities.filter(a => a.status === "in_progress");
     else if (agendaFilter === "completed") displayedActivities = myAssignedActivities.filter(a => a.status === "completed");
 
-    const memberRows = displayedActivities.map(act => renderAgendaRow(act, false)).join("");
+    const memberRows = displayedActivities.map(act => renderAgendaRow(act)).join("");
 
     const activeCount = myAssignedActivities.filter(a => a.status === "in_progress" || a.status === "completed").length;
     const wipCount = myAssignedActivities.filter(a => a.status === "in_progress").length;
@@ -984,33 +1507,107 @@ document.addEventListener("DOMContentLoaded", async () => {
             <button type="button" class="btn btn-sm ${agendaFilter === 'all' ? 'btn-primary' : 'btn-secondary'} btn-agenda-filter" data-filter="all">
               All Assigned (${myAssignedActivities.length})
             </button>
+            <button type="button" class="btn btn-sm ${agendaFilter === 'trackers' ? 'btn-primary' : 'btn-secondary'} btn-agenda-filter" data-filter="trackers" style="font-weight: 700;">
+              ⏱️ My Trackers (${myTimers.length})
+            </button>
           </div>
         </div>
 
-        ${displayedActivities.length === 0 ? `
-          <div style="text-align: center; padding: 2.5rem 1rem; color: var(--muted);">
-            <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">📂</div>
-            <h4>No Activities in this Filter View</h4>
-            <p style="font-size: 0.88rem; margin: 0;">Try switching the filter pills above to view all assigned project tasks.</p>
+        ${agendaFilter === 'trackers' ? `
+          <div style="margin-top: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #F8FAFC; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.85rem 1.2rem; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong style="color: var(--charcoal); font-size: 0.95rem;">⏱️ Recorded Time Sessions: ${myTimers.length}</strong>
+                <div style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
+                  You can edit session notes or reassign the associated activity to another assigned WIP task. Recorded durations are immutable.
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <span style="font-size: 0.76rem; color: var(--muted); text-transform: uppercase; font-weight: 700; display: block;">Total Logged Time</span>
+                <span style="font-size: 1.25rem; font-weight: 800; color: #2563EB; font-family: monospace;">
+                  ${formatDurationSeconds(myTimers.reduce((acc, t) => acc + (t.duration_seconds || 0), 0))}
+                </span>
+              </div>
+            </div>
+
+            ${myTimers.length === 0 ? `
+              <div style="text-align: center; padding: 2.5rem 1rem; color: var(--muted);">
+                <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">⏱️</div>
+                <h4>No Time Trackers Recorded Yet</h4>
+                <p style="font-size: 0.88rem; margin: 0;">Use the Activity Time Tracker widget above to link and track your work sessions.</p>
+              </div>
+            ` : `
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Associated Activity</th>
+                      <th>Activity Status</th>
+                      <th>Session Date</th>
+                      <th style="text-align: right;">Work Duration</th>
+                      <th>Session Notes</th>
+                      <th style="text-align: center;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${myTimers.map(t => {
+                      const dateStr = t.start_time ? new Date(t.start_time).toLocaleString() : (t.created_at || "-");
+                      return `
+                        <tr>
+                          <td>
+                            <code>${t.activity_id}</code>
+                            <div style="font-size: 0.82rem; font-weight: 600; color: var(--charcoal); margin-top: 2px;">${escapeHtml(t.activity_name)}</div>
+                          </td>
+                          <td>${getStatusBadge(t.activity_status)}</td>
+                          <td style="font-size: 0.82rem; font-family: monospace; color: var(--slate);">${dateStr}</td>
+                          <td style="text-align: right; font-family: monospace; font-weight: 700; color: #16A34A; font-size: 0.88rem;">
+                            <span class="time-log-badge has-time" title="Duration is locked">${formatDurationSeconds(t.duration_seconds)}</span>
+                          </td>
+                          <td style="font-size: 0.82rem; color: var(--charcoal); max-width: 250px;">
+                            ${t.notes ? escapeHtml(t.notes) : `<span style="color: var(--muted); font-style: italic;">No notes provided</span>`}
+                          </td>
+                          <td style="text-align: center; white-space: nowrap;">
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-edit-timer" data-log-id="${t.log_id}" data-act-id="${t.activity_id}" style="padding: 3px 8px; font-size: 0.78rem; font-weight: 700; margin-right: 4px;" title="Edit notes or change associated activity">
+                              ✏️ Edit
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-timer" data-log-id="${t.log_id}" data-act-id="${t.activity_id}" data-dur="${t.duration_seconds}" style="padding: 3px 8px; font-size: 0.78rem; font-weight: 700;" title="Delete this tracker log">
+                              🗑️ Delete
+                            </button>
+                          </td>
+                        </tr>
+                      `;
+                    }).join("")}
+                  </tbody>
+                </table>
+              </div>
+            `}
           </div>
         ` : `
-          <div class="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>Activity ID</th>
-                  <th>Activity Name</th>
-                  <th>Plan Duration</th>
-                  <th>Status</th>
-                  <th>Schedule Variance</th>
-                  <th>Execution Permissions &amp; Review Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${memberRows}
-              </tbody>
-            </table>
-          </div>
+          ${displayedActivities.length === 0 ? `
+            <div style="text-align: center; padding: 2.5rem 1rem; color: var(--muted);">
+              <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">📂</div>
+              <h4>No Activities in this Filter View</h4>
+              <p style="font-size: 0.88rem; margin: 0;">Try switching the filter pills above to view all assigned project tasks.</p>
+            </div>
+          ` : `
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Activity ID</th>
+                    <th>Activity Name</th>
+                    <th>Plan Duration</th>
+                    <th>Status</th>
+                    <th>Schedule Variance</th>
+                    <th>Execution Permissions &amp; Review Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${memberRows}
+                </tbody>
+              </table>
+            </div>
+          `}
         `}
       </div>
     `;
@@ -1061,11 +1658,41 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     });
 
+    // Attach Track Time listener
+    agendaTasksContainer.querySelectorAll(".btn-track-time-task").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const actId = btn.getAttribute("data-act-id");
+        if (actId) selectAndStartTaskTimer(actId);
+      });
+    });
+
+    // Attach Edit Timer and Delete Timer listeners (for Trackers Screen)
+    agendaTasksContainer.querySelectorAll(".btn-edit-timer").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const logId = btn.getAttribute("data-log-id");
+        const actId = btn.getAttribute("data-act-id");
+        openEditTimerModal(logId, actId);
+      });
+    });
+
+    agendaTasksContainer.querySelectorAll(".btn-delete-timer").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const logId = btn.getAttribute("data-log-id");
+        const actId = btn.getAttribute("data-act-id");
+        const dur = btn.getAttribute("data-dur");
+        handleDeleteTimer(logId, actId, dur);
+      });
+    });
+
     // Update Kanban board if visible
     renderAgendaKanbanBoard(myAssignedActivities, ctrlActivities);
   }
 
-  function renderAgendaKanbanBoard(myAssignedActivities, ctrlActivities) {
+  /**
+ * Renders interactive Kanban board with 4 columns: Not Started, WIP, Awaiting Review, Verified.
+ */
+function renderAgendaKanbanBoard(myAssignedActivities, ctrlActivities) {
     const kanbanContainer = document.getElementById("agenda-kanban-container");
     if (!kanbanContainer) return;
 
@@ -1114,6 +1741,9 @@ document.addEventListener("DOMContentLoaded", async () => {
               <button type="button" class="btn btn-xs btn-outline-secondary btn-kanban-details" data-act-id="${a.activity_id}" style="font-weight: 600; cursor: pointer;">📋 Details</button>
           `;
           if (a.status === "in_progress") {
+            if (isActAssignedForTimer(a)) {
+              actionBtn += `<button type="button" class="btn btn-xs btn-outline-primary btn-kanban-track-time" data-act-id="${a.activity_id}">⏱️ Track</button>`;
+            }
             if (perm.isViewOnly) {
               actionBtn += `<span class="badge badge-amber" style="font-size: 0.72rem;">👁️ View-Only</span>`;
             } else {
@@ -1147,6 +1777,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
               <div class="kanban-card-meta">
                 <span>⏱️ ${isMilestone ? '0d (Milestone)' : `${a.duration}d`}</span>
+                <span class="time-log-badge ${(a.total_logged_seconds || 0) > 0 ? 'has-time' : ''}">⏱️ ${formatDurationSeconds(a.total_logged_seconds || 0)}</span>
                 <span style="font-weight: 700; color: ${svColor};">SV: ${svStr}</span>
               </div>
               ${actionBtn ? `<div style="margin-top: 8px;">${actionBtn}</div>` : ''}
@@ -1181,6 +1812,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         const aid = btn.getAttribute("data-act-id");
         const act = allActivities.find(x => x.activity_id === aid);
         if (act) openMemberActivityModal(act);
+      });
+    });
+
+    // Attach kanban track time button listener
+    kanbanContainer.querySelectorAll(".btn-kanban-track-time").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const aid = btn.getAttribute("data-act-id");
+        if (aid) selectAndStartTaskTimer(aid);
       });
     });
 
@@ -1245,17 +1885,144 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   btnRefreshAgenda.addEventListener("click", () => loadAgendaTasks());
 
+  // Edit Timer Modal & Trackers Controller 
+  /**
+ * Opens modal dialog to update timer notes or reassign timer to another assigned WIP activity.
+ */
+function openEditTimerModal(logId, actId) {
+    if (!editTimerModal || !currentControlModel) return;
+    const allActivities = currentControlModel.activities || [];
+    const sourceAct = allActivities.find(a => a.activity_id === actId);
+    if (!sourceAct) return;
+    const log = (sourceAct.time_logs || []).find(l => l.log_id === logId);
+    if (!log) return;
 
-  // ── Modal Activity Execution Handler ───────────────────────────────────────
-  function openMemberActivityModal(act) {
+    if (editTimerLogId) editTimerLogId.value = logId;
+    if (editTimerSourceActId) editTimerSourceActId.value = actId;
+    if (editTimerDurationDisplay) editTimerDurationDisplay.value = formatDurationSeconds(log.duration_seconds || 0);
+    if (editTimerNotes) editTimerNotes.value = log.notes || "";
+
+    // Target activities must be assigned to user (including Lead and Controller roles) and in progress (WIP)
+    const assignedWipActs = allActivities.filter(a => isActAssignedForTimer(a) && a.status === "in_progress");
+    
+    let opts = "";
+    if (!assignedWipActs.some(a => a.activity_id === actId)) {
+      opts += `<option value="${sourceAct.activity_id}">[${sourceAct.activity_id}] ${escapeHtml(sourceAct.name)} (Current Task - ${sourceAct.status ? sourceAct.status.replace('_', ' ') : ''})</option>`;
+    }
+    assignedWipActs.forEach(a => {
+      opts += `<option value="${a.activity_id}">[${a.activity_id}] ${escapeHtml(a.name)} (WIP)</option>`;
+    });
+
+    if (editTimerTargetAct) {
+      editTimerTargetAct.innerHTML = opts;
+      editTimerTargetAct.value = actId;
+    }
+
+    editTimerModal.style.display = "flex";
+  }
+
+  /**
+ * Closes the timer edit modal dialog.
+ */
+function closeEditTimerModal() {
+    if (editTimerModal) editTimerModal.style.display = "none";
+  }
+
+  if (btnCloseEditTimerModal) btnCloseEditTimerModal.addEventListener("click", closeEditTimerModal);
+  if (btnCancelEditTimerModal) btnCancelEditTimerModal.addEventListener("click", closeEditTimerModal);
+
+  if (editTimerForm) {
+    editTimerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const logId = editTimerLogId.value;
+      const sourceActId = editTimerSourceActId.value;
+      const targetActId = editTimerTargetAct.value;
+      const newNotes = editTimerNotes.value.trim();
+
+      const saveBtn = document.getElementById("btn-save-edit-timer");
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+      }
+
+      const { data, error } = await updateActivityTimeLog(activeProjectId, sourceActId, logId, {
+        user_id: userId,
+        notes: newNotes,
+        target_activity_id: targetActId
+      });
+
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "💾 Save Changes";
+      }
+
+      if (error) {
+        alert(`Failed to update timer: ${error}`);
+        return;
+      }
+
+      closeEditTimerModal();
+      await loadAgendaTasks();
+    });
+  }
+
+  /**
+ * Deletes a user-generated timer log and deducts duration from the activity total.
+ */
+async function handleDeleteTimer(logId, actId, durationSec) {
+    const durStr = formatDurationSeconds(parseInt(durationSec, 10) || 0);
+    const confirmed = confirm(`Are you sure you want to delete this timer log (${durStr} on [${actId}])? This will remove the recorded time from the activity.`);
+    if (!confirmed) return;
+
+    const { data, error } = await deleteActivityTimeLog(activeProjectId, actId, logId, userId);
+    if (error) {
+      alert(`Failed to delete timer: ${error}`);
+      return;
+    }
+
+    await loadAgendaTasks();
+  }
+
+
+  // Modal Activity Execution Handler
+  /**
+ * Opens read-only activity detail modal dialog.
+ */
+function openMemberActivityModal(act) {
     selectedModalAct = act;
     modalActId.textContent = act.activity_id;
     modalActNameDisplay.textContent = act.name || "Activity Execution";
 
+    let teamsDisplay = "None";
+    if (act.assigned_teams && act.assigned_teams.length > 0) {
+      teamsDisplay = act.assigned_teams.map(tId => {
+        const tm = activeProject && activeProject.teams ? activeProject.teams.find(t => String(t.team_id) === String(tId) || String(t.name) === String(tId)) : null;
+        return tm ? tm.name : tId;
+      }).join(", ");
+    }
+    let usersDisplay = "None";
+    if (act.assigned_users && act.assigned_users.length > 0) {
+      usersDisplay = act.assigned_users.map(uId => {
+        const u = resolveUser(uId);
+        return u.username ? `${u.first_name || ""} ${u.last_name || ""} (@${u.username})`.trim() : uId;
+      }).join(", ");
+    }
+    let ctrlDisplay = "None appointed";
+    if (act.controller_id) {
+      const cu = resolveUser(act.controller_id);
+      ctrlDisplay = cu.username ? `${cu.first_name || ""} ${cu.last_name || ""} (@${cu.username})`.trim() : act.controller_id;
+    }
+
     modalActInfoDisplay.innerHTML = `
       <strong>Activity:</strong> ${act.name} (${act.activity_id})<br>
       <strong>Duration:</strong> ${act.duration} days | <strong>Planned ES/EF:</strong> Day ${act.es || 0} → Day ${act.ef || act.duration}<br>
-      <strong>Schedule Variance:</strong> ${act.sv_days !== undefined ? (act.sv_days >= 0 ? '+' : '') + act.sv_days.toFixed(1) + 'd' : '0.0d'}
+      <strong>Schedule Variance:</strong> ${act.sv_days !== undefined ? (act.sv_days >= 0 ? '+' : '') + act.sv_days.toFixed(1) + 'd' : '0.0d'}<br>
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.86rem;">
+        <strong style="color: var(--charcoal);">👥 Activity Staff:</strong><br>
+        &bull; <strong>Assigned Teams:</strong> ${teamsDisplay}<br>
+        &bull; <strong>Contributors:</strong> ${usersDisplay}<br>
+        &bull; <strong>Appointed Controller:</strong> ${ctrlDisplay}
+      </div>
     `;
 
     modalActStatus.value = act.status || "not_started";
@@ -1264,7 +2031,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     modalActStartDate.value = act.actual_start_date || "";
     modalActFinishDate.value = act.actual_finish_date || "";
 
-    if (isController && modalControllerSignoffBox) {
+    const isActController = isUserController(act);
+    if (isActController && modalControllerSignoffBox) {
       modalControllerSignoffBox.style.display = "block";
       modalSignoffUser.textContent = `Sign-off as Controller: ${fn} ${ln}`;
       modalSignoffCheck.checked = act.status === "verified";
@@ -1275,7 +2043,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     memberActivityModal.style.display = "flex";
   }
 
-  function closeMemberActivityModal() {
+  /**
+ * Closes the activity detail modal dialog.
+ */
+function closeMemberActivityModal() {
     memberActivityModal.style.display = "none";
     selectedModalAct = null;
   }
@@ -1288,7 +2059,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const val = parseInt(modalActProgressRange.value, 10);
     if (val === 0) modalActStatus.value = "not_started";
     else if (val === 100) {
-      if (isController && modalSignoffCheck && modalSignoffCheck.checked) {
+      if (selectedModalAct && isUserController(selectedModalAct) && modalSignoffCheck && modalSignoffCheck.checked) {
         modalActStatus.value = "verified";
       } else {
         modalActStatus.value = "completed";
@@ -1317,7 +2088,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       actual_finish_date: modalActFinishDate.value || null
     };
 
-    if (isController && modalSignoffCheck && modalSignoffCheck.checked && payload.status === "verified") {
+    if (selectedModalAct && isUserController(selectedModalAct) && modalSignoffCheck && modalSignoffCheck.checked && payload.status === "verified") {
       payload.verified_by = `${fn} ${ln} (Controller)`;
       payload.verified_date = new Date().toISOString().split("T")[0];
     }
@@ -1332,10 +2103,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadAgendaTasks();
   });
 
-  // ============================================================================
   // VIEW 4: NOTIFICATIONS AUDIT LOG
-  // ============================================================================
-  async function loadNotificationsLog() {
+  /**
+ * Fetches and displays recent project notifications in the Notifications view.
+ */
+async function loadNotificationsLog() {
     fullNotificationsContainer.innerHTML = `<p style="color: var(--muted); text-align: center; padding: 2rem 0;">Loading notifications...</p>`;
     const { data: notifications, error } = await fetchNotifications(userId);
 
@@ -1428,11 +2200,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     btnTabMarkAllRead.disabled = false;
     btnTabMarkAllRead.textContent = "✓ Mark All as Read";
   });
-
-  // ============================================================================
+  
   // VIEW 5: USER PROFILE
-  // ============================================================================
-  function renderProfileForm() {
+  /**
+ * Renders editable profile form in the Profile tab.
+ */
+function renderProfileForm() {
     renderProfileSidebar(profileFormContainer, user, (updated) => {
       setLoggedUser(updated);
       window.location.reload();

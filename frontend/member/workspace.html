@@ -185,6 +185,56 @@
           </div>
         </div>
 
+        <!-- Trello-Style Live Time Tracker Widget -->
+        <div id="stopwatch-widget-container" class="stopwatch-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.25rem;">⏱️</span>
+              <strong style="font-size: 1.05rem; color: var(--charcoal);">Activity Time Tracker</strong>
+              <span id="stopwatch-status-badge" class="badge" style="background: #F1F5F9; color: #64748B; font-size: 0.75rem; font-weight: 700;">IDLE</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--muted);">
+              <span style="color: #D97706; font-weight: 600;">* Strict Requirement:</span> Timer must be linked to an Activity currently in progress (WIP).
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; flex-wrap: wrap;">
+            <!-- Digits Readout -->
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div id="stopwatch-digits" class="stopwatch-digits">00:00:00</div>
+              <div id="stopwatch-live-label" style="display: none; align-items: center; gap: 6px; font-size: 0.82rem; color: #16A34A; font-weight: 700;">
+                <span class="pulse-indicator"></span> Tracking live...
+              </div>
+            </div>
+
+            <!-- Task Selector (WIP Only) -->
+            <div style="flex: 1.2; min-width: 250px;">
+              <label for="stopwatch-task-select" style="font-size: 0.78rem; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 3px;">
+                Link to In-Progress (WIP) Activity:
+              </label>
+              <select id="stopwatch-task-select" class="form-control" style="font-size: 0.88rem; font-weight: 600;">
+                <option value="">-- Select an In-Progress Activity to Track --</option>
+              </select>
+            </div>
+
+            <!-- Notes & Start/Stop Controls -->
+            <div style="flex: 1; min-width: 200px;">
+              <label for="stopwatch-notes" style="font-size: 0.78rem; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 3px;">
+                Session Notes (Optional):
+              </label>
+              <input type="text" id="stopwatch-notes" class="form-control" placeholder="What are you working on?" style="font-size: 0.85rem;">
+            </div>
+
+            <div style="align-self: flex-end; padding-bottom: 2px;">
+              <button type="button" id="btn-stopwatch-toggle" class="btn btn-primary" style="padding: 0.55rem 1.4rem; font-weight: 700; font-size: 0.95rem; white-space: nowrap;">
+                ▶ Start Timer
+              </button>
+            </div>
+          </div>
+          
+          <div id="stopwatch-msg-banner" style="display: none; margin-top: 0.75rem; padding: 0.5rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 600;"></div>
+        </div>
+
         <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.5rem 1.8rem; box-shadow: var(--shadow-sm);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 10px;">
             <div>
@@ -407,6 +457,68 @@
           </div>
         </form>
       </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: EDIT TIME TRACKER LOG (SESSION NOTES & ASSOCIATED ACTIVITY)
+       ==================================================================== -->
+  <div id="edit-timer-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog" style="max-width: 520px; width: 95%;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0; font-size: 1.15rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px;">
+            <span>⏱️</span> Edit Activity Timer Log
+          </h3>
+          <span style="font-size: 0.8rem; color: var(--muted); font-weight: 600;">Update session notes or reassign associated activity.</span>
+        </div>
+        <button type="button" id="btn-close-edit-timer-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--muted);">&times;</button>
+      </div>
+      <form id="edit-timer-form">
+        <div class="modal-body" style="padding: 1.2rem 1.4rem;">
+          <input type="hidden" id="edit-timer-log-id">
+          <input type="hidden" id="edit-timer-source-act-id">
+
+          <!-- Duration (Locked / Read-only) -->
+          <div class="form-group" style="margin-bottom: 1.1rem;">
+            <label style="font-size: 0.82rem; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px;">
+              Work Duration (Non-editable):
+            </label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="text" id="edit-timer-duration-display" class="form-control" disabled style="font-family: monospace; font-weight: 800; font-size: 1.05rem; background: #F1F5F9; color: #1E293B; max-width: 170px;">
+              <span style="font-size: 0.76rem; color: var(--muted);">Recorded session duration is locked and cannot be edited.</span>
+            </div>
+          </div>
+
+          <!-- Associated Activity (Must be WIP & assigned to user) -->
+          <div class="form-group" style="margin-bottom: 1.1rem;">
+            <label for="edit-timer-target-act" style="font-size: 0.85rem; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 4px;">
+              Associated Activity:*
+            </label>
+            <select id="edit-timer-target-act" class="form-control" required style="font-weight: 600; font-size: 0.88rem;">
+              <!-- Populated with user's assigned in-progress activities -->
+            </select>
+            <span style="font-size: 0.76rem; color: var(--muted); display: block; margin-top: 3px;">
+              * Must be an Activity currently in progress (WIP) and assigned to you.
+            </span>
+          </div>
+
+          <!-- Session Notes -->
+          <div class="form-group">
+            <label for="edit-timer-notes" style="font-size: 0.85rem; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 4px;">
+              Session Notes:
+            </label>
+            <textarea id="edit-timer-notes" rows="3" placeholder="What did you work on during this focus session?..." style="width: 100%; padding: 0.65rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.88rem; font-family: inherit;"></textarea>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 0.9rem 1.4rem; border-top: 1px solid var(--border);">
+          <button type="button" id="btn-cancel-edit-timer-modal" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="btn-save-edit-timer" class="btn btn-primary" style="font-weight: 700;">
+            💾 Save Changes
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

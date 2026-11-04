@@ -1,7 +1,5 @@
-"""
-MongoDB Database Initialization & Schema Provisioning Script.
-Applies $jsonSchema validation rules, builds indexes, and seeds initial data.
-"""
+"""MongoDB Database Initialization & Schema Provisioning Script.
+Applies $jsonSchema validation rules, builds indexes, and seeds initial data."""
 import sys
 import logging
 from pymongo.errors import CollectionInvalid, OperationFailure

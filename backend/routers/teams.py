@@ -1,5 +1,5 @@
 """
-SyncFlow – Teams API Router (`/syncflow/teams`).
+SyncFlow - Teams API Router (`/syncflow/teams`).
 Handles saving, fetching, and reusing teams created by Project Managers across projects.
 """
 from datetime import datetime
@@ -30,10 +30,12 @@ class TeamResponse(BaseModel):
 
 
 def _teams_collection():
+    """Returns the MongoDB 'teams' collection instance."""
     return get_db()["teams"]
 
 
 def _format_team(doc: Dict[str, Any]) -> Dict[str, Any]:
+    """Formats a raw MongoDB team document into a standardized response dictionary."""
     member_ids = [str(m) for m in doc.get("member_ids", [])]
     updated = doc.get("updated_at") or doc.get("created_at")
     return {

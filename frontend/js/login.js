@@ -1,5 +1,5 @@
 /**
- * SyncFlow Frontend – Login Controller
+ * SyncFlow Frontend - Login Controller
  */
 
 import { loginUser } from "./api.js";
@@ -30,11 +30,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const forgotIdentifier = document.getElementById("forgot-identifier");
   const forgotStatus = document.getElementById("forgot-status");
 
+  /**
+   * Displays an error alert message to the user.
+   */
   function showError(msg) {
     errorAlert.textContent = msg;
     errorAlert.style.display = "block";
   }
 
+  /**
+   * Clears and hides the error alert message.
+   */
   function clearError() {
     errorAlert.textContent = "";
     errorAlert.style.display = "none";

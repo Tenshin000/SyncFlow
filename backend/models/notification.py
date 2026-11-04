@@ -1,7 +1,4 @@
-"""
-SyncFlow – Notification Models.
-Defines schemas for project-level notifications, recipient targeting, and join actions.
-"""
+"""SyncFlow - Defines schemas for project-level notifications, recipient targeting, and join actions."""
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional, Any, Dict

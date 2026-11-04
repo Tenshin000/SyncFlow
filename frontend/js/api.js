@@ -1,5 +1,5 @@
 /**
- * SyncFlow Frontend – Centralized API Connector
+ * SyncFlow Frontend - Centralized API Connector
  * Handles all REST communication with the FastAPI backend (/syncflow).
  */
 
@@ -107,7 +107,10 @@ async function apiRequest(endpoint, options = {}) {
   return await executeRequest();
 }
 
-// ── Authentication & Users API ────────────────────────────────────────────────
+// Authentication & Users API 
+/**
+ * Authenticates user credentials using identifier/username and password.
+ */
 export async function loginUser(identifier, password) {
   return await apiRequest("/syncflow/user/login", {
     method: "POST",
@@ -115,6 +118,9 @@ export async function loginUser(identifier, password) {
   });
 }
 
+/**
+ * Registers a new user account with profile information and role.
+ */
 export async function signupUser(payload) {
   return await apiRequest("/syncflow/user/signup", {
     method: "POST",
@@ -122,12 +128,18 @@ export async function signupUser(payload) {
   });
 }
 
+/**
+ * Retrieves profile information for the specified user ID.
+ */
 export async function fetchUserProfile(userId) {
   return await apiRequest(`/syncflow/user/${userId}/profile`, {
     method: "GET"
   });
 }
 
+/**
+ * Updates profile details for the specified user ID.
+ */
 export async function updateUserProfile(userId, payload) {
   return await apiRequest(`/syncflow/user/${userId}`, {
     method: "PUT",
@@ -135,6 +147,9 @@ export async function updateUserProfile(userId, payload) {
   });
 }
 
+/**
+ * Retrieves all registered users for personnel allocation and team setup.
+ */
 export async function fetchAllUsers() {
   return await apiRequest("/syncflow/user", {
     method: "GET"
@@ -142,7 +157,10 @@ export async function fetchAllUsers() {
 }
 
 
-// ── Projects & Teams API ─────────────────────────────────────────────────────
+// Projects & Teams API
+/**
+ * Retrieves project summaries, optionally filtered by PM ID or participating member ID.
+ */
 export async function fetchProjects(pmId = null, memberId = null) {
   const params = new URLSearchParams();
   if (pmId) params.append("pm_id", pmId);
@@ -153,12 +171,18 @@ export async function fetchProjects(pmId = null, memberId = null) {
   });
 }
 
+/**
+ * Fetches complete project document including WBS, activities, teams, and dependencies.
+ */
 export async function fetchProjectDetail(projectId) {
   return await apiRequest(`/syncflow/projects/${projectId}`, {
     method: "GET"
   });
 }
 
+/**
+ * Creates a new project document in the database.
+ */
 export async function createProject(payload) {
   return await apiRequest("/syncflow/projects", {
     method: "POST",
@@ -166,6 +190,9 @@ export async function createProject(payload) {
   });
 }
 
+/**
+ * Updates the project scope / description statement.
+ */
 export async function updateProjectDescription(projectId, description) {
   return await apiRequest(`/syncflow/projects/${projectId}/description`, {
     method: "PUT",
@@ -173,6 +200,9 @@ export async function updateProjectDescription(projectId, description) {
   });
 }
 
+/**
+ * Retrieves the PM's reusable team library from historical projects.
+ */
 export async function fetchReusableTeams(pmId) {
   const query = pmId ? `?pm_id=${encodeURIComponent(pmId)}` : "";
   return await apiRequest(`/syncflow/teams${query}`, {
@@ -180,12 +210,18 @@ export async function fetchReusableTeams(pmId) {
   });
 }
 
+/**
+ * Deletes a project from the system by project ID.
+ */
 export async function deleteProject(projectId) {
   return await apiRequest(`/syncflow/projects/${projectId}`, {
     method: "DELETE"
   });
 }
 
+/**
+ * Updates project assigned teams, individual contributors, and controllers.
+ */
 export async function updateProjectPersonnel(projectId, payload) {
   return await apiRequest(`/syncflow/projects/${projectId}/personnel`, {
     method: "PUT",
@@ -193,6 +229,9 @@ export async function updateProjectPersonnel(projectId, payload) {
   });
 }
 
+/**
+ * Updates WBS activities list, duration estimates, and assignments.
+ */
 export async function updateProjectActivities(projectId, activities) {
   return await apiRequest(`/syncflow/projects/${projectId}/activities`, {
     method: "PUT",
@@ -200,6 +239,9 @@ export async function updateProjectActivities(projectId, activities) {
   });
 }
 
+/**
+ * Updates project deliverables list (compatibility route for WBS).
+ */
 export async function updateProjectDeliverables(projectId, deliverables) {
   return await apiRequest(`/syncflow/projects/${projectId}/deliverables`, {
     method: "PUT",
@@ -207,6 +249,9 @@ export async function updateProjectDeliverables(projectId, deliverables) {
   });
 }
 
+/**
+ * Updates canonical recursive Work Breakdown Structure tree hierarchy.
+ */
 export async function updateProjectWbs(projectId, wbs) {
   return await apiRequest(`/syncflow/projects/${projectId}/wbs`, {
     method: "PUT",
@@ -214,6 +259,9 @@ export async function updateProjectWbs(projectId, wbs) {
   });
 }
 
+/**
+ * Updates precedence relationships with circular logic prevention.
+ */
 export async function updateProjectDependencies(projectId, dependencies) {
   return await apiRequest(`/syncflow/projects/${projectId}/dependencies`, {
     method: "PUT",
@@ -221,12 +269,18 @@ export async function updateProjectDependencies(projectId, dependencies) {
   });
 }
 
+/**
+ * Evaluates schedule health diagnostics including dangling tasks and cycles.
+ */
 export async function fetchScheduleHealth(projectId) {
   return await apiRequest(`/syncflow/projects/${projectId}/schedule-health`, {
     method: "GET"
   });
 }
 
+/**
+ * Calculates PERT critical path expected duration, variance, and completion probability.
+ */
 export async function fetchPertAnalysis(projectId, targetDays = null) {
   const query = targetDays !== null ? `?target_days=${encodeURIComponent(targetDays)}` : "";
   return await apiRequest(`/syncflow/projects/${projectId}/pert-analysis${query}`, {
@@ -234,12 +288,18 @@ export async function fetchPertAnalysis(projectId, targetDays = null) {
   });
 }
 
+/**
+ * Retrieves historical controller-approved activities for analogous estimation benchmarks.
+ */
 export async function fetchCompletedActivities() {
   return await apiRequest(`/syncflow/projects/completed-activities`, {
     method: "GET"
   });
 }
 
+/**
+ * Calculates comprehensive CPM schedule, floats, S-curve bounds, and network diagrams.
+ */
 export async function fetchProjectSchedule(projectId, params = {}) {
   const q = new URLSearchParams();
   if (params.imposed_deadline_days) q.append("imposed_deadline_days", params.imposed_deadline_days);
@@ -251,6 +311,9 @@ export async function fetchProjectSchedule(projectId, params = {}) {
   });
 }
 
+/**
+ * Updates baseline schedule settings such as imposed deadline and float thresholds.
+ */
 export async function updateProjectScheduleSettings(projectId, payload) {
   return await apiRequest(`/syncflow/projects/${projectId}/schedule-settings`, {
     method: "POST",
@@ -258,6 +321,9 @@ export async function updateProjectScheduleSettings(projectId, payload) {
   });
 }
 
+/**
+ * Calculates Control Schedule (PMBOK 6.6) statuses, EV metrics, and S-Curve progression.
+ */
 export async function fetchControlSchedule(projectId, statusDate = null) {
   const q = statusDate ? `?status_date=${encodeURIComponent(statusDate)}` : "";
   return await apiRequest(`/syncflow/projects/${projectId}/control-schedule${q}`, {
@@ -265,6 +331,9 @@ export async function fetchControlSchedule(projectId, statusDate = null) {
   });
 }
 
+/**
+ * Updates activity operational status (WIP, Completed, Verified) and actual dates.
+ */
 export async function updateActivityStatus(projectId, activityId, payload) {
   return await apiRequest(`/syncflow/projects/${projectId}/activities/${activityId}/status`, {
     method: "PUT",
@@ -272,13 +341,19 @@ export async function updateActivityStatus(projectId, activityId, payload) {
   });
 }
 
+/**
+ * Initializes realistic sample progress across activities for demonstration.
+ */
 export async function seedProjectProgress(projectId) {
   return await apiRequest(`/syncflow/projects/${projectId}/activities/seed-progress`, {
     method: "POST"
   });
 }
 
-// ── Notifications API ────────────────────────────────────────────────────────
+// Notifications API 
+/**
+ * Fetches project and system notifications for the specified user.
+ */
 export async function fetchNotifications(userId, projectId = null) {
   const q = new URLSearchParams({ user_id: userId });
   if (projectId) q.append("project_id", projectId);
@@ -287,6 +362,9 @@ export async function fetchNotifications(userId, projectId = null) {
   });
 }
 
+/**
+ * Retrieves count of unread notifications for badge rendering.
+ */
 export async function fetchUnreadNotificationsCount(userId, projectId = null) {
   const q = new URLSearchParams({ user_id: userId });
   if (projectId) q.append("project_id", projectId);
@@ -296,12 +374,18 @@ export async function fetchUnreadNotificationsCount(userId, projectId = null) {
 }
 
 
+/**
+ * Marks a specific notification as read by the user.
+ */
 export async function markNotificationRead(notificationId, userId) {
   return await apiRequest(`/syncflow/notifications/${encodeURIComponent(notificationId)}/read?user_id=${encodeURIComponent(userId)}`, {
     method: "PUT"
   });
 }
 
+/**
+ * Marks all notifications in a project as read for the user.
+ */
 export async function markAllNotificationsRead(userId, projectId = null) {
   return await apiRequest("/syncflow/notifications/mark-all-read", {
     method: "PUT",
@@ -309,6 +393,9 @@ export async function markAllNotificationsRead(userId, projectId = null) {
   });
 }
 
+/**
+ * Handles interactive actions on notifications (e.g. accepting a join request).
+ */
 export async function actOnNotification(notificationId, userId, action) {
   return await apiRequest(`/syncflow/notifications/${encodeURIComponent(notificationId)}/action`, {
     method: "POST",
@@ -316,13 +403,19 @@ export async function actOnNotification(notificationId, userId, action) {
   });
 }
 
+/**
+ * Deletes or dismisses a notification for the current user.
+ */
 export async function deleteNotification(notificationId, userId) {
   return await apiRequest(`/syncflow/notifications/${encodeURIComponent(notificationId)}?user_id=${encodeURIComponent(userId)}`, {
     method: "DELETE"
   });
 }
 
-// ── Project Search & Participation ───────────────────────────────────────────
+// Project Search & Participation
+/**
+ * Searches all projects and computes current user's membership status.
+ */
 export async function searchAvailableProjects(userId, query = "") {
   const q = new URLSearchParams({ user_id: userId });
   if (query) q.append("query", query);
@@ -331,6 +424,9 @@ export async function searchAvailableProjects(userId, query = "") {
   });
 }
 
+/**
+ * Submits a join request or directly joins an open participation project.
+ */
 export async function joinProject(projectId, userId) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/join`, {
     method: "POST",
@@ -339,7 +435,10 @@ export async function joinProject(projectId, userId) {
 }
 
 
-// ── Multi-Baseline Comparison ────────────────────────────────────────────────
+// Multi-Baseline Comparison 
+/**
+ * Freezes the current CPM schedule into a single canonical Planned Baseline snapshot.
+ */
 export async function createBaseline(projectId, payload) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/baselines`, {
     method: "POST",
@@ -347,19 +446,28 @@ export async function createBaseline(projectId, payload) {
   });
 }
 
+/**
+ * Retrieves the planned baseline snapshot for schedule comparison.
+ */
 export async function fetchBaselines(projectId) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/baselines`, {
     method: "GET"
   });
 }
 
+/**
+ * Clears the saved Planned Baseline snapshot.
+ */
 export async function deleteBaseline(projectId, baselineId) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/baselines/${encodeURIComponent(baselineId)}`, {
     method: "DELETE"
   });
 }
 
-// ── DCMA 14-Point Quality Diagnostic ─────────────────────────────────────────
+// DCMA 14-Point Quality Diagnostic
+/**
+ * Executes the DCMA 14-Point automated schedule quality assessment.
+ */
 export async function fetchDcmaQuality(projectId) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/schedule/dcma-quality`, {
     method: "GET"
@@ -368,14 +476,20 @@ export async function fetchDcmaQuality(projectId) {
 
 
 
-// ── Executive Portfolio Dashboard ────────────────────────────────────────────
+// Executive Portfolio Dashboard
+/**
+ * Retrieves cross-project executive portfolio metrics and health indicators.
+ */
 export async function fetchPortfolioDashboard(userId) {
   return await apiRequest(`/syncflow/portfolio/dashboard?user_id=${encodeURIComponent(userId)}`, {
     method: "GET"
   });
 }
 
-// ── Google Gemini 1.5 Flash AI NLP Engine ─────────────────────────────────────
+// Google Gemini Flash AI NLP Engine
+/**
+ * Calls Gemini AI engine to generate hierarchical WBS nodes from text description.
+ */
 export async function aiGenerateWbs(projectId, payload) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/nlp/text-to-wbs`, {
     method: "POST",
@@ -383,6 +497,9 @@ export async function aiGenerateWbs(projectId, payload) {
   });
 }
 
+/**
+ * Calls Gemini AI engine to calculate Three-Point duration estimates for activities.
+ */
 export async function aiEstimateDurations(projectId, payload = {}) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/nlp/estimate-durations`, {
     method: "POST",
@@ -390,6 +507,9 @@ export async function aiEstimateDurations(projectId, payload = {}) {
   });
 }
 
+/**
+ * Calls Gemini AI engine to identify topological precedence dependencies from text.
+ */
 export async function aiExtractDependencies(projectId, payload = {}) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/nlp/extract-dependencies`, {
     method: "POST",
@@ -397,9 +517,80 @@ export async function aiExtractDependencies(projectId, payload = {}) {
   });
 }
 
+/**
+ * Validates Google Gemini API key by performing a test ping.
+ */
 export async function aiVerifyKey(apiKey) {
   return await apiRequest("/syncflow/nlp/verify-key", {
     method: "POST",
     body: JSON.stringify({ api_key: apiKey })
   });
 }
+
+// Time Tracking & Stopwatch API (Trello-Style)
+/**
+ * Starts a live work timer linked strictly to an in-progress (WIP) activity assigned to user.
+ */
+export async function startActivityTimer(projectId, activityId, payload = {}) {
+  return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/activities/${encodeURIComponent(activityId)}/timer/start`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+/**
+ * Stops an active stopwatch timer and logs elapsed seconds to the activity.
+ */
+export async function stopActivityTimer(projectId, activityId, payload = {}) {
+  return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/activities/${encodeURIComponent(activityId)}/timer/stop`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+/**
+ * Retrieves all time logs and contributor history for a specific activity.
+ */
+export async function fetchActivityTimeLogs(projectId, activityId) {
+  return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/activities/${encodeURIComponent(activityId)}/time-logs`, {
+    method: "GET"
+  });
+}
+
+/**
+ * Retrieves executive rollup of logged time across all activities for PM Control audit.
+ */
+export async function fetchProjectTimeLogsSummary(projectId) {
+  return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/time-logs/summary`, {
+    method: "GET"
+  });
+}
+
+/**
+ * Updates session notes or reassigns an existing timer log to another WIP activity.
+ */
+export async function updateActivityTimeLog(projectId, activityId, logId, payload = {}) {
+  return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/activities/${encodeURIComponent(activityId)}/time-logs/${encodeURIComponent(logId)}`, {
+    method: "PUT",
+    body: JSON.stringify(payload)
+  });
+}
+
+/**
+ * Deletes a user-generated timer log and deducts logged seconds from the activity.
+ */
+export async function deleteActivityTimeLog(projectId, activityId, logId, userId) {
+  return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/activities/${encodeURIComponent(activityId)}/time-logs/${encodeURIComponent(logId)}?user_id=${encodeURIComponent(userId)}`, {
+    method: "DELETE"
+  });
+}
+
+/**
+ * Retrieves all time tracking sessions created by a specific user for the Trackers screen.
+ */
+export async function fetchUserTimeLogs(projectId, userId) {
+  return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/my-time-logs?user_id=${encodeURIComponent(userId)}`, {
+    method: "GET"
+  });
+}
+

@@ -1,7 +1,4 @@
-"""
-SyncFlow – Project & Team Pydantic Models.
-Defines schemas for project creation, workspace management, and team reusability.
-"""
+"""SyncFlow - Defines schemas for project creation, workspace management, and team reusability."""
 from datetime import date, datetime
 from enum import Enum
 from typing import List, Optional, Any, Dict
@@ -173,9 +170,38 @@ class CreateBaselineRequest(BaseModel):
     description: Optional[str] = Field(default="", max_length=1000, description="Notes on baseline rationale or approval")
 
 
+class TimeLogEntry(BaseModel):
+    """Immutable record of focused work time logged on an activity."""
+    log_id: str = Field(..., description="Unique log session ID")
+    user_id: str = Field(..., description="User ID who performed the work")
+    user_name: Optional[str] = Field(default="Team Member", description="Full name or display handle")
+    start_time: str = Field(..., description="ISO 8601 session start timestamp")
+    end_time: str = Field(..., description="ISO 8601 session finish timestamp")
+    duration_seconds: int = Field(default=0, ge=0, description="Total duration in seconds")
+    notes: Optional[str] = Field(default="", description="Work notes or session task description")
+    created_at: Optional[str] = None
 
 
+class StartTimerRequest(BaseModel):
+    """Payload to start a running timer linked to an in-progress task."""
+    user_id: str = Field(..., description="User ID starting the timer")
+    user_name: Optional[str] = Field(default="", description="Optional display name")
+    notes: Optional[str] = Field(default="", description="Optional focus notes")
 
+
+class StopTimerRequest(BaseModel):
+    """Payload to stop a running timer and record elapsed session time."""
+    user_id: str = Field(..., description="User ID stopping the timer")
+    user_name: Optional[str] = Field(default="", description="Optional display name")
+    duration_seconds: Optional[int] = Field(default=None, ge=0, description="Elapsed duration in seconds")
+    notes: Optional[str] = Field(default="", description="Work notes or session summary")
+
+
+class UpdateTimeLogRequest(BaseModel):
+    """Payload to update an existing timer session log (notes or associated activity)."""
+    user_id: str = Field(..., description="User ID requesting the update")
+    notes: Optional[str] = Field(default=None, description="Updated session notes")
+    target_activity_id: Optional[str] = Field(default=None, description="Reassigned activity ID (must be assigned & WIP)")
 
 
 class ProjectDetail(BaseModel):

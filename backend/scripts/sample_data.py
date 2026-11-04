@@ -1,6 +1,4 @@
-"""
-Realistic seed data for Users, Teams, WBS Hierarchy (L1 -> L2 -> L3), and Dependencies.
-"""
+"""Realistic seed data for Users, Teams, WBS Hierarchy (L1 -> L2 -> L3), and Dependencies."""
 from datetime import datetime, date
 
 SEED_USERS = [

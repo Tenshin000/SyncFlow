@@ -1,12 +1,9 @@
-"""
-SyncFlow – User Pydantic models (shared type definitions).
-Note: the live auth flow uses schemas defined inline in backend/user.py.
-      These models serve as a shared reference for future features (e.g. admin panels).
-"""
+"""SyncFlow - User Pydantic models (shared type definitions)."""
 from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, Field
 
+"""Note: the live auth flow uses schemas defined inline in backend/user.py. These models serve as a shared reference for future features (e.g. admin panels)."""
 
 class UserBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=100)

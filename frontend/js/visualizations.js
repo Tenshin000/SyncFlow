@@ -1,5 +1,5 @@
 /**
- * SyncFlow Frontend – Visualizations Component
+ * SyncFlow Frontend - Visualizations Component
  * Replaces Streamlit st.graphviz_chart with interactive vis-network canvas graphs.
  * Renders:
  * 1. Top-to-Bottom Hierarchical WBS Tree (Project -> Activities -> Tasks -> Operations)
@@ -62,6 +62,9 @@ export function renderWbsTree(containerElement, projectName, wbsItems, userMap =
   });
 
   // Recursive traversal for arbitrary depth
+  /**
+   * Recursively traverses WBS tree nodes to create Vis-Network nodes and hierarchical edges.
+   */
   function traverse(item, parentId, level) {
     const nodeId = item.id || `node_${item.wbs_number || Math.random().toString(36).substring(2, 9)}`;
     const isLeaf = !item.children || item.children.length === 0 || item.type === "work_package";

@@ -1,5 +1,5 @@
 /**
- * SyncFlow Frontend – Project-Scoped Notification System
+ * SyncFlow Frontend - Project-Scoped Notification System
  * Handles notification bell badge, dropdown log drawer, interactive actions
  * (e.g., project join approvals), mark-as-read, and full CRUD operations.
  */
