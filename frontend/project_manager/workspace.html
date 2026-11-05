@@ -1914,7 +1914,7 @@
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.4rem;">✨</span>
             <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">AI Text-to-WBS Generator</h4>
-            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">Google Gemini Flash (Free Tier)</span>
+            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">gemini-flash-latest / gemini-flash-lite-latest</span>
           </div>
           <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #e0e7ff;">
             Decompose unstructured project scopes, charters, and specifications into formal PMBOK Work Breakdown Structures.
@@ -1963,6 +1963,18 @@
               <span style="color: #b91c1c;"><strong>Replace Entire WBS</strong> — Recreates baseline from scratch</span>
             </label>
           </div>
+        </div>
+
+        <!-- Model Selection (Strictly limited to gemini-flash-latest and gemini-flash-lite-latest) -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label for="ai-wbs-model-select" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal); display: flex; justify-content: space-between;">
+            <span>4. Gemini Model:</span>
+            <span style="font-size: 0.78rem; font-weight: 400; color: var(--muted);">Available: gemini-flash-latest, gemini-flash-lite-latest</span>
+          </label>
+          <select id="ai-wbs-model-select" class="form-control" style="font-size: 0.88rem; font-weight: 600;">
+            <option value="gemini-flash-latest" selected>gemini-flash-latest (Recommended - Balanced Speed &amp; Reasoning)</option>
+            <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Fast &amp; Lightweight)</option>
+          </select>
         </div>
 
         <!-- Optional Gemini API Key input -->
@@ -2027,7 +2039,7 @@
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.4rem;">✨</span>
             <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">AI DCMA 14-Point PERT Estimator</h4>
-            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">Google Gemini Flash (Free Tier)</span>
+            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">gemini-flash-latest / gemini-flash-lite-latest</span>
           </div>
           <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #e0e7ff;">
             Calculates realistic 3-point duration estimates (a, m, b) compliant with DCMA Metric 6 (durations &le; 44d).
@@ -2055,6 +2067,18 @@
             Project Manager Guidance / Technical Velocity (Optional):
           </label>
           <textarea id="ai-estimate-prompt-input" class="form-control" rows="3" placeholder="e.g. Senior engineering team with high domain velocity; apply tighter duration ranges for core development. Third-party vendor integrations carry moderate delivery uncertainty..." style="font-size: 0.88rem; line-height: 1.5;"></textarea>
+        </div>
+
+        <!-- Model Selection (Strictly limited to gemini-flash-latest and gemini-flash-lite-latest) -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label for="ai-estimate-model-select" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal); display: flex; justify-content: space-between;">
+            <span>Gemini Model:</span>
+            <span style="font-size: 0.78rem; font-weight: 400; color: var(--muted);">Available: gemini-flash-latest, gemini-flash-lite-latest</span>
+          </label>
+          <select id="ai-estimate-model-select" class="form-control" style="font-size: 0.88rem; font-weight: 600;">
+            <option value="gemini-flash-latest" selected>gemini-flash-latest (Recommended - Balanced Speed &amp; Reasoning)</option>
+            <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Fast &amp; Lightweight)</option>
+          </select>
         </div>
 
         <!-- Optional Gemini API Key input -->
@@ -2119,7 +2143,7 @@
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.4rem;">✨</span>
             <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">AI Precedence Dependency Extractor</h4>
-            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">Google Gemini Flash (Free Tier)</span>
+            <span style="background: rgba(255,255,255,0.18); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: 600;">gemini-flash-latest / gemini-flash-lite-latest</span>
           </div>
           <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #e0e7ff;">
             Infers logical relationships (FS, SS, FF, SF) and non-negative lags from scope narratives, validating against circular loops.
@@ -2155,6 +2179,18 @@
             Sequencing Rules / Focus (Optional):
           </label>
           <input type="text" id="ai-dep-prompt-input" class="form-control" placeholder="e.g. Prefer linear Finish-to-Start handoffs between major deliverables..." style="font-size: 0.88rem;">
+        </div>
+
+        <!-- Model Selection (Strictly limited to gemini-flash-latest and gemini-flash-lite-latest) -->
+        <div class="form-group" style="margin-bottom: 1.1rem;">
+          <label for="ai-dep-model-select" style="font-size: 0.88rem; font-weight: 700; color: var(--charcoal); display: flex; justify-content: space-between;">
+            <span>Gemini Model:</span>
+            <span style="font-size: 0.78rem; font-weight: 400; color: var(--muted);">Available: gemini-flash-latest, gemini-flash-lite-latest</span>
+          </label>
+          <select id="ai-dep-model-select" class="form-control" style="font-size: 0.88rem; font-weight: 600;">
+            <option value="gemini-flash-latest" selected>gemini-flash-latest (Recommended - Balanced Speed &amp; Reasoning)</option>
+            <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Fast &amp; Lightweight)</option>
+          </select>
         </div>
 
         <!-- Optional Gemini API Key input -->
@@ -2217,7 +2253,7 @@
     }
   </style>
 
-  <script type="module" src="/js/pm_workspace.js?v=8"></script>
-  <script type="module" src="/js/ai-modals.js?v=8"></script>
+  <script type="module" src="/js/pm_workspace.js?v=20261027_2215"></script>
+  <script type="module" src="/js/ai-modals.js?v=20261027_2215"></script>
 </body>
 </html>

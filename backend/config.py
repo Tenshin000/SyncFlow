@@ -38,10 +38,12 @@ class Settings(BaseModel):
         f"mongodb://{os.getenv('MONGO_INITDB_ROOT_USERNAME', 'syncflow_admin')}:{os.getenv('MONGO_INITDB_ROOT_PASSWORD', 'syncflow_password123')}@{os.getenv('MONGO_HOST', 'localhost')}:{os.getenv('MONGO_PORT', 27017)}/{os.getenv('MONGO_INITDB_DATABASE', 'syncflow_db')}?authSource=admin"
     )
     
-    # LLM API Keys
+    # LLM API Keys & Permitted Models
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY", "")
     DEFAULT_LLM_PROVIDER: str = os.getenv("DEFAULT_LLM_PROVIDER", "gemini")
+    ALLOWED_GEMINI_MODELS: list = ["gemini-flash-latest", "gemini-flash-lite-latest"]
+    DEFAULT_GEMINI_MODEL: str = os.getenv("DEFAULT_GEMINI_MODEL", "gemini-flash-latest")
     
     # Streamlit Config
     STREAMLIT_SERVER_PORT: int = int(os.getenv("STREAMLIT_SERVER_PORT", 8501))

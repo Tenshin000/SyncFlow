@@ -88,6 +88,7 @@ function startProgressSequence(prefix, steps) {
   if (container) container.style.display = "block";
 
   let stepIdx = 0;
+  let elapsedSeconds = 0;
   const update = () => {
     if (stepIdx < steps.length) {
       const s = steps[stepIdx];
@@ -96,11 +97,16 @@ function startProgressSequence(prefix, steps) {
       if (barEl) barEl.style.width = s.pct;
       if (detailEl) detailEl.textContent = s.detail;
       stepIdx++;
+    } else {
+      elapsedSeconds += 2;
+      if (detailEl) {
+        detailEl.textContent = `Optimizing PMBOK structure with Gemini... (${elapsedSeconds}s)`;
+      }
     }
   };
 
   update();
-  const interval = setInterval(update, 2200);
+  const interval = setInterval(update, 2000);
 
   return {
     finish: (finalMsg) => {
@@ -250,6 +256,8 @@ export async function submitWbsGeneration() {
   const customPrompt = (promptInput ? promptInput.value : "").trim();
   const mode = modeRadio ? modeRadio.value : "merge";
   const apiKey = (keyInput ? keyInput.value : "").trim();
+  const modelSelect = document.getElementById("ai-wbs-model-select");
+  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-latest";
   if (apiKey) storeGeminiKey(apiKey);
 
   if (errorBox) errorBox.style.display = "none";
@@ -257,7 +265,7 @@ export async function submitWbsGeneration() {
   if (cancelBtn) cancelBtn.disabled = true;
 
   const progress = startProgressSequence("ai-wbs", [
-    { pct: "30%", title: "Step 1/3: 🌐 Connecting to Google Gemini AI Engine...", detail: "Analyzing project charter & preparing PMBOK parameters..." },
+    { pct: "30%", title: `Step 1/3: 🌐 Connecting to Google Gemini (${selectedModel})...`, detail: "Analyzing project charter & preparing PMBOK parameters..." },
     { pct: "65%", title: "Step 2/3: 🧠 Decomposing Scope into PMBOK Hierarchy...", detail: "Synthesizing Deliverables, Work Packages & PERT duration estimates..." },
     { pct: "90%", title: "Step 3/3: ⚡ Validating Structure & Inserting to MongoDB...", detail: "Verifying DCMA 14-point rules and committing baseline to workspace..." }
   ]);
@@ -267,10 +275,14 @@ export async function submitWbsGeneration() {
       scope_text: scopeText,
       custom_prompt: customPrompt || undefined,
       mode: mode,
-      api_key: apiKey || undefined
+      api_key: apiKey || undefined,
+      model: selectedModel
     };
 
-    const res = await aiGenerateWbs(projectId, payload);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out after 90 seconds. Google Gemini took too long to respond. Please try again.")), 90000)
+    );
+    const res = await Promise.race([aiGenerateWbs(projectId, payload), timeoutPromise]);
     if (res.error) {
       throw new Error(res.error);
     }
@@ -289,13 +301,13 @@ export async function submitWbsGeneration() {
       window.location.reload();
     }, 350);
 
-
   } catch (err) {
     progress.stop();
     if (errorBox && errorMsg) {
       errorMsg.textContent = "AI Generation Error: " + (err.message || "Failed to decompose scope into WBS.");
       errorBox.style.display = "block";
     }
+  } finally {
     if (submitBtn) submitBtn.disabled = false;
     if (cancelBtn) cancelBtn.disabled = false;
   }
@@ -368,6 +380,8 @@ export async function submitEstimateCalculation() {
 
   const customPrompt = (promptInput ? promptInput.value : "").trim();
   const apiKey = (keyInput ? keyInput.value : "").trim();
+  const modelSelect = document.getElementById("ai-estimate-model-select");
+  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-latest";
   if (apiKey) storeGeminiKey(apiKey);
 
   if (errorBox) errorBox.style.display = "none";
@@ -375,7 +389,7 @@ export async function submitEstimateCalculation() {
   if (cancelBtn) cancelBtn.disabled = true;
 
   const progress = startProgressSequence("ai-estimate", [
-    { pct: "30%", title: "Step 1/3: 🌐 Contacting Gemini AI Engine...", detail: "Auditing activities against DCMA 14-Point Metric 6 guidelines..." },
+    { pct: "30%", title: `Step 1/3: 🌐 Contacting Gemini (${selectedModel})...`, detail: "Auditing activities against DCMA 14-Point Metric 6 guidelines..." },
     { pct: "65%", title: "Step 2/3: 🧠 Calculating PERT 3-Point Parameters...", detail: "Computing optimistic (a), most likely (m), and pessimistic (b) durations..." },
     { pct: "90%", title: "Step 3/3: ⚡ Applying Estimates & Risk Rationales...", detail: "Committing PERT beta distribution parameters to schedule baseline..." }
   ]);
@@ -383,10 +397,14 @@ export async function submitEstimateCalculation() {
   try {
     const payload = {
       custom_prompt: customPrompt || undefined,
-      api_key: apiKey || undefined
+      api_key: apiKey || undefined,
+      model: selectedModel
     };
 
-    const res = await aiEstimateDurations(projectId, payload);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out after 90 seconds. Google Gemini took too long to respond. Please try again.")), 90000)
+    );
+    const res = await Promise.race([aiEstimateDurations(projectId, payload), timeoutPromise]);
     if (res.error) {
       throw new Error(res.error);
     }
@@ -407,6 +425,7 @@ export async function submitEstimateCalculation() {
       errorMsg.textContent = "AI Estimation Error: " + (err.message || "Failed to calculate estimates.");
       errorBox.style.display = "block";
     }
+  } finally {
     if (submitBtn) submitBtn.disabled = false;
     if (cancelBtn) cancelBtn.disabled = false;
   }
@@ -480,6 +499,8 @@ export async function submitDependencyExtraction() {
   const narrative = (narrativeInput ? narrativeInput.value : "").trim();
   const customPrompt = (promptInput ? promptInput.value : "").trim();
   const apiKey = (keyInput ? keyInput.value : "").trim();
+  const modelSelect = document.getElementById("ai-dep-model-select");
+  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-latest";
   if (apiKey) storeGeminiKey(apiKey);
 
   if (errorBox) errorBox.style.display = "none";
@@ -487,7 +508,7 @@ export async function submitDependencyExtraction() {
   if (cancelBtn) cancelBtn.disabled = true;
 
   const progress = startProgressSequence("ai-dep", [
-    { pct: "30%", title: "Step 1/3: 🌐 Analyzing Workflow Narrative...", detail: "Identifying handoffs, dependencies, and lag requirements..." },
+    { pct: "30%", title: `Step 1/3: 🌐 Analyzing Narrative (${selectedModel})...`, detail: "Identifying handoffs, dependencies, and lag requirements..." },
     { pct: "65%", title: "Step 2/3: 🧠 Synthesizing Precedence Links (FS, SS, FF)...", detail: "Enforcing DCMA non-negative lags & testing cycle freedom with Kahn's algorithm..." },
     { pct: "90%", title: "Step 3/3: ⚡ Committing Dependency Network...", detail: "Connecting activities into topological CPM schedule network..." }
   ]);
@@ -496,10 +517,14 @@ export async function submitDependencyExtraction() {
     const payload = {
       workflow_narrative: narrative || undefined,
       custom_prompt: customPrompt || undefined,
-      api_key: apiKey || undefined
+      api_key: apiKey || undefined,
+      model: selectedModel
     };
 
-    const res = await aiExtractDependencies(projectId, payload);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out after 90 seconds. Google Gemini took too long to respond. Please try again.")), 90000)
+    );
+    const res = await Promise.race([aiExtractDependencies(projectId, payload), timeoutPromise]);
     if (res.error) {
       throw new Error(res.error);
     }
@@ -507,7 +532,6 @@ export async function submitDependencyExtraction() {
     progress.finish("Complete! 🎉 Dependencies extracted.");
     sessionStorage.setItem("syncflow_active_view", "3");
     sessionStorage.setItem("syncflow_ai_flash", "✨ Precedence network dependencies synthesized and validated successfully!");
-
 
     closeDependencyModal();
 
@@ -521,6 +545,7 @@ export async function submitDependencyExtraction() {
       errorMsg.textContent = "AI Dependency Extraction Error: " + (err.message || "Failed to extract dependencies.");
       errorBox.style.display = "block";
     }
+  } finally {
     if (submitBtn) submitBtn.disabled = false;
     if (cancelBtn) cancelBtn.disabled = false;
   }
@@ -636,5 +661,5 @@ function attachDirectHandlers() {
 // Check flash message immediately in case DOM is already ready
 checkAndDisplayFlashMessage();
 
-console.log("SyncFlow Google Gemini 1.5 Flash AI Engine loaded and attached successfully.");
+console.log("SyncFlow Google Gemini Flash (gemini-flash-latest / gemini-flash-lite-latest) AI Engine loaded and attached successfully.");
 

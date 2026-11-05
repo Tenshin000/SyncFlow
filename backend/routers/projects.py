@@ -683,8 +683,12 @@ def _process_activities_payload(raw_activities: list) -> list:
         if is_milestone:
             te = sigma = var = 0.0
         elif tech == "three_point":
-            if a <= 0: raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Activity '{act_id}' ({name}): Optimistic duration (a={a}) must be strictly positive (> 0).")
-            if not (a < m < b): raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Activity '{act_id}' ({name}): Three-Point (Beta) estimation strictly requires Optimistic < Most Likely < Pessimistic (a < m < b). Received Opt a={a}, Likely m={m}, Pess b={b}.")
+            if a <= 0:
+                a = 0.5
+            if m <= a:
+                m = round(a + max(1.0, round(a * 0.3, 1)), 1)
+            if b <= m:
+                b = round(m + max(1.5, round(m * 0.4, 1)), 1)
             te, sigma, var = calculate_pert_statistics(a, m, b)
 
         elif tech == "parametric":
