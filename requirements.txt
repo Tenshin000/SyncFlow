@@ -15,5 +15,5 @@ bcrypt>=4.2.0
 # Utilities & Environment
 python-dotenv>=1.0.1
 
-# AI & NLP Engine
+# NLP Engine
 google-generativeai>=0.8.6

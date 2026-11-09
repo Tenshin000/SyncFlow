@@ -523,8 +523,79 @@
   </div>
 
 
+    <!-- Join Project Choice Modal (Individual vs Team) -->
+  <div id="modal-join-choice" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); padding: 1rem;">
+    <div style="background: #ffffff; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 20px 45px rgba(0,0,0,0.25); border: 1px solid var(--border); overflow: hidden;">
+      <!-- Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border); background: #F8FAFC;">
+        <div>
+          <h3 id="join-choice-project-title" style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--charcoal);">
+            Join Project
+          </h3>
+          <p id="join-choice-project-subtitle" style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--muted);">
+            Select how you would like to participate in this project
+          </p>
+        </div>
+        <button type="button" id="btn-close-join-modal" style="background: none; border: none; font-size: 1.4rem; color: var(--muted); cursor: pointer; line-height: 1; padding: 4px 8px; border-radius: 6px;">&times;</button>
+      </div>
+
+      <!-- Body -->
+      <div style="padding: 1.4rem;">
+        <p style="font-size: 0.88rem; color: var(--slate); margin: 0 0 1rem 0; line-height: 1.4;">
+          Please choose whether you want to enter as an <strong>individual contributor</strong> or join one of the project's <strong>assembled teams</strong>:
+        </p>
+
+        <!-- Options Container -->
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.25rem;">
+          <!-- Option: Individual -->
+          <label id="lbl-join-individual" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 2px solid #2563EB; background: #EFF6FF; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">
+            <input type="radio" name="join-choice-type" id="join-radio-individual" value="individual" checked style="margin-top: 3px; accent-color: #2563EB;">
+            <div>
+              <div style="font-weight: 700; font-size: 0.92rem; color: var(--charcoal);">👤 Join as Individual Contributor</div>
+              <div style="font-size: 0.78rem; color: var(--slate); margin-top: 2px;">Enter the project without specific team assignment; tasks can be assigned directly to you.</div>
+            </div>
+          </label>
+
+          <!-- Option: Team -->
+          <label id="lbl-join-team" style="display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 2px solid var(--border); background: #ffffff; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">
+            <input type="radio" name="join-choice-type" id="join-radio-team" value="team" style="margin-top: 3px; accent-color: #2563EB;">
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.92rem; color: var(--charcoal);">👥 Join an Existing Team</div>
+              <div style="font-size: 0.78rem; color: var(--slate); margin-top: 2px;">Associate your membership with a specific department or operational team.</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Team Dropdown (Visible only if join-radio-team is checked) -->
+        <div id="join-team-selection-box" style="display: none; background: #F8FAFC; border: 1.5px dashed var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 1rem;">
+          <label for="join-team-dropdown" style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--charcoal); margin-bottom: 6px;">
+            Select Team:*
+          </label>
+          <select id="join-team-dropdown" style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.88rem; background: #fff; font-family: inherit;">
+            <!-- Populated dynamically -->
+          </select>
+          <div id="join-team-empty-hint" style="display: none; font-size: 0.78rem; color: #B45309; margin-top: 6px;">
+            ⚠️ This project has no configured teams yet. You can still join as an Individual Contributor.
+          </div>
+        </div>
+
+        <div id="join-choice-policy-notice" style="font-size: 0.78rem; color: var(--muted); padding: 8px 12px; background: #F1F5F9; border-radius: 6px;">
+          <!-- Dynamic notice about instant enrollment vs PM approval -->
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 1rem 1.4rem; border-top: 1px solid var(--border); background: #FAFBFD;">
+        <button type="button" id="btn-cancel-join-choice" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="btn-confirm-join-choice" class="btn btn-primary" style="font-weight: 700;">
+          🚀 Confirm &amp; Join
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="center-error-container"></div>
 
-  <script type="module" src="/js/member_workspace.js"></script>
+  <script type="module" src="/js/member_workspace.js?v=20261107_1710"></script>
 </body>
 </html>

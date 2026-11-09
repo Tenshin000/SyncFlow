@@ -373,10 +373,7 @@ def get_one(user_id: str):
 @router.get("/{user_id}/profile", response_model=UserProfile)
 def get_profile(user_id: str):
     """API endpoint returning user profile details for account management."""
-    user = get_user(user_id)
-    if not user:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found.")
-    return user
+    return get_one(user_id)
 
 
 @router.put("/{user_id}", response_model=UserProfile)

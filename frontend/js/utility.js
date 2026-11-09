@@ -225,7 +225,9 @@ export const ALLOWED_NOTIF_TYPES = {
   join_rejected: { icon: "🚫", label: "Declined", badgeClass: "badge-danger" },
   review_request: { icon: "📋", label: "Review Request", badgeClass: "badge-amber" },
   review_confirmed: { icon: "🔵", label: "Task Verified", badgeClass: "badge-blue" },
-  review_returned_wip: { icon: "🔙", label: "Returned to WIP", badgeClass: "badge-amber" }
+  review_returned_wip: { icon: "🔙", label: "Returned to WIP", badgeClass: "badge-amber" },
+  team_lead_assigned: { icon: "👑", label: "Team Lead", badgeClass: "badge-amber" },
+  project_update: { icon: "📢", label: "Project Update", badgeClass: "badge-blue" }
 };
 
 /**

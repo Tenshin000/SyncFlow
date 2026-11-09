@@ -90,7 +90,12 @@ async function apiRequest(endpoint, options = {}) {
 
       return result;
     } catch (err) {
-      return { data: null, error: err.message || "Network error. Please ensure the backend is running." };
+      const isAborted = err.name === "AbortError" || (config.signal && config.signal.aborted);
+      return { 
+        data: null, 
+        error: isAborted ? "Request was cancelled." : (err.message || "Network error. Please ensure the backend is running."),
+        isAborted: Boolean(isAborted)
+      };
     } finally {
       if (method === "GET") {
         _inFlightRequests.delete(cacheKey);
@@ -427,10 +432,21 @@ export async function searchAvailableProjects(userId, query = "") {
 /**
  * Submits a join request or directly joins an open participation project.
  */
-export async function joinProject(projectId, userId) {
+export async function joinProject(projectId, userId, teamId = null) {
+  const body = { user_id: userId };
+  if (teamId) body.team_id = teamId;
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/join`, {
     method: "POST",
-    body: JSON.stringify({ user_id: userId })
+    body: JSON.stringify(body)
+  });
+}
+
+/**
+ * Officially starts/kicks off project execution, transitioning initial tasks to WIP.
+ */
+export async function kickoffProject(projectId) {
+  return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/kickoff`, {
+    method: "POST"
   });
 }
 
@@ -490,30 +506,33 @@ export async function fetchPortfolioDashboard(userId) {
 /**
  * Calls Gemini AI engine to generate hierarchical WBS nodes from text description.
  */
-export async function aiGenerateWbs(projectId, payload) {
+export async function aiGenerateWbs(projectId, payload, options = {}) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/nlp/text-to-wbs`, {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    ...options
   });
 }
 
 /**
  * Calls Gemini AI engine to calculate Three-Point duration estimates for activities.
  */
-export async function aiEstimateDurations(projectId, payload = {}) {
+export async function aiEstimateDurations(projectId, payload = {}, options = {}) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/nlp/estimate-durations`, {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    ...options
   });
 }
 
 /**
  * Calls Gemini AI engine to identify topological precedence dependencies from text.
  */
-export async function aiExtractDependencies(projectId, payload = {}) {
+export async function aiExtractDependencies(projectId, payload = {}, options = {}) {
   return await apiRequest(`/syncflow/projects/${encodeURIComponent(projectId)}/nlp/extract-dependencies`, {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    ...options
   });
 }
 

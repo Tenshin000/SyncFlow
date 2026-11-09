@@ -6,16 +6,6 @@
  * 2. Left-to-Right Project Network Diagram (Precedence Diagramming Method - PDM)
  */
 
-/**
- * Calculates PERT expected duration: Te = (O + 4M + P) / 6
- */
-export function calculatePertTe(act) {
-  const opt = parseFloat(act.optimistic_time) || 0;
-  const most = parseFloat(act.most_likely_time) || 0;
-  const pess = parseFloat(act.pessimistic_time) || 0;
-  if (!opt && !most && !pess) return null;
-  return ((opt + 4 * most + pess) / 6.0).toFixed(1);
-}
 
 /**
  * Renders the Hierarchical WBS Tree in the specified container element.

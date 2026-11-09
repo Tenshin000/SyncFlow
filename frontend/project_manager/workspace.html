@@ -324,7 +324,7 @@
                 <span id="estimate-save-status" class="badge badge-emerald" style="display: none;">Saved</span>
               </div>
               <p style="margin: 3px 0 0 0; font-size: 0.88rem; color: var(--slate);">
-                Estimate activity durations using Three-Point (Beta Distribution), Parametric, Analogous, and Single-Point techniques.
+                Estimate activity durations using Three-Point (Beta Distribution), Parametric, Analogous, Single-Point, and Milestone techniques.
               </p>
             </div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -457,6 +457,7 @@
                   <option value="parametric">Parametric</option>
                   <option value="analogous">Analogous</option>
                   <option value="single_point">Single-Point</option>
+                  <option value="milestone">Milestone</option>
                 </select>
               </div>
 
@@ -615,6 +616,29 @@
                   <input type="range" id="sched-slider-near-crit" min="5" max="100" step="5" value="25" style="width: 100%; accent-color: #F59E0B; cursor: pointer;">
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- ================================================================
+               PROJECT EXECUTION KICK-OFF BANNER & ACTION
+               ================================================================ -->
+          <div id="sched-kickoff-container" style="background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%); border: 1.5px solid #BFDBFE; border-radius: var(--radius-md); padding: 1.2rem 1.6rem; margin-bottom: 1.4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: var(--shadow-sm);">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.3rem;">🚀</span>
+                <h4 style="margin: 0; font-size: 1.15rem; color: var(--charcoal); font-weight: 800;">
+                  Project Execution Kick-Off
+                </h4>
+                <span id="sched-kickoff-status-badge" class="badge badge-secondary" style="font-size: 0.78rem; font-weight: 700;">Not Started</span>
+              </div>
+              <p id="sched-kickoff-desc" style="margin: 4px 0 0 0; font-size: 0.88rem; color: var(--slate); max-width: 680px; line-height: 1.45;">
+                Sequenced and estimated activities are ready to begin. Kick off the project to transition initial activities in the sequence to <strong>Work in Progress (WIP)</strong> and officially start project execution.
+              </p>
+            </div>
+            <div>
+              <button type="button" id="btn-kickoff-project" class="btn btn-primary" style="font-weight: 700; font-size: 0.95rem; padding: 0.7rem 1.6rem; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); border: none; box-shadow: 0 4px 12px rgba(37,99,235,0.3); display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                <span>🚀</span> Start Project (Begin Initial Tasks)
+              </button>
             </div>
           </div>
 
@@ -891,6 +915,9 @@
                 </button>
                 <button type="button" id="btn-ctrl-refresh" class="btn btn-secondary btn-sm" style="padding: 5px 10px;">
                   🔄 Refresh
+                </button>
+                <button type="button" id="btn-ctrl-kickoff-project" class="btn btn-primary btn-sm" style="font-weight: 700; background: #2563EB; border: none; display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;">
+                  <span>🚀</span> Start Project
                 </button>
               </div>
             </div>
@@ -1972,8 +1999,8 @@
             <span style="font-size: 0.78rem; font-weight: 400; color: var(--muted);">Available: gemini-flash-latest, gemini-flash-lite-latest</span>
           </label>
           <select id="ai-wbs-model-select" class="form-control" style="font-size: 0.88rem; font-weight: 600;">
-            <option value="gemini-flash-latest" selected>gemini-flash-latest (Recommended - Balanced Speed &amp; Reasoning)</option>
-            <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Fast &amp; Lightweight)</option>
+            <option value="gemini-flash-lite-latest" selected>gemini-flash-lite-latest (Recommended - Fast &amp; Lightweight)</option>
+            <option value="gemini-flash-latest">gemini-flash-latest (Advanced Reasoning &amp; Context)</option>
           </select>
         </div>
 
@@ -2076,8 +2103,8 @@
             <span style="font-size: 0.78rem; font-weight: 400; color: var(--muted);">Available: gemini-flash-latest, gemini-flash-lite-latest</span>
           </label>
           <select id="ai-estimate-model-select" class="form-control" style="font-size: 0.88rem; font-weight: 600;">
-            <option value="gemini-flash-latest" selected>gemini-flash-latest (Recommended - Balanced Speed &amp; Reasoning)</option>
-            <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Fast &amp; Lightweight)</option>
+            <option value="gemini-flash-lite-latest" selected>gemini-flash-lite-latest (Recommended - Fast &amp; Lightweight)</option>
+            <option value="gemini-flash-latest">gemini-flash-latest (Advanced Reasoning &amp; Context)</option>
           </select>
         </div>
 
@@ -2188,8 +2215,8 @@
             <span style="font-size: 0.78rem; font-weight: 400; color: var(--muted);">Available: gemini-flash-latest, gemini-flash-lite-latest</span>
           </label>
           <select id="ai-dep-model-select" class="form-control" style="font-size: 0.88rem; font-weight: 600;">
-            <option value="gemini-flash-latest" selected>gemini-flash-latest (Recommended - Balanced Speed &amp; Reasoning)</option>
-            <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Fast &amp; Lightweight)</option>
+            <option value="gemini-flash-lite-latest" selected>gemini-flash-lite-latest (Recommended - Fast &amp; Lightweight)</option>
+            <option value="gemini-flash-latest">gemini-flash-latest (Advanced Reasoning &amp; Context)</option>
           </select>
         </div>
 
@@ -2253,7 +2280,7 @@
     }
   </style>
 
-  <script type="module" src="/js/pm_workspace.js?v=20261027_2215"></script>
-  <script type="module" src="/js/ai-modals.js?v=20261027_2215"></script>
+  <script type="module" src="/js/pm_workspace.js?v=20261107_1710"></script>
+  <script type="module" src="/js/ai-modals.js?v=20261107_1710"></script>
 </body>
 </html>

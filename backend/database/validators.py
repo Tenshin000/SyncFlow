@@ -11,6 +11,10 @@ DEPENDENCY_TYPES = [
     "Start-to-Finish (SF)",
     "Start-to-Start (SS)",
     "Finish-to-Finish (FF)",
+    "FS",
+    "SF",
+    "SS",
+    "FF",
     "NULL",
 ]
 
@@ -131,6 +135,10 @@ PROJECTS_COLLECTION_VALIDATOR = {
                             "items": {
                                 "bsonType": ["objectId", "string"]
                             }
+                        },
+                        "lead_id": {
+                            "bsonType": ["objectId", "string", "null"],
+                            "description": "Optional User ID or ObjectId of the designated Team Lead"
                         }
                     }
                 }

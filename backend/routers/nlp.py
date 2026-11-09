@@ -5,9 +5,8 @@ and Precedence Dependency Extraction with strict JSON Schema constrained decodin
 """
 import re
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-from bson import ObjectId
-from fastapi import APIRouter, HTTPException, status, Query, Body
+from typing import Dict, Any
+from fastapi import APIRouter, HTTPException, status, Body
 
 from backend.database.connection import get_db
 from backend.routers.projects import (
@@ -45,15 +44,13 @@ from backend.nlp.prompts import (
 router = APIRouter(prefix="/syncflow", tags=["AI & NLP Engine"])
 
 
-# ==============================================================================
-# KEY VERIFICATION & AVAILABLE MODELS ENDPOINTS
-# ==============================================================================
+# Gemini key verification and model discovery
 @router.get("/nlp/models")
 def get_available_models():
     """Returns the strictly allowed Google Gemini models ('gemini-flash-latest' and 'gemini-flash-lite-latest')."""
     return {
         "models": ["gemini-flash-latest", "gemini-flash-lite-latest"],
-        "default": "gemini-flash-latest"
+        "default": "gemini-flash-lite-latest"
     }
 
 
@@ -72,9 +69,7 @@ def check_api_key(payload: Dict[str, Any] = Body(...)):
     }
 
 
-# ==============================================================================
-# 1. TEXT-TO-WBS DECOMPOSITION
-# ==============================================================================
+# Text-to-WBS decomposition
 @router.post("/projects/{project_id}/nlp/text-to-wbs")
 def generate_wbs_from_text(project_id: str, payload: TextToWBSRequest):
     """
@@ -390,9 +385,7 @@ def generate_wbs_from_text(project_id: str, payload: TextToWBSRequest):
     return _format_detail(updated)
 
 
-# ==============================================================================
-# 2. DCMA 14-POINT DURATION ESTIMATION
-# ==============================================================================
+# PERT duration estimation
 @router.post("/projects/{project_id}/nlp/estimate-durations")
 def estimate_activity_durations(project_id: str, payload: EstimateDurationsRequest):
     """
@@ -463,7 +456,8 @@ def estimate_activity_durations(project_id: str, payload: EstimateDurationsReque
             exp_d, std_dev, var = calculate_pert_statistics(opt, ml, pess)
 
 
-            act["estimation_technique"] = "three_point"
+            if not act.get("is_milestone") and act.get("estimation_technique") != "milestone":
+                act["estimation_technique"] = "three_point"
             act["optimistic"] = opt
             act["most_likely"] = ml
             act["pessimistic"] = pess
@@ -496,9 +490,7 @@ def estimate_activity_durations(project_id: str, payload: EstimateDurationsReque
     }
 
 
-# ==============================================================================
-# 3. PRECEDENCE DEPENDENCY EXTRACTION
-# ==============================================================================
+# Precedence dependency extraction
 @router.post("/projects/{project_id}/nlp/extract-dependencies")
 def extract_project_dependencies(project_id: str, payload: ExtractDependenciesRequest):
     """

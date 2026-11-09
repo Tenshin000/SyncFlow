@@ -1,4 +1,4 @@
-"""SyncFlow - Defines schemas for project creation, workspace management, and team reusability."""
+"""Pydantic request and response schemas for projects, WBS, and schedules."""
 from datetime import date, datetime
 from enum import Enum
 from typing import List, Optional, Any, Dict
@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class TeamMemberModel(BaseModel):
-    """Member within a team."""
     user_id: str
     username: Optional[str] = None
     first_name: Optional[str] = None
@@ -16,66 +15,59 @@ class TeamMemberModel(BaseModel):
 
 
 class TeamModel(BaseModel):
-    """Team definition within a project or PM team template library."""
-    team_id: Optional[str] = Field(default=None, description="Unique team identifier, e.g. TEAM-ENG-1")
-    name: str = Field(..., min_length=1, max_length=100, description="Team designation")
-    member_ids: List[str] = Field(default_factory=list, description="Assigned User IDs")
-    lead_id: Optional[str] = Field(default=None, description="Optional designated team lead user ID")
-    created_by: Optional[str] = Field(default=None, description="PM user ID who created the team")
+    team_id: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=100)
+    member_ids: List[str] = Field(default_factory=list)
+    lead_id: Optional[str] = None
+    created_by: Optional[str] = None
     created_at: Optional[datetime] = None
 
 
 class CreateProjectRequest(BaseModel):
-    """Payload for creating a new project from scratch."""
-    name: str = Field(..., min_length=1, max_length=150, description="Project Name")
-    description: Optional[str] = Field(default="", max_length=2000, description="Optional Project Scope")
-    start_date: date = Field(..., description="Project start date (today or future)")
-    created_by: str = Field(..., description="ID of Project Manager creator")
-    assigned_user_ids: List[str] = Field(default_factory=list, description="IDs of individual users assigned")
-    teams: List[TeamModel] = Field(default_factory=list, description="Teams configured for this project")
-    controllers: List[str] = Field(default_factory=list, description="IDs of project controllers")
-    open_participation: bool = Field(default=False, description="Whether users can join freely without PM approval")
-    allow_multiteam: bool = Field(default=False, description="Whether members can be assigned to multiple teams simultaneously")
+    name: str = Field(..., min_length=1, max_length=150)
+    description: Optional[str] = Field(default="", max_length=2000)
+    start_date: date
+    created_by: str
+    assigned_user_ids: List[str] = Field(default_factory=list)
+    teams: List[TeamModel] = Field(default_factory=list)
+    controllers: List[str] = Field(default_factory=list)
+    open_participation: bool = False
+    allow_multiteam: bool = False
 
     @field_validator("start_date")
     @classmethod
     def validate_start_date(cls, v: date) -> date:
         today = date.today()
         if v < today:
-            raise ValueError(f"Start Date cannot be in the past. Selected: {v}, Today: {today}")
+            raise ValueError(f"Start date cannot be in the past ({v} < {today})")
         return v
 
 
 class JoinProjectRequest(BaseModel):
-    """Payload for a user requesting to join or directly joining a project."""
-    user_id: str = Field(..., description="User ID requesting to join")
+    user_id: str
+    team_id: Optional[str] = None
 
 
 class UpdateProjectDescriptionRequest(BaseModel):
-    """Payload for updating project scope / description in Plan Schedule Management."""
-    description: str = Field(default="", max_length=3000, description="Updated project description")
+    description: str = Field(default="", max_length=3000)
 
 
 class UpdateProjectPersonnelRequest(BaseModel):
-    """Payload for updating teams, individual contributors, and controllers in Project Workspace."""
-    teams: List[TeamModel] = Field(default_factory=list, description="Updated teams configured for this project")
-    assigned_user_ids: List[str] = Field(default_factory=list, description="Updated individual contributor IDs")
-    controllers: Optional[List[str]] = Field(default=None, description="Updated controller IDs")
+    teams: List[TeamModel] = Field(default_factory=list)
+    assigned_user_ids: List[str] = Field(default_factory=list)
+    controllers: Optional[List[str]] = None
 
 
 class UpdateProjectActivitiesRequest(BaseModel):
-    """Payload for updating WBS activities, tasks, and operations in Project Workspace."""
-    activities: List[Dict[str, Any]] = Field(default_factory=list, description="Updated WBS activities hierarchy")
+    activities: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class UpdateProjectDeliverablesRequest(BaseModel):
-    """Payload for updating WBS deliverables, sub-deliverables, and work packages."""
-    deliverables: List[Dict[str, Any]] = Field(default_factory=list, description="Updated WBS deliverables hierarchy")
+    deliverables: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class UpdateProjectWbsRequest(BaseModel):
-    """Payload for updating recursive WBS hierarchy (Major Deliverables -> Sub-deliverables -> Work Packages)."""
-    wbs: List[Dict[str, Any]] = Field(default_factory=list, description="Updated recursive WBS tree")
+    wbs: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class DependencyTypeEnum(str, Enum):
@@ -86,22 +78,19 @@ class DependencyTypeEnum(str, Enum):
 
 
 class DependencyModel(BaseModel):
-    """Activity dependency / precedence relationship."""
     dependency_id: Optional[str] = None
-    from_activity_id: str = Field(..., description="Predecessor Activity ID")
-    to_activity_id: str = Field(..., description="Successor Activity ID")
-    type: str = Field(default="FS", description="Relationship type: FS, SS, FF, SF")
-    lag_days: float = Field(default=0.0, ge=0.0, description="Lag in days (strictly non-negative)")
-    description: Optional[str] = Field(default="", description="Technical, operational, or managerial justification")
+    from_activity_id: str
+    to_activity_id: str
+    type: str = "FS"
+    lag_days: float = Field(default=0.0, ge=0.0)
+    description: Optional[str] = ""
 
 
 class UpdateProjectDependenciesRequest(BaseModel):
-    """Payload for updating project dependencies and precedence relationships."""
-    dependencies: List[DependencyModel] = Field(default_factory=list, description="Updated dependencies list")
+    dependencies: List[DependencyModel] = Field(default_factory=list)
 
 
 class ProjectSummary(BaseModel):
-    """Summary representation of a project for PM dashboard list/grid."""
     id: str
     name: str
     description: str
@@ -122,16 +111,14 @@ class ProjectSummary(BaseModel):
 
 
 class ScheduleSettingsModel(BaseModel):
-    """Configuration and baseline targets for Develop Schedule process."""
-    imposed_deadline_date: Optional[str] = Field(default=None, description="Externally imposed deadline date (YYYY-MM-DD)")
-    imposed_deadline_days: Optional[float] = Field(default=None, description="Externally imposed target duration in days")
-    near_critical_threshold_days: float = Field(default=25.0, ge=0.0, description="Float threshold (in days) to flag near-critical activities")
-    diagram_mode: str = Field(default="aon", description="Default network diagram view: 'aon' (CPM) or 'aoa' (PERT)")
-    notes: Optional[str] = Field(default="", description="PM notes on baseline schedule and critical path governance")
+    imposed_deadline_date: Optional[str] = None
+    imposed_deadline_days: Optional[float] = None
+    near_critical_threshold_days: float = Field(default=25.0, ge=0.0)
+    diagram_mode: str = "aon"
+    notes: Optional[str] = ""
 
 
 class UpdateScheduleSettingsRequest(BaseModel):
-    """Payload for updating schedule baseline parameters and deadlines."""
     imposed_deadline_date: Optional[str] = None
     imposed_deadline_days: Optional[float] = None
     near_critical_threshold_days: Optional[float] = None
@@ -140,72 +127,62 @@ class UpdateScheduleSettingsRequest(BaseModel):
 
 
 class ActivityStatusUpdateRequest(BaseModel):
-    """Payload for updating an activity's execution and verification status in Control Schedule."""
-    status: str = Field(..., description="One of: 'not_started', 'in_progress', 'completed', 'verified'")
-    progress_pct: Optional[float] = Field(default=None, ge=0.0, le=100.0, description="Percentage of completion")
-    actual_start_date: Optional[str] = Field(default=None, description="Actual start date YYYY-MM-DD")
-    actual_finish_date: Optional[str] = Field(default=None, description="Actual completion date YYYY-MM-DD")
-    verified_by: Optional[str] = Field(default=None, description="Controller ID or name who verified the activity")
-    verified_date: Optional[str] = Field(default=None, description="Date YYYY-MM-DD when verified by Controller")
-    reviewer_id: Optional[str] = Field(default=None, description="User ID performing the status change or controller review")
-    description: Optional[str] = Field(default="", description="Mandatory notes or review feedback description")
-    notes: Optional[str] = Field(default="", description="Variance notes, causes, or corrective actions")
-    completion_proof: Optional[str] = Field(default=None, description="Text description of deliverable proof or completion evidence")
-    verification_checklist: Optional[List[Dict[str, Any]]] = Field(default=None, description="Itemized acceptance checklist verified by Controller")
+    status: str
+    progress_pct: Optional[float] = Field(default=None, ge=0.0, le=100.0)
+    actual_start_date: Optional[str] = None
+    actual_finish_date: Optional[str] = None
+    verified_by: Optional[str] = None
+    verified_date: Optional[str] = None
+    reviewer_id: Optional[str] = None
+    description: Optional[str] = ""
+    notes: Optional[str] = ""
+    completion_proof: Optional[str] = None
+    verification_checklist: Optional[List[Dict[str, Any]]] = None
 
 
 class CalendarSettingsModel(BaseModel):
-    """Enterprise calendar and shift configuration."""
-    working_days: List[int] = Field(default=[0, 1, 2, 3, 4], description="0=Mon, 1=Tue, ..., 4=Fri, 5=Sat, 6=Sun")
-    holidays: List[str] = Field(default_factory=list, description="Statutory holidays and non-working dates (YYYY-MM-DD)")
-    shift_hours_per_day: float = Field(default=8.0, gt=0.0, le=24.0, description="Standard working hours per day")
-    calendar_name: str = Field(default="Standard 5-Day (Mon-Fri)", description="Descriptive calendar template label")
-
-
+    working_days: List[int] = Field(default=[0, 1, 2, 3, 4])
+    holidays: List[str] = Field(default_factory=list)
+    shift_hours_per_day: float = Field(default=8.0, gt=0.0, le=24.0)
+    calendar_name: str = "Standard 5-Day (Mon-Fri)"
 
 
 class CreateBaselineRequest(BaseModel):
-    """Payload to freeze current schedule into an immutable baseline snapshot."""
-    name: str = Field(..., min_length=1, max_length=120, description="Baseline name, e.g. Contract Baseline 0")
-    description: Optional[str] = Field(default="", max_length=1000, description="Notes on baseline rationale or approval")
+    name: str = Field(..., min_length=1, max_length=120)
+    description: Optional[str] = Field(default="", max_length=1000)
 
 
 class TimeLogEntry(BaseModel):
-    """Immutable record of focused work time logged on an activity."""
-    log_id: str = Field(..., description="Unique log session ID")
-    user_id: str = Field(..., description="User ID who performed the work")
-    user_name: Optional[str] = Field(default="Team Member", description="Full name or display handle")
-    start_time: str = Field(..., description="ISO 8601 session start timestamp")
-    end_time: str = Field(..., description="ISO 8601 session finish timestamp")
-    duration_seconds: int = Field(default=0, ge=0, description="Total duration in seconds")
-    notes: Optional[str] = Field(default="", description="Work notes or session task description")
+    log_id: str
+    user_id: str
+    user_name: Optional[str] = "Team Member"
+    start_time: str
+    end_time: str
+    duration_seconds: int = Field(default=0, ge=0)
+    notes: Optional[str] = ""
     created_at: Optional[str] = None
 
 
 class StartTimerRequest(BaseModel):
-    """Payload to start a running timer linked to an in-progress task."""
-    user_id: str = Field(..., description="User ID starting the timer")
-    user_name: Optional[str] = Field(default="", description="Optional display name")
-    notes: Optional[str] = Field(default="", description="Optional focus notes")
+    user_id: str
+    user_name: Optional[str] = ""
+    notes: Optional[str] = ""
 
 
 class StopTimerRequest(BaseModel):
-    """Payload to stop a running timer and record elapsed session time."""
-    user_id: str = Field(..., description="User ID stopping the timer")
-    user_name: Optional[str] = Field(default="", description="Optional display name")
-    duration_seconds: Optional[int] = Field(default=None, ge=0, description="Elapsed duration in seconds")
-    notes: Optional[str] = Field(default="", description="Work notes or session summary")
+    user_id: str
+    user_name: Optional[str] = ""
+    duration_seconds: Optional[int] = Field(default=None, ge=0)
+    notes: Optional[str] = ""
 
 
 class UpdateTimeLogRequest(BaseModel):
-    """Payload to update an existing timer session log (notes or associated activity)."""
-    user_id: str = Field(..., description="User ID requesting the update")
-    notes: Optional[str] = Field(default=None, description="Updated session notes")
-    target_activity_id: Optional[str] = Field(default=None, description="Reassigned activity ID (must be assigned & WIP)")
+    user_id: str
+    notes: Optional[str] = None
+    target_activity_id: Optional[str] = None
 
 
 class ProjectDetail(BaseModel):
-    """Complete project document representation."""
     id: str
     name: str
     description: str

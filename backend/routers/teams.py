@@ -5,11 +5,11 @@ Handles saving, fetching, and reusing teams created by Project Managers across p
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from backend.database.connection import get_db
-from backend.utility import to_object_id, format_date
+from backend.utility import format_date
 
 router = APIRouter(prefix="/syncflow/teams", tags=["Teams Library"])
 
@@ -17,6 +17,7 @@ router = APIRouter(prefix="/syncflow/teams", tags=["Teams Library"])
 class SaveTeamRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     member_ids: List[str] = Field(default_factory=list)
+    lead_id: Optional[str] = None
     created_by: str = Field(..., description="PM user ID")
 
 
@@ -24,6 +25,7 @@ class TeamResponse(BaseModel):
     team_id: str
     name: str
     member_ids: List[str]
+    lead_id: Optional[str] = None
     created_by: Optional[str] = None
     members_count: int = 0
     updated_at: Optional[str] = None
@@ -42,6 +44,7 @@ def _format_team(doc: Dict[str, Any]) -> Dict[str, Any]:
         "team_id": str(doc.get("team_id") or doc.get("_id")),
         "name": doc.get("name", "Unnamed Team"),
         "member_ids": member_ids,
+        "lead_id": str(doc.get("lead_id")) if doc.get("lead_id") else None,
         "created_by": str(doc.get("created_by") or ""),
         "members_count": len(member_ids),
         "updated_at": format_date(updated, "%Y-%m-%dT%H:%M:%S")
@@ -79,10 +82,12 @@ def get_pm_teams(pm_id: Optional[str] = None):
             key = name.lower()
             if key not in teams_dict:
                 m_ids = [str(m) for m in team.get("member_ids", [])]
+                lead_id = str(team.get("lead_id")) if team.get("lead_id") else None
                 teams_dict[key] = {
                     "team_id": str(team.get("team_id") or f"TEAM-{abs(hash(name)) % 100000}"),
                     "name": name,
                     "member_ids": m_ids,
+                    "lead_id": lead_id,
                     "created_by": pm_id or "",
                     "members_count": len(m_ids),
                     "updated_at": str(proj.get("updated_at", ""))
@@ -105,6 +110,7 @@ def save_team_to_library(payload: SaveTeamRequest):
         "team_id": team_id,
         "name": team_name,
         "member_ids": [str(m) for m in payload.member_ids],
+        "lead_id": str(payload.lead_id) if payload.lead_id else None,
         "created_by": payload.created_by,
         "updated_at": now,
         "created_at": now

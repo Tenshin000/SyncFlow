@@ -87,7 +87,8 @@ export function renderScheduleMatrixRowHtml(r, rowClass, badgeHtml) {
  * Generates HTML table row markup for duration estimation (Beta PERT, Parametric, Analogous, Single-Point).
  */
 export function renderEstimateRowHtml({ aid, act, wpName, tech, inputsHtml, te, sigma, varVal, isCrit, pathBadge, sigmaBadgeColor }) {
-  const isMilestone = Boolean(act && act.is_milestone);
+  const isMilestone = Boolean(act && (act.is_milestone || tech === 'milestone'));
+  const effectiveTech = isMilestone ? 'milestone' : (tech || 'three_point');
   return `
     <tr data-row-id="${aid}" style="${isCrit ? 'background: #FFFBFB;' : ''}">
       <td>
@@ -99,16 +100,13 @@ export function renderEstimateRowHtml({ aid, act, wpName, tech, inputsHtml, te, 
         <div style="font-size: 0.76rem; color: var(--slate);">${wpName}</div>
       </td>
       <td>
-        ${isMilestone ? `
-          <span class="badge badge-secondary" style="padding: 5px 8px; font-size: 0.78rem; font-weight: 700;">🎯 Milestone</span>
-        ` : `
-          <select class="form-control pert-select-tech" data-id="${aid}" style="padding: 4px 6px; font-size: 0.8rem; font-weight: 600;">
-            <option value="three_point" ${tech === 'three_point' ? 'selected' : ''}>🎲 Three-Point (Beta)</option>
-            <option value="parametric" ${tech === 'parametric' ? 'selected' : ''}>📐 Parametric</option>
-            <option value="analogous" ${tech === 'analogous' ? 'selected' : ''}>📜 Analogous</option>
-            <option value="single_point" ${tech === 'single_point' ? 'selected' : ''}>🎯 Single-Point</option>
-          </select>
-        `}
+        <select class="form-control pert-select-tech" data-id="${aid}" style="padding: 4px 6px; font-size: 0.8rem; font-weight: 600;">
+          <option value="three_point" ${effectiveTech === 'three_point' ? 'selected' : ''}>🎲 Three-Point (Beta)</option>
+          <option value="parametric" ${effectiveTech === 'parametric' ? 'selected' : ''}>📐 Parametric</option>
+          <option value="analogous" ${effectiveTech === 'analogous' ? 'selected' : ''}>📜 Analogous</option>
+          <option value="single_point" ${effectiveTech === 'single_point' ? 'selected' : ''}>🎯 Single-Point</option>
+          <option value="milestone" ${effectiveTech === 'milestone' ? 'selected' : ''}>🏁 Milestone</option>
+        </select>
       </td>
       <td>${inputsHtml}</td>
       <td style="text-align: right;">
@@ -182,7 +180,9 @@ export function renderControlTaskRowHtml(a, statusPillClass, statusIcon, statusT
       </td>
       <td style="padding: 8px; text-align: center; white-space: nowrap;">
         <select class="ctrl-row-status-select" data-act-id="${a.activity_id}" style="padding: 3px 6px; font-size: 0.78rem; font-weight: 600; border-radius: 4px; border: 1px solid var(--border); margin-right: 4px;">
-          <option value="not_started" ${a.status === 'not_started' ? 'selected' : ''}>⚪ White: Not Started</option>
+          ${a.status === 'not_started' 
+            ? '<option value="not_started" selected>⚪ White: Not Started</option>' 
+            : '<option value="not_started" disabled style="display: none;">⚪ White: Not Started (Locked)</option>'}
           <option value="in_progress" ${a.status === 'in_progress' ? 'selected' : ''}>🟡 Yellow: In-Progress</option>
           <option value="completed" ${a.status === 'completed' ? 'selected' : ''}>🟢 Green: Completed</option>
           <option value="verified" ${a.status === 'verified' ? 'selected' : ''}>🔵 Blue: Verified</option>

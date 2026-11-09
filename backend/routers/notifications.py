@@ -362,6 +362,13 @@ def handle_notification_action(notification_id: str, payload: NotificationAction
             }
         )
 
+        req_team_id = notif_data.get("requested_team_id")
+        if req_team_id:
+            proj_col.update_one(
+                {**pq, "teams.team_id": req_team_id},
+                {"$addToSet": {"teams.$.member_ids": requester_id}}
+            )
+
         # 2. Update notification status to approved
         notif_data["status"] = "approved"
         notif_data["reviewed_by"] = payload.user_id

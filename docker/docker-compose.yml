@@ -1,3 +1,5 @@
+name: syncflow
+
 services:
   # ============================================================================
   # 1. MongoDB Database Server (Pre-instantiated with $jsonSchema validation)

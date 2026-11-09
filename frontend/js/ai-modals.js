@@ -21,7 +21,7 @@ const LOCAL_STORAGE_GEMINI_KEY = "syncflow_gemini_api_key";
 function getStoredGeminiKey() {
   try {
     return localStorage.getItem(LOCAL_STORAGE_GEMINI_KEY) || "";
-  } catch {
+  } catch (err) {
     return "";
   }
 }
@@ -74,6 +74,12 @@ async function getProjectData(projectId) {
   return null;
 }
 
+// State Management for AI Requests and Cancellations (Items 6 & 7)
+let activeAiAbortController = null;
+let isAiRunning = false;
+let activeProgressSequence = null;
+let activeModalName = null;
+
 // Dynamic Progress Sequence Helper & Flash Notification
 /**
  * Initiates a step-by-step progress ticker animation for long-running AI generation.
@@ -100,7 +106,7 @@ function startProgressSequence(prefix, steps) {
     } else {
       elapsedSeconds += 2;
       if (detailEl) {
-        detailEl.textContent = `Optimizing PMBOK structure with Gemini... (${elapsedSeconds}s)`;
+        detailEl.textContent = `Optimizing PMBOK structure with Gemini... (${elapsedSeconds}s / 180s)`;
       }
     }
   };
@@ -108,19 +114,23 @@ function startProgressSequence(prefix, steps) {
   update();
   const interval = setInterval(update, 2000);
 
-  return {
+  const seqObj = {
     finish: (finalMsg) => {
       clearInterval(interval);
       if (titleEl) titleEl.textContent = finalMsg || "Complete! Applying updates...";
       if (pctEl) pctEl.textContent = "100%";
       if (barEl) barEl.style.width = "100%";
       if (detailEl) detailEl.textContent = "Updating workspace hierarchy...";
+      activeProgressSequence = null;
     },
     stop: () => {
       clearInterval(interval);
       if (container) container.style.display = "none";
+      activeProgressSequence = null;
     }
   };
+  activeProgressSequence = seqObj;
+  return seqObj;
 }
 
 /**
@@ -170,6 +180,85 @@ export function checkAndDisplayFlashMessage() {
 }
 
 
+/**
+ * Displays an on-screen toast notification for AI status and cancellations.
+ */
+export function showAiToast(message, type = "success") {
+  const existing = document.getElementById("syncflow-ai-toast");
+  if (existing) existing.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "syncflow-ai-toast";
+  const bg = type === "warning" ? "#78350F" : "#064E3B";
+  const border = type === "warning" ? "#F59E0B" : "#10B981";
+  const icon = type === "warning" ? "⚠️" : "✅";
+  toast.style.cssText = `
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 99999;
+    background: ${bg};
+    color: #FFFFFF;
+    padding: 1rem 1.4rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.25), 0 8px 10px -6px rgba(0,0,0,0.2);
+    border: 1px solid ${border};
+    font-size: 0.92rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: aiToastSlideIn 0.35s ease-out;
+  `;
+  toast.innerHTML = `
+    <span style="font-size: 1.3rem;">${icon}</span>
+    <span style="flex: 1;">${message}</span>
+    <button style="background: none; border: none; color: #FFFFFF; font-size: 1.3rem; cursor: pointer; padding: 0 4px;" onclick="this.parentElement.remove()">&times;</button>
+  `;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    if (toast && toast.parentElement) {
+      toast.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(-15px)";
+      setTimeout(() => toast.remove(), 600);
+    }
+  }, 5000);
+}
+
+/**
+ * Safely cancels active Gemini AI request with user confirmation and without errors.
+ */
+function cancelActiveAiRequest(source) {
+  if (activeAiAbortController) {
+    try {
+      activeAiAbortController.abort();
+    } catch (e) {
+      console.warn("Abort error:", e);
+    }
+  }
+  if (activeProgressSequence) {
+    activeProgressSequence.stop();
+    activeProgressSequence = null;
+  }
+  isAiRunning = false;
+  activeAiAbortController = null;
+  activeModalName = null;
+
+  // Reset modal buttons
+  ["wbs", "estimate", "dep"].forEach(prefix => {
+    const sub = document.getElementById(`btn-submit-ai-${prefix}`);
+    const can = document.getElementById(`btn-cancel-ai-${prefix}`);
+    if (sub) sub.disabled = false;
+    if (can) { can.disabled = false; can.textContent = "Cancel"; }
+    const load = document.getElementById(`ai-${prefix}-loading`);
+    if (load) load.style.display = "none";
+  });
+
+  showAiToast("⚠️ Gemini AI generation request was cancelled.", "warning");
+}
+
 // 1. AI Text-to-WBS Modal Logic
 
 /**
@@ -217,9 +306,19 @@ export function openWbsModal() {
 /**
  * Closes the AI Text-to-WBS modal dialog.
  */
-export function closeWbsModal() {
+export function closeWbsModal(force = false) {
+  if (isAiRunning && !force) {
+    const userConfirmed = confirm(
+      "⚠️ Cancel AI Generation Request?\n\n" +
+      "The ongoing request to Google Gemini will be safely terminated immediately. No data will be modified.\n\n" +
+      "Do you want to proceed with cancelling?"
+    );
+    if (!userConfirmed) return false;
+    cancelActiveAiRequest("wbs");
+  }
   const modal = document.getElementById("ai-wbs-modal");
   if (modal) modal.style.display = "none";
+  return true;
 }
 
 /**
@@ -257,17 +356,24 @@ export async function submitWbsGeneration() {
   const mode = modeRadio ? modeRadio.value : "merge";
   const apiKey = (keyInput ? keyInput.value : "").trim();
   const modelSelect = document.getElementById("ai-wbs-model-select");
-  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-latest";
+  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-lite-latest";
   if (apiKey) storeGeminiKey(apiKey);
 
   if (errorBox) errorBox.style.display = "none";
   if (submitBtn) submitBtn.disabled = true;
-  if (cancelBtn) cancelBtn.disabled = true;
+  if (cancelBtn) {
+    cancelBtn.disabled = false;
+    cancelBtn.textContent = "Cancel Request";
+  }
+
+  activeAiAbortController = new AbortController();
+  isAiRunning = true;
+  activeModalName = "wbs";
 
   const progress = startProgressSequence("ai-wbs", [
-    { pct: "30%", title: `Step 1/3: 🌐 Connecting to Google Gemini (${selectedModel})...`, detail: "Analyzing project charter & preparing PMBOK parameters..." },
-    { pct: "65%", title: "Step 2/3: 🧠 Decomposing Scope into PMBOK Hierarchy...", detail: "Synthesizing Deliverables, Work Packages & PERT duration estimates..." },
-    { pct: "90%", title: "Step 3/3: ⚡ Validating Structure & Inserting to MongoDB...", detail: "Verifying DCMA 14-point rules and committing baseline to workspace..." }
+    { pct: "30%", title: `Step 1/3: 🚀 Connecting to Google Gemini (${selectedModel})...`, detail: "Analyzing project charter & preparing PMBOK parameters..." },
+    { pct: "65%", title: "Step 2/3: ⚙️ Decomposing Scope into PMBOK Hierarchy...", detail: "Synthesizing Deliverables, Work Packages & PERT duration estimates..." },
+    { pct: "90%", title: "Step 3/3: 💾 Validating Structure & Inserting to MongoDB...", detail: "Verifying DCMA 14-point rules and committing baseline to workspace..." }
   ]);
 
   try {
@@ -280,39 +386,53 @@ export async function submitWbsGeneration() {
     };
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out after 90 seconds. Google Gemini took too long to respond. Please try again.")), 90000)
+      setTimeout(() => reject(new Error("Request timed out after 180 seconds. Google Gemini took too long to respond. Please try again.")), 180000)
     );
-    const res = await Promise.race([aiGenerateWbs(projectId, payload), timeoutPromise]);
-    if (res.error) {
+    const res = await Promise.race([
+      aiGenerateWbs(projectId, payload, { signal: activeAiAbortController.signal }),
+      timeoutPromise
+    ]);
+
+    if (res && res.isAborted) {
+      // User cancelled request cleanly
+      return;
+    }
+    if (res && res.error) {
       throw new Error(res.error);
     }
 
-    progress.finish("Complete! 🎉 WBS synthesized successfully.");
-    
-    // Store active view (View 2: Define Activities & WBS) and flash message for notification on reload
+    progress.finish("Complete! ✅ WBS synthesized successfully.");
+
     sessionStorage.setItem("syncflow_active_view", "2");
-    sessionStorage.setItem("syncflow_ai_flash", "✨ WBS successfully synthesized! Level 2 Deliverables and Work Packages are now live.");
+    sessionStorage.setItem("syncflow_ai_flash", "✅ WBS successfully synthesized! Level 2 Deliverables and Work Packages are now live.");
 
-    // Dismiss modal immediately
-    closeWbsModal();
+    closeWbsModal(true);
 
-    // Reload workspace to render the newly created WBS
     setTimeout(() => {
       window.location.reload();
     }, 350);
 
   } catch (err) {
     progress.stop();
+    if (activeAiAbortController && activeAiAbortController.signal.aborted) {
+      // Silently exit when aborted by user
+      return;
+    }
     if (errorBox && errorMsg) {
       errorMsg.textContent = "AI Generation Error: " + (err.message || "Failed to decompose scope into WBS.");
       errorBox.style.display = "block";
     }
   } finally {
+    isAiRunning = false;
+    activeAiAbortController = null;
+    activeModalName = null;
     if (submitBtn) submitBtn.disabled = false;
-    if (cancelBtn) cancelBtn.disabled = false;
+    if (cancelBtn) {
+      cancelBtn.disabled = false;
+      cancelBtn.textContent = "Cancel";
+    }
   }
 }
-
 
 // 2. AI DCMA 14-Point PERT Estimator Modal Logic
 
@@ -353,9 +473,19 @@ export function openEstimateModal() {
 /**
  * Closes the AI DCMA 14-Point PERT Estimator modal dialog.
  */
-export function closeEstimateModal() {
+export function closeEstimateModal(force = false) {
+  if (isAiRunning && !force) {
+    const userConfirmed = confirm(
+      "⚠️ Cancel AI Estimation Request?\n\n" +
+      "The ongoing request to Google Gemini will be safely terminated immediately. No data will be modified.\n\n" +
+      "Do you want to proceed with cancelling?"
+    );
+    if (!userConfirmed) return false;
+    cancelActiveAiRequest("estimate");
+  }
   const modal = document.getElementById("ai-estimate-modal");
   if (modal) modal.style.display = "none";
+  return true;
 }
 
 /**
@@ -381,17 +511,24 @@ export async function submitEstimateCalculation() {
   const customPrompt = (promptInput ? promptInput.value : "").trim();
   const apiKey = (keyInput ? keyInput.value : "").trim();
   const modelSelect = document.getElementById("ai-estimate-model-select");
-  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-latest";
+  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-lite-latest";
   if (apiKey) storeGeminiKey(apiKey);
 
   if (errorBox) errorBox.style.display = "none";
   if (submitBtn) submitBtn.disabled = true;
-  if (cancelBtn) cancelBtn.disabled = true;
+  if (cancelBtn) {
+    cancelBtn.disabled = false;
+    cancelBtn.textContent = "Cancel Request";
+  }
+
+  activeAiAbortController = new AbortController();
+  isAiRunning = true;
+  activeModalName = "estimate";
 
   const progress = startProgressSequence("ai-estimate", [
-    { pct: "30%", title: `Step 1/3: 🌐 Contacting Gemini (${selectedModel})...`, detail: "Auditing activities against DCMA 14-Point Metric 6 guidelines..." },
-    { pct: "65%", title: "Step 2/3: 🧠 Calculating PERT 3-Point Parameters...", detail: "Computing optimistic (a), most likely (m), and pessimistic (b) durations..." },
-    { pct: "90%", title: "Step 3/3: ⚡ Applying Estimates & Risk Rationales...", detail: "Committing PERT beta distribution parameters to schedule baseline..." }
+    { pct: "30%", title: `Step 1/3: 🔍 Auditing Activities with Gemini (${selectedModel})...`, detail: "Auditing activities against DCMA 14-Point Metric 6 guidelines..." },
+    { pct: "65%", title: "Step 2/3: 📐 Calculating PERT 3-Point Parameters...", detail: "Computing optimistic (a), most likely (m), and pessimistic (b) durations..." },
+    { pct: "90%", title: "Step 3/3: 💾 Applying Estimates & Risk Rationales...", detail: "Committing PERT beta distribution parameters to schedule baseline..." }
   ]);
 
   try {
@@ -402,18 +539,26 @@ export async function submitEstimateCalculation() {
     };
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out after 90 seconds. Google Gemini took too long to respond. Please try again.")), 90000)
+      setTimeout(() => reject(new Error("Request timed out after 180 seconds. Google Gemini took too long to respond. Please try again.")), 180000)
     );
-    const res = await Promise.race([aiEstimateDurations(projectId, payload), timeoutPromise]);
-    if (res.error) {
+    const res = await Promise.race([
+      aiEstimateDurations(projectId, payload, { signal: activeAiAbortController.signal }),
+      timeoutPromise
+    ]);
+
+    if (res && res.isAborted) {
+      // User cancelled request cleanly
+      return;
+    }
+    if (res && res.error) {
       throw new Error(res.error);
     }
 
-    progress.finish("Complete! 🎉 PERT estimates calculated.");
+    progress.finish("Complete! ✅ PERT estimates calculated.");
     sessionStorage.setItem("syncflow_active_view", "4");
-    sessionStorage.setItem("syncflow_ai_flash", "✨ DCMA 14-Point PERT estimates calculated and applied successfully!");
+    sessionStorage.setItem("syncflow_ai_flash", "✅ DCMA 14-Point PERT estimates calculated and applied successfully!");
 
-    closeEstimateModal();
+    closeEstimateModal(true);
 
     setTimeout(() => {
       window.location.reload();
@@ -421,16 +566,25 @@ export async function submitEstimateCalculation() {
 
   } catch (err) {
     progress.stop();
+    if (activeAiAbortController && activeAiAbortController.signal.aborted) {
+      // Silently exit when aborted by user
+      return;
+    }
     if (errorBox && errorMsg) {
       errorMsg.textContent = "AI Estimation Error: " + (err.message || "Failed to calculate estimates.");
       errorBox.style.display = "block";
     }
   } finally {
+    isAiRunning = false;
+    activeAiAbortController = null;
+    activeModalName = null;
     if (submitBtn) submitBtn.disabled = false;
-    if (cancelBtn) cancelBtn.disabled = false;
+    if (cancelBtn) {
+      cancelBtn.disabled = false;
+      cancelBtn.textContent = "Cancel";
+    }
   }
 }
-
 
 // 3. AI Precedence Dependency Extractor Modal Logic
 
@@ -470,9 +624,19 @@ export function openDependencyModal() {
 /**
  * Closes the AI Precedence Dependency Extractor modal dialog.
  */
-export function closeDependencyModal() {
+export function closeDependencyModal(force = false) {
+  if (isAiRunning && !force) {
+    const userConfirmed = confirm(
+      "⚠️ Cancel AI Dependency Extraction Request?\n\n" +
+      "The ongoing request to Google Gemini will be safely terminated immediately. No data will be modified.\n\n" +
+      "Do you want to proceed with cancelling?"
+    );
+    if (!userConfirmed) return false;
+    cancelActiveAiRequest("dep");
+  }
   const modal = document.getElementById("ai-dependency-modal");
   if (modal) modal.style.display = "none";
+  return true;
 }
 
 /**
@@ -500,17 +664,24 @@ export async function submitDependencyExtraction() {
   const customPrompt = (promptInput ? promptInput.value : "").trim();
   const apiKey = (keyInput ? keyInput.value : "").trim();
   const modelSelect = document.getElementById("ai-dep-model-select");
-  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-latest";
+  const selectedModel = modelSelect ? modelSelect.value : "gemini-flash-lite-latest";
   if (apiKey) storeGeminiKey(apiKey);
 
   if (errorBox) errorBox.style.display = "none";
   if (submitBtn) submitBtn.disabled = true;
-  if (cancelBtn) cancelBtn.disabled = true;
+  if (cancelBtn) {
+    cancelBtn.disabled = false;
+    cancelBtn.textContent = "Cancel Request";
+  }
+
+  activeAiAbortController = new AbortController();
+  isAiRunning = true;
+  activeModalName = "dep";
 
   const progress = startProgressSequence("ai-dep", [
-    { pct: "30%", title: `Step 1/3: 🌐 Analyzing Narrative (${selectedModel})...`, detail: "Identifying handoffs, dependencies, and lag requirements..." },
-    { pct: "65%", title: "Step 2/3: 🧠 Synthesizing Precedence Links (FS, SS, FF)...", detail: "Enforcing DCMA non-negative lags & testing cycle freedom with Kahn's algorithm..." },
-    { pct: "90%", title: "Step 3/3: ⚡ Committing Dependency Network...", detail: "Connecting activities into topological CPM schedule network..." }
+    { pct: "30%", title: `Step 1/3: 🔍 Analyzing Narrative (${selectedModel})...`, detail: "Identifying handoffs, dependencies, and lag requirements..." },
+    { pct: "65%", title: "Step 2/3: 🔗 Synthesizing Precedence Links (FS, SS, FF)...", detail: "Enforcing DCMA non-negative lags & testing cycle freedom with Kahn's algorithm..." },
+    { pct: "90%", title: "Step 3/3: 💾 Committing Dependency Network...", detail: "Connecting activities into topological CPM schedule network..." }
   ]);
 
   try {
@@ -522,18 +693,26 @@ export async function submitDependencyExtraction() {
     };
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out after 90 seconds. Google Gemini took too long to respond. Please try again.")), 90000)
+      setTimeout(() => reject(new Error("Request timed out after 180 seconds. Google Gemini took too long to respond. Please try again.")), 180000)
     );
-    const res = await Promise.race([aiExtractDependencies(projectId, payload), timeoutPromise]);
-    if (res.error) {
+    const res = await Promise.race([
+      aiExtractDependencies(projectId, payload, { signal: activeAiAbortController.signal }),
+      timeoutPromise
+    ]);
+
+    if (res && res.isAborted) {
+      // User cancelled request cleanly
+      return;
+    }
+    if (res && res.error) {
       throw new Error(res.error);
     }
 
-    progress.finish("Complete! 🎉 Dependencies extracted.");
+    progress.finish("Complete! ✅ Dependencies extracted.");
     sessionStorage.setItem("syncflow_active_view", "3");
-    sessionStorage.setItem("syncflow_ai_flash", "✨ Precedence network dependencies synthesized and validated successfully!");
+    sessionStorage.setItem("syncflow_ai_flash", "✅ Precedence network dependencies synthesized and validated successfully!");
 
-    closeDependencyModal();
+    closeDependencyModal(true);
 
     setTimeout(() => {
       window.location.reload();
@@ -541,16 +720,25 @@ export async function submitDependencyExtraction() {
 
   } catch (err) {
     progress.stop();
+    if (activeAiAbortController && activeAiAbortController.signal.aborted) {
+      // Silently exit when aborted by user
+      return;
+    }
     if (errorBox && errorMsg) {
       errorMsg.textContent = "AI Dependency Extraction Error: " + (err.message || "Failed to extract dependencies.");
       errorBox.style.display = "block";
     }
   } finally {
+    isAiRunning = false;
+    activeAiAbortController = null;
+    activeModalName = null;
     if (submitBtn) submitBtn.disabled = false;
-    if (cancelBtn) cancelBtn.disabled = false;
+    if (cancelBtn) {
+      cancelBtn.disabled = false;
+      cancelBtn.textContent = "Cancel";
+    }
   }
 }
-
 
 // Expose on window for direct HTML inline calls & developer console access
 

@@ -25,7 +25,7 @@ fi
 
 # Function to run docker compose with correct context and env file
 run_compose() {
-    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
+    docker compose -p syncflow --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
 }
 
 # Command dispatcher

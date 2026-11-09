@@ -204,11 +204,24 @@
               </button>
             </div>
 
-            <!-- Team Creation Form -->
-            <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1.1rem; margin-bottom: 1.2rem;">
+            <!-- Team Feedback & Edit Indicator Banners -->
+            <div id="team-editing-banner" class="alert-box alert-amber" style="display: none; margin-bottom: 0.9rem; align-items: center; justify-content: space-between;"></div>
+            <div id="team-added-banner" class="alert-box alert-success" style="display: none; margin-bottom: 0.9rem;"></div>
+
+            <!-- Team Creation Form Card -->
+            <div id="team-builder-form-card" style="background: #F8FAFC; border: 1.5px solid var(--border-light); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.4rem; transition: all 0.3s ease;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.65rem;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 1.25rem;">👥</span>
+                  <strong id="team-form-card-title" style="font-size: 1.05rem; color: var(--charcoal);">Create a New Team</strong>
+                  <span id="team-builder-mode-tag" class="badge badge-blue">New Team</span>
+                </div>
+                <span id="team-draft-count-badge" class="badge badge-gray" style="font-size: 0.8rem; font-weight: 700;">0 members selected</span>
+              </div>
+
               <div class="form-group">
-                <label for="team-name-input">Team Name*</label>
-                <input type="text" id="team-name-input" placeholder="e.g. Core Engineering Team">
+                <label for="team-name-input" style="font-weight: 700;">Team Name*</label>
+                <input type="text" id="team-name-input" placeholder="e.g. Core Engineering Team" style="font-size: 0.95rem; font-weight: 600;">
               </div>
 
               <!-- Dynamic Role Filter and Candidate Selection -->
@@ -220,21 +233,21 @@
                   </select>
                 </div>
                 <div class="form-group" style="display: flex; align-items: flex-end;">
-                  <button type="button" id="btn-add-all-filtered" class="btn btn-secondary btn-block" style="padding: 0.65rem 0.85rem;">
+                  <button type="button" id="btn-add-all-filtered" class="btn btn-secondary btn-block" style="padding: 0.65rem 0.85rem; font-weight: 600;">
                     ➕ Add All Filtered
                   </button>
                 </div>
               </div>
 
               <div class="form-group">
-                <label>Select Team Members:</label>
+                <label style="font-weight: 700;">Select Team Members (Optional - empty teams supported):</label>
                 <div id="team-candidate-picker-container" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.6rem; background: #FFFFFF;">
                   <!-- Checkbox candidate items -->
                 </div>
               </div>
 
               <div class="form-group" style="margin-top: 0.8rem;">
-                <label for="team-lead-select">Designate Team Lead (Optional):</label>
+                <label for="team-lead-select" style="font-weight: 700;">Designate Team Lead (Optional):</label>
                 <select id="team-lead-select" style="width: 100%; padding: 0.5rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem;">
                   <option value="">(None / No Designated Lead)</option>
                 </select>
@@ -243,12 +256,28 @@
                 </span>
               </div>
 
-              <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button type="button" id="btn-cancel-team-edit" class="btn btn-secondary btn-sm" style="display: none;">Cancel Edit</button>
-                <button type="button" id="btn-confirm-team" class="btn btn-primary btn-sm">
-                  Add Team
-                </button>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.1rem; padding-top: 0.9rem; border-top: 1px solid var(--border-light);">
+                <span id="team-form-hint" style="font-size: 0.82rem; color: var(--muted);">
+                  💡 Configure team details and click "Add Team to Project".
+                </span>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" id="btn-cancel-team-edit" class="btn btn-secondary" style="display: none; font-weight: 700; padding: 0.55rem 1.1rem;">
+                    ✕ Cancel Edit
+                  </button>
+                  <button type="button" id="btn-confirm-team" class="btn btn-primary" style="font-weight: 700; padding: 0.6rem 1.4rem;">
+                    ➕ Add Team to Project
+                  </button>
+                </div>
               </div>
+            </div>
+
+            <!-- Configured Teams Section Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.4rem 0 0.6rem 0;">
+              <h5 style="margin: 0; font-size: 0.95rem; color: var(--charcoal); font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                <span>📋 Configured Project Teams</span>
+                <span id="configured-teams-count-badge" class="badge badge-blue">0</span>
+              </h5>
+              <span style="font-size: 0.78rem; color: var(--muted);">Teams assembled for this project</span>
             </div>
 
             <!-- Configured Teams Display -->
@@ -365,6 +394,6 @@
     </div>
   </div>
 
-  <script type="module" src="/js/pm_dashboard.js"></script>
+  <script type="module" src="/js/pm_dashboard.js?v=20261107_1730"></script>
 </body>
 </html>

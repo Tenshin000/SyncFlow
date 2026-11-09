@@ -13,7 +13,7 @@ $EnvFile = Join-Path $ScriptDir "public.env"
 
 function Run-Compose {
     param([string[]]$ComposeArgs)
-    docker compose --env-file $EnvFile -f $ComposeFile @ComposeArgs
+    docker compose -p syncflow --env-file $EnvFile -f $ComposeFile @ComposeArgs
 }
 
 switch ($Command.ToLower()) {

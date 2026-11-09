@@ -193,13 +193,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   /**
    * Fetches and caches project/system users for resolving activity staff names.
    */
+  /**
+   * Fetches and caches project/system users for resolving activity staff names.
+   * Maps both ID and username for instantaneous O(1) roster lookups.
+   */
   async function ensureUsersLoaded() {
     if (userMap.size > 0) return;
     try {
       const res = await fetchAllUsers();
       if (res && res.data) {
         allUsers = res.data;
-        allUsers.forEach(u => userMap.set(String(u.id || u._id), u));
+        allUsers.forEach(u => {
+          const uid = String(u.id || u._id || "");
+          if (uid) userMap.set(uid, u);
+          if (u.username) userMap.set(u.username, u);
+        });
       }
     } catch (err) {
       console.warn("Could not load users map:", err);
@@ -567,32 +575,11 @@ function renderSearchResults() {
 
     // Join button clicks
     searchResultsContainer.querySelectorAll(".btn-join-project").forEach(btn => {
-      btn.addEventListener("click", async () => {
+      btn.addEventListener("click", () => {
         const pid = btn.getAttribute("data-proj-id");
         const isOpen = btn.getAttribute("data-open") === "true";
-        btn.disabled = true;
-        btn.textContent = isOpen ? "Joining..." : "Submitting Request...";
-
-        const { data, error } = await joinProject(pid, userId);
-        btn.disabled = false;
-
-        if (error) {
-          alert(`Join request failed: ${error}`);
-          btn.textContent = isOpen ? "⚡ Join Project (Immediate Access)" : "🛡️ Request to Join Project";
-          return;
-        }
-
-        if (isOpen) {
-          alert("🎉 You have successfully joined the project! Selecting project and opening schedule...");
-          await loadParticipatingProjects();
-          selectProjectDirectly(pid);
-        } else {
-          alert("📬 Your join request has been sent to the Project Manager for confirmation. You will receive a notification once reviewed.");
-          await loadSearchProjects(inputSearchQuery.value.trim());
-        }
-
-        refreshSidebarBadge();
-        if (bellCtrl) bellCtrl.refresh();
+        const proj = allSearchProjects.find(p => (p.id || p._id) === pid);
+        openJoinChoiceModal(pid, proj, isOpen, btn);
       });
     });
 
@@ -1764,7 +1751,7 @@ function renderAgendaKanbanBoard(myAssignedActivities, ctrlActivities) {
                 <code style="font-weight: 700; font-size: 0.78rem; color: ${isMilestone ? '#7C3AED' : 'inherit'};">
                   ${isMilestone ? '◆ ' : ''}${a.activity_id}
                 </code>
-                ${perm.isController ? `<span class="badge badge-blue" style="font-size: 0.65rem; padding: 1px 4px;">🛡️ Controller</span>` : ''}
+                ${perm.isController ? `<span class="badge badge-blue" style="font-size: 0.65rem; padding: 1px 4px;">🛡️ Controller</span>` : (!perm.isController && perm.isLead ? `<span class="badge badge-amber" style="font-size: 0.65rem; padding: 1px 4px;">👑 Team Lead</span>` : '')}
               </div>
               <div class="kanban-card-title">${a.name}</div>
               <div style="font-size: 0.75rem; color: var(--muted);">WP: ${a.work_package_id || 'N/A'}</div>
@@ -2103,7 +2090,189 @@ function closeMemberActivityModal() {
     await loadAgendaTasks();
   });
 
-  // VIEW 4: NOTIFICATIONS AUDIT LOG
+  // =========================================================================
+  // JOIN PROJECT CHOICE MODAL LOGIC (Item 3: Choose Individual vs Team)
+  // =========================================================================
+  const joinChoiceModal = document.getElementById("modal-join-choice");
+  const joinChoiceTitle = document.getElementById("join-choice-project-title");
+  const joinChoiceSubtitle = document.getElementById("join-choice-project-subtitle");
+  const joinRadioIndividual = document.getElementById("join-radio-individual");
+  const joinRadioTeam = document.getElementById("join-radio-team");
+  const joinLblIndividual = document.getElementById("lbl-join-individual");
+  const joinLblTeam = document.getElementById("lbl-join-team");
+  const joinTeamBox = document.getElementById("join-team-selection-box");
+  const joinTeamDropdown = document.getElementById("join-team-dropdown");
+  const joinTeamEmptyHint = document.getElementById("join-team-empty-hint");
+  const joinPolicyNotice = document.getElementById("join-choice-policy-notice");
+  const btnCloseJoinModal = document.getElementById("btn-close-join-modal");
+  const btnCancelJoinChoice = document.getElementById("btn-cancel-join-choice");
+  const btnConfirmJoinChoice = document.getElementById("btn-confirm-join-choice");
+
+  let activeJoinTarget = null; // { pid, proj, isOpen, triggerBtn }
+
+  function updateJoinChoiceRadioStyles() {
+    if (!joinRadioIndividual || !joinRadioTeam) return;
+    if (joinRadioIndividual.checked) {
+      if (joinLblIndividual) {
+        joinLblIndividual.style.borderColor = "#2563EB";
+        joinLblIndividual.style.background = "#EFF6FF";
+      }
+      if (joinLblTeam) {
+        joinLblTeam.style.borderColor = "var(--border)";
+        joinLblTeam.style.background = "#ffffff";
+      }
+      if (joinTeamBox) joinTeamBox.style.display = "none";
+    } else {
+      if (joinLblTeam) {
+        joinLblTeam.style.borderColor = "#2563EB";
+        joinLblTeam.style.background = "#EFF6FF";
+      }
+      if (joinLblIndividual) {
+        joinLblIndividual.style.borderColor = "var(--border)";
+        joinLblIndividual.style.background = "#ffffff";
+      }
+      if (joinTeamBox) joinTeamBox.style.display = "block";
+    }
+  }
+
+  if (joinRadioIndividual && joinRadioTeam) {
+    joinRadioIndividual.addEventListener("change", updateJoinChoiceRadioStyles);
+    joinRadioTeam.addEventListener("change", updateJoinChoiceRadioStyles);
+  }
+
+  function closeJoinChoiceModal() {
+    if (joinChoiceModal) joinChoiceModal.style.display = "none";
+    activeJoinTarget = null;
+  }
+
+  if (btnCloseJoinModal) btnCloseJoinModal.addEventListener("click", closeJoinChoiceModal);
+  if (btnCancelJoinChoice) btnCancelJoinChoice.addEventListener("click", closeJoinChoiceModal);
+  if (joinChoiceModal) {
+    joinChoiceModal.addEventListener("click", (e) => {
+      if (e.target === joinChoiceModal) closeJoinChoiceModal();
+    });
+  }
+
+  function openJoinChoiceModal(pid, proj, isOpen, triggerBtn) {
+    if (!joinChoiceModal) return;
+    activeJoinTarget = { pid, proj, isOpen, triggerBtn };
+
+    const pName = (proj && proj.name) || "Project";
+    if (joinChoiceTitle) joinChoiceTitle.textContent = `🚀 Join Project: ${pName}`;
+    if (joinChoiceSubtitle) {
+      joinChoiceSubtitle.textContent = isOpen
+        ? "Open Enrollment Project — Instant access upon joining"
+        : "Private Governance Project — Requires confirmation by the Project Manager";
+    }
+
+    if (joinPolicyNotice) {
+      joinPolicyNotice.innerHTML = isOpen
+        ? `⚡ <strong>Instant Access:</strong> This project has open participation. Once you confirm, you will be enrolled immediately.`
+        : `📬 <strong>Approval Required:</strong> Your request will be sent to the Project Manager for approval before you are enrolled.`;
+    }
+
+    // Default to Individual
+    if (joinRadioIndividual) joinRadioIndividual.checked = true;
+    if (joinRadioTeam) joinRadioTeam.checked = false;
+
+    // Populate teams dropdown
+    const teams = (proj && proj.teams) || [];
+    if (joinTeamDropdown) {
+      if (teams.length > 0) {
+        joinTeamDropdown.innerHTML = teams.map(t => `<option value="${t.team_id}">${t.name} (${t.member_count || 0} members)</option>`).join("");
+        joinTeamDropdown.style.display = "block";
+        if (joinTeamEmptyHint) joinTeamEmptyHint.style.display = "none";
+        if (joinRadioTeam) joinRadioTeam.disabled = false;
+        if (joinLblTeam) {
+          joinLblTeam.style.opacity = "1";
+          joinLblTeam.style.cursor = "pointer";
+        }
+      } else {
+        joinTeamDropdown.innerHTML = "";
+        joinTeamDropdown.style.display = "none";
+        if (joinTeamEmptyHint) joinTeamEmptyHint.style.display = "block";
+        if (joinRadioTeam) joinRadioTeam.disabled = true;
+        if (joinLblTeam) {
+          joinLblTeam.style.opacity = "0.6";
+          joinLblTeam.style.cursor = "not-allowed";
+        }
+      }
+    }
+
+    updateJoinChoiceRadioStyles();
+    if (btnConfirmJoinChoice) {
+      btnConfirmJoinChoice.disabled = false;
+      btnConfirmJoinChoice.textContent = isOpen ? "🚀 Join Project Now" : "📬 Submit Join Request";
+    }
+    joinChoiceModal.style.display = "flex";
+  }
+
+  if (btnConfirmJoinChoice) {
+    btnConfirmJoinChoice.addEventListener("click", async () => {
+      if (!activeJoinTarget) return;
+      const { pid, isOpen, triggerBtn } = activeJoinTarget;
+
+      const isTeam = joinRadioTeam && joinRadioTeam.checked;
+      const selectedTeamId = isTeam && joinTeamDropdown ? joinTeamDropdown.value : null;
+
+      btnConfirmJoinChoice.disabled = true;
+      btnConfirmJoinChoice.textContent = isOpen ? "Joining..." : "Submitting Request...";
+      if (triggerBtn) {
+        triggerBtn.disabled = true;
+        triggerBtn.textContent = isOpen ? "Joining..." : "Submitting Request...";
+      }
+
+      const { data, error } = await joinProject(pid, userId, selectedTeamId);
+
+      btnConfirmJoinChoice.disabled = false;
+      btnConfirmJoinChoice.textContent = isOpen ? "🚀 Join Project Now" : "📬 Submit Join Request";
+      if (triggerBtn) {
+        triggerBtn.disabled = false;
+        triggerBtn.textContent = isOpen ? "⚡ Join Project (Immediate Access)" : "📬 Request to Join Project";
+      }
+
+      if (error) {
+        alert(`Join request failed: ${error}`);
+        return;
+      }
+
+      closeJoinChoiceModal();
+
+      if (isOpen) {
+        const teamMsg = selectedTeamId ? " and assigned to your selected team" : " as an individual contributor";
+        alert(`✅ You have successfully joined the project${teamMsg}! Selecting project and opening schedule...`);
+        await loadParticipatingProjects();
+        selectProjectDirectly(pid);
+      } else {
+        const teamMsg = selectedTeamId ? " (requesting team assignment)" : " (as individual contributor)";
+        alert(`📬 Your join request${teamMsg} has been sent to the Project Manager for confirmation. You will receive a notification once approved.`);
+        await loadSearchProjects(inputSearchQuery.value.trim());
+      }
+
+      refreshSidebarBadge();
+      if (bellCtrl) bellCtrl.refresh();
+    });
+  }
+
+  // Real-time listener for notification updates (Item 5: instant sidebar badge update)
+  window.addEventListener("syncflow:notifications_updated", (e) => {
+    const count = (e.detail && e.detail.unread_count !== undefined) ? e.detail.unread_count : null;
+    if (sidebarNotifBadge) {
+      if (count !== null) {
+        if (count > 0) {
+          sidebarNotifBadge.textContent = count > 99 ? "99+" : String(count);
+          sidebarNotifBadge.style.display = "inline-block";
+        } else {
+          sidebarNotifBadge.style.display = "none";
+        }
+      } else {
+        refreshSidebarBadge();
+      }
+    }
+  });
+
+
+    // VIEW 4: NOTIFICATIONS AUDIT LOG
   /**
  * Fetches and displays recent project notifications in the Notifications view.
  */

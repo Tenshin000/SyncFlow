@@ -3,13 +3,11 @@ SyncFlow - Multi-Project Executive Portfolio Router (`/syncflow/portfolio`).
 Provides enterprise-wide aggregate health, Schedule Variance (SV),
 Schedule Performance Index (SPI), milestone completion, and critical delay diagnostics.
 """
-from datetime import datetime
-from typing import List, Optional, Dict, Any
-from bson import ObjectId
-from fastapi import APIRouter, HTTPException, status, Query
+from typing import Optional
+from fastapi import APIRouter, Query
 
 from backend.database.connection import get_db
-from backend.routers.projects import _calculate_control_schedule, _calculate_comprehensive_schedule
+from backend.routers.projects import _calculate_control_schedule
 from backend.utility import build_id_query
 
 router = APIRouter(prefix="/syncflow/portfolio", tags=["Executive Portfolio"])
@@ -39,7 +37,8 @@ def get_portfolio_dashboard(user_id: Optional[str] = Query(None)):
     current_user = users_col.find_one(build_id_query(user_id)) if user_id else None
 
 
-    is_pm = bool(current_user and current_user.get("role") == "Project Manager")
+    # User is PM if flagged as admin or has Project Manager role
+    is_pm = bool(current_user and (current_user.get("is_admin") or current_user.get("role", "").strip().lower() in ("project manager", "project_manager")))
 
     # Fetch projects: if PM, all projects; otherwise projects user participates in
     query = {}

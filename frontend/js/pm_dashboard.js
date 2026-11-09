@@ -14,6 +14,10 @@ import {
 } from "./api.js";
 import { requireAuth, renderProfileSidebar, setLoggedUser } from "./auth.js";
 import { initNotificationBell } from "./notifications.js";
+import { escapeHtml } from "./utility.js";
+
+// Reusable HTML escape utility imported from shared utility.js
+const safeEscapeHtml = escapeHtml;
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = requireAuth("pm");
@@ -75,6 +79,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const teamCandidateContainer = document.getElementById("team-candidate-picker-container");
   const btnConfirmTeam = document.getElementById("btn-confirm-team");
   const btnCancelTeamEdit = document.getElementById("btn-cancel-team-edit");
+  const teamBuilderFormCard = document.getElementById("team-builder-form-card");
+  const teamEditingBanner = document.getElementById("team-editing-banner");
+  const teamAddedBanner = document.getElementById("team-added-banner");
+  const teamFormCardTitle = document.getElementById("team-form-card-title");
+  const teamBuilderModeTag = document.getElementById("team-builder-mode-tag");
+  const teamDraftCountBadge = document.getElementById("team-draft-count-badge");
+  const configuredTeamsCountBadge = document.getElementById("configured-teams-count-badge");
+  const teamFormHint = document.getElementById("team-form-hint");
+  const wizardModalBody = document.getElementById("wizard-modal-body");
   const selectTeamLead = document.getElementById("team-lead-select");
   const configuredTeamsList = document.getElementById("configured-teams-list");
   const btnImportReusable = document.getElementById("btn-import-reusable-teams");
@@ -638,6 +651,18 @@ function getGloballyBlockedIds() {
  */
 function renderTeamBuilderSection() {
     const blocked = getGloballyBlockedIds();
+
+    // Update draft members counter badge
+    if (teamDraftCountBadge) {
+      const count = draftTeamMemberIds.length;
+      teamDraftCountBadge.textContent = `${count} member${count === 1 ? '' : 's'} selected`;
+      teamDraftCountBadge.className = count > 0 ? "badge badge-blue" : "badge badge-gray";
+    }
+
+    // Update configured teams count badge
+    if (configuredTeamsCountBadge) {
+      configuredTeamsCountBadge.textContent = String(configuredTeams.length);
+    }
     const availableForTeam = allUsersCache.filter(u => !blocked.has(String(u.id || u._id)));
 
     // Calculate dynamic roles
@@ -664,7 +689,11 @@ function renderTeamBuilderSection() {
     selectTeamRole.innerHTML = roleOptionsHtml;
 
     renderTeamCandidates();
-    renderTeamLeadOptions(editingTeamIndex !== null && configuredTeams[editingTeamIndex] ? (configuredTeams[editingTeamIndex].lead_id || "") : (selectTeamLead ? selectTeamLead.value : ""));
+    const currentLeadVal = selectTeamLead ? selectTeamLead.value : "";
+    const leadToSelect = (editingTeamIndex !== null && configuredTeams[editingTeamIndex])
+      ? (currentLeadVal || configuredTeams[editingTeamIndex].lead_id || "")
+      : currentLeadVal;
+    renderTeamLeadOptions(leadToSelect);
     renderConfiguredTeamsList();
   }
 
@@ -674,14 +703,21 @@ function renderTeamBuilderSection() {
 function renderTeamLeadOptions(selectedLeadId = "") {
     if (!selectTeamLead) return;
     let html = `<option value="">(None / No Designated Lead)</option>`;
+    let hasSelected = false;
     draftTeamMemberIds.forEach(uid => {
       const u = allUsersCache.find(x => String(x.id || x._id) === String(uid));
       if (u) {
-        const isSel = String(selectedLeadId) === String(uid) ? "selected" : "";
-        html += `<option value="${uid}" ${isSel}>👑 ${u.last_name}, ${u.first_name} (${u.role || 'Member'})</option>`;
+        const isSel = String(selectedLeadId) === String(uid);
+        if (isSel) hasSelected = true;
+        html += `<option value="${uid}" ${isSel ? "selected" : ""}>👑 ${u.last_name}, ${u.first_name} (${u.role || 'Member'})</option>`;
       }
     });
     selectTeamLead.innerHTML = html;
+    if (selectedLeadId && hasSelected) {
+      selectTeamLead.value = String(selectedLeadId);
+    } else {
+      selectTeamLead.value = "";
+    }
   }
 
   /**
@@ -724,6 +760,9 @@ function renderTeamCandidates() {
           if (!draftTeamMemberIds.includes(uid)) draftTeamMemberIds.push(uid);
         } else {
           draftTeamMemberIds = draftTeamMemberIds.filter(id => id !== uid);
+          if (selectTeamLead && selectTeamLead.value === uid) {
+            selectTeamLead.value = "";
+          }
         }
         renderTeamBuilderSection();
       });
@@ -759,21 +798,28 @@ function renderTeamCandidates() {
   btnConfirmTeam.addEventListener("click", () => {
     const tName = inputTeamName.value.trim();
     if (!tName) {
-      alert("Please provide a designation for the team.");
+      alert("Please provide a name for the team.");
+      inputTeamName.focus();
       return;
     }
 
     const leadId = selectTeamLead && selectTeamLead.value ? selectTeamLead.value : null;
+    const wasEditing = editingTeamIndex !== null;
+    const savedMemberCount = draftTeamMemberIds.length;
 
-    if (editingTeamIndex !== null) {
+    if (wasEditing) {
       // Update existing team in place
       configuredTeams[editingTeamIndex].name = tName;
       configuredTeams[editingTeamIndex].member_ids = [...draftTeamMemberIds];
       configuredTeams[editingTeamIndex].lead_id = leadId;
       editingTeamIndex = null;
-      btnConfirmTeam.textContent = "Add Team";
-      btnCancelTeamEdit.style.display = "none";
     } else {
+      // Prevent duplicate team name
+      if (configuredTeams.some(t => t.name.toLowerCase() === tName.toLowerCase())) {
+        alert(`A team named "${tName}" already exists. Please choose a distinct team name.`);
+        inputTeamName.focus();
+        return;
+      }
       // Add new team
       const newTeamId = `TEAM-${configuredTeams.length + 1}`;
       configuredTeams.push({
@@ -784,7 +830,34 @@ function renderTeamCandidates() {
       });
     }
 
-    // Auto-clear team name as requested!
+    // Visual feedback: show team added / updated notification banner
+    if (teamAddedBanner) {
+      const emptyNote = savedMemberCount === 0 ? " (Empty team — members can be assigned later)" : ` (${savedMemberCount} member${savedMemberCount === 1 ? '' : 's'})`;
+      teamAddedBanner.innerHTML = `<span>✅ <strong>Team ${wasEditing ? 'Updated' : 'Added'}:</strong> "${safeEscapeHtml(tName)}"${emptyNote}</span>`;
+      teamAddedBanner.style.display = "flex";
+      setTimeout(() => {
+        if (teamAddedBanner) teamAddedBanner.style.display = "none";
+      }, 6000);
+    }
+    if (teamEditingBanner) teamEditingBanner.style.display = "none";
+
+    // Reset form card styles & labels
+    if (teamBuilderFormCard) {
+      teamBuilderFormCard.style.border = "1.5px solid var(--border-light)";
+      teamBuilderFormCard.style.boxShadow = "none";
+      teamBuilderFormCard.style.background = "#F8FAFC";
+    }
+    if (teamFormCardTitle) teamFormCardTitle.textContent = "Create a New Team";
+    if (teamBuilderModeTag) {
+      teamBuilderModeTag.className = "badge badge-blue";
+      teamBuilderModeTag.textContent = "New Team";
+    }
+    if (teamFormHint) teamFormHint.textContent = "💡 Configure team details and click 'Add Team to Project'.";
+    btnConfirmTeam.innerHTML = "➕ Add Team to Project";
+    btnConfirmTeam.style.background = "";
+    btnCancelTeamEdit.style.display = "none";
+
+    // Auto-clear inputs for next team
     inputTeamName.value = "";
     draftTeamMemberIds = [];
     selectTeamRole.value = "All Roles";
@@ -793,6 +866,14 @@ function renderTeamCandidates() {
     renderTeamBuilderSection();
     renderUnassignedSection();
     updateRosterKPI();
+
+    // Smoothly ensure the configured teams list is in view
+    setTimeout(() => {
+      const listEl = document.getElementById("configured-teams-list");
+      if (listEl && listEl.lastElementChild) {
+        listEl.lastElementChild.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }, 50);
   });
 
   // Cancel Team Edit
@@ -801,8 +882,24 @@ function renderTeamCandidates() {
     inputTeamName.value = "";
     draftTeamMemberIds = [];
     if (selectTeamLead) selectTeamLead.value = "";
-    btnConfirmTeam.textContent = "Add Team";
+
+    if (teamFormCardTitle) teamFormCardTitle.textContent = "Create a New Team";
+    if (teamBuilderModeTag) {
+      teamBuilderModeTag.className = "badge badge-blue";
+      teamBuilderModeTag.textContent = "New Team";
+    }
+    if (teamFormHint) teamFormHint.textContent = "💡 Configure team details and click 'Add Team to Project'.";
+    btnConfirmTeam.innerHTML = "➕ Add Team to Project";
+    btnConfirmTeam.style.background = "";
     btnCancelTeamEdit.style.display = "none";
+
+    if (teamEditingBanner) teamEditingBanner.style.display = "none";
+    if (teamBuilderFormCard) {
+      teamBuilderFormCard.style.border = "1.5px solid var(--border-light)";
+      teamBuilderFormCard.style.boxShadow = "none";
+      teamBuilderFormCard.style.background = "#F8FAFC";
+    }
+
     renderTeamBuilderSection();
   });
 
@@ -810,36 +907,65 @@ function renderTeamCandidates() {
  * Renders the list of configured teams with member counts and removal triggers.
  */
 function renderConfiguredTeamsList() {
+    if (configuredTeamsCountBadge) {
+      configuredTeamsCountBadge.textContent = String(configuredTeams.length);
+    }
+
     if (configuredTeams.length === 0) {
-      configuredTeamsList.innerHTML = `<p style="font-size: 0.85rem; color: var(--muted); margin: 0.6rem 0;">No teams assembled yet.</p>`;
+      configuredTeamsList.innerHTML = `
+        <div style="background: #FFFFFF; border: 1.5px dashed var(--border); border-radius: 8px; padding: 1.5rem; text-align: center; color: var(--muted);">
+          <div style="font-size: 1.8rem; margin-bottom: 0.3rem;">👥</div>
+          <strong style="color: var(--charcoal); font-size: 0.95rem; display: block;">No teams configured yet</strong>
+          <span style="font-size: 0.85rem;">Use the Team Builder above to assemble teams, or proceed with individual contributors.</span>
+        </div>
+      `;
       return;
     }
 
     let listHtml = "";
     configuredTeams.forEach((team, idx) => {
+      const isBeingEdited = editingTeamIndex === idx;
+      const memberCount = (team.member_ids || []).length;
       const memberNames = (team.member_ids || []).map(mid => {
         const u = allUsersCache.find(x => String(x.id || x._id) === String(mid));
         return u ? `${u.last_name}, ${u.first_name} (${u.role || 'Member'})` : `User ${mid}`;
       }).join(", ");
 
       const leadUser = team.lead_id ? allUsersCache.find(x => String(x.id || x._id) === String(team.lead_id)) : null;
-      const leadBadge = leadUser 
-        ? `<span class="badge badge-amber" style="margin-left: 6px;">👑 Lead: ${leadUser.first_name} ${leadUser.last_name}</span>`
+      const leadBadge = leadUser
+        ? `<span class="badge badge-amber" style="margin-left: 6px;">👑 Lead: ${safeEscapeHtml(leadUser.first_name)} ${safeEscapeHtml(leadUser.last_name)}</span>`
         : "";
 
+      const cardBorder = isBeingEdited ? "2px solid #2563EB" : "1px solid var(--border-light)";
+      const cardBg = isBeingEdited ? "#EFF6FF" : "#FFFFFF";
+      const cardShadow = isBeingEdited ? "0 4px 12px rgba(37, 99, 235, 0.15)" : "none";
+
       listHtml += `
-        <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-left: 4px solid var(--primary); border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <strong>🏢 ${team.name}</strong> 
-            <span class="badge badge-blue" style="margin-left: 6px;">${team.member_ids.length} Members</span>
-            ${leadBadge}
-            <div style="font-size: 0.82rem; color: var(--slate); margin-top: 3px;">
-              ${memberNames || "No members"}
+        <div style="background: ${cardBg}; border: ${cardBorder}; border-left: 5px solid ${isBeingEdited ? '#2563EB' : 'var(--primary)'}; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center; box-shadow: ${cardShadow}; transition: all 0.2s ease;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <strong style="font-size: 1rem; color: var(--charcoal);">👥 ${safeEscapeHtml(team.name)}</strong>
+              ${memberCount > 0
+                ? `<span class="badge badge-blue">${memberCount} Member${memberCount === 1 ? '' : 's'}</span>`
+                : `<span class="badge badge-amber" style="font-weight: 700;">⚠️ Empty Team (0 Members)</span>`
+              }
+              ${isBeingEdited
+                ? `<span class="badge" style="background: #FEF3C7; color: #92400E; font-weight: 800; border: 1px solid #F59E0B;">✏️ Currently Editing Above</span>`
+                : ""
+              }
+              ${leadBadge}
+            </div>
+            <div style="font-size: 0.83rem; color: var(--slate); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${memberNames ? `<strong>Members:</strong> ${safeEscapeHtml(memberNames)}` : `<em style="color: var(--muted);">No members assigned yet (can be added later)</em>`}
             </div>
           </div>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn btn-secondary btn-sm btn-edit-team" data-index="${idx}">✏️ Edit</button>
-            <button class="btn btn-secondary btn-sm btn-remove-team" data-index="${idx}" style="color: #DC2626;">🗑️</button>
+          <div style="display: flex; gap: 8px; margin-left: 12px; flex-shrink: 0;">
+            <button type="button" class="btn btn-secondary btn-sm btn-edit-team" data-index="${idx}" ${isBeingEdited ? 'disabled style="opacity: 0.6;"' : ''}>
+              ${isBeingEdited ? '✏️ Editing...' : '✏️ Edit Team'}
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm btn-remove-team" data-index="${idx}" style="color: #DC2626;" title="Remove this team">
+              🗑️
+            </button>
           </div>
         </div>
       `;
@@ -847,31 +973,82 @@ function renderConfiguredTeamsList() {
 
     configuredTeamsList.innerHTML = listHtml;
 
+    // Attach Edit triggers
     configuredTeamsList.querySelectorAll(".btn-edit-team").forEach(btn => {
       btn.addEventListener("click", () => {
         const idx = parseInt(btn.getAttribute("data-index"), 10);
         editingTeamIndex = idx;
         const targetTeam = configuredTeams[idx];
         inputTeamName.value = targetTeam.name;
-        draftTeamMemberIds = [...targetTeam.member_ids];
-        btnConfirmTeam.textContent = "Update Team";
+        draftTeamMemberIds = [...(targetTeam.member_ids || [])];
+        if (selectTeamLead) selectTeamLead.value = targetTeam.lead_id || "";
+
+        // Update form titles & button
+        if (teamFormCardTitle) teamFormCardTitle.textContent = `Edit Team: "${targetTeam.name}"`;
+        if (teamBuilderModeTag) {
+          teamBuilderModeTag.className = "badge badge-amber";
+          teamBuilderModeTag.textContent = "Editing Mode";
+        }
+        if (teamFormHint) teamFormHint.innerHTML = `<strong>Editing mode:</strong> modify fields and click "✓ Save Team Changes".`;
+        btnConfirmTeam.innerHTML = "✓ Save Team Changes";
+        btnConfirmTeam.style.background = "#2563EB";
         btnCancelTeamEdit.style.display = "inline-flex";
+
+        // Display prominent editing banner above team builder inputs
+        if (teamEditingBanner) {
+          teamEditingBanner.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
+              <div>
+                <div style="font-weight: 800; font-size: 0.95rem; color: #92400E; display: flex; align-items: center; gap: 6px;">
+                  <span>✏️ Currently Editing:</span>
+                  <strong>"${safeEscapeHtml(targetTeam.name)}"</strong>
+                  <span class="badge badge-blue">${(targetTeam.member_ids || []).length} Members</span>
+                </div>
+                <div style="font-size: 0.82rem; color: #B45309; margin-top: 2px;">
+                  Modify team name, members, or designated lead below, then click <strong>"✓ Save Team Changes"</strong>.
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-banner-cancel-edit" style="font-weight: 700; flex-shrink: 0;">Cancel Edit</button>
+            </div>
+          `;
+          teamEditingBanner.style.display = "flex";
+          const bannerCancel = teamEditingBanner.querySelector("#btn-banner-cancel-edit");
+          if (bannerCancel) bannerCancel.addEventListener("click", () => btnCancelTeamEdit.click());
+        }
+
+        // Prominently highlight the team form card with active border & background
+        if (teamBuilderFormCard) {
+          teamBuilderFormCard.style.border = "2px solid #2563EB";
+          teamBuilderFormCard.style.boxShadow = "0 0 0 5px rgba(37, 99, 235, 0.25)";
+          teamBuilderFormCard.style.background = "#EFF6FF";
+        }
+
+        // Smoothly scroll the modal body directly to top so the form is front and center!
+        const modalBody = document.getElementById("wizard-modal-body");
+        if (modalBody) {
+          modalBody.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        if (teamBuilderFormCard) {
+          teamBuilderFormCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        if (inputTeamName) {
+          inputTeamName.focus();
+          inputTeamName.select();
+        }
+
         renderTeamBuilderSection();
-        renderTeamLeadOptions(targetTeam.lead_id || "");
       });
     });
 
+    // Attach Remove triggers
     configuredTeamsList.querySelectorAll(".btn-remove-team").forEach(btn => {
       btn.addEventListener("click", () => {
         const idx = parseInt(btn.getAttribute("data-index"), 10);
-        configuredTeams.splice(idx, 1);
         if (editingTeamIndex === idx) {
-          editingTeamIndex = null;
-          inputTeamName.value = "";
-          draftTeamMemberIds = [];
-          btnConfirmTeam.textContent = "Add Team";
-          btnCancelTeamEdit.style.display = "none";
+          btnCancelTeamEdit.click();
         }
+        configuredTeams.splice(idx, 1);
         renderTeamBuilderSection();
         renderUnassignedSection();
         updateRosterKPI();
@@ -1016,6 +1193,48 @@ function updateRosterKPI() {
 
   // PROJECT SUBMISSION & INITIALIZATION
   btnInitProject.addEventListener("click", async () => {
+    // Check if user is currently editing a team without saving
+    if (editingTeamIndex !== null) {
+      const tName = inputTeamName.value.trim();
+      if (tName) {
+        configuredTeams[editingTeamIndex].name = tName;
+        configuredTeams[editingTeamIndex].member_ids = [...draftTeamMemberIds];
+        configuredTeams[editingTeamIndex].lead_id = selectTeamLead && selectTeamLead.value ? selectTeamLead.value : null;
+        editingTeamIndex = null;
+      }
+    }
+
+    // Check if user entered team details without clicking Add Team
+    const pendingTeamName = (inputTeamName ? inputTeamName.value : "").trim();
+    if (pendingTeamName) {
+      const memberCount = draftTeamMemberIds.length;
+      const addNow = confirm(
+        `⚠️ Unsaved Team Notice:\n\n` +
+        `You entered details for team "${pendingTeamName}" (${memberCount} member${memberCount === 1 ? '' : 's'} selected), but haven't clicked "Add Team to Project".\n\n` +
+        `• Click OK to ADD "${pendingTeamName}" to your project now and proceed.\n` +
+        `• Click CANCEL to review or discard this team.`
+      );
+      if (addNow) {
+        const newTeamId = `TEAM-${configuredTeams.length + 1}`;
+        configuredTeams.push({
+          team_id: newTeamId,
+          name: pendingTeamName,
+          member_ids: [...draftTeamMemberIds],
+          lead_id: selectTeamLead && selectTeamLead.value ? selectTeamLead.value : null
+        });
+        inputTeamName.value = "";
+        draftTeamMemberIds = [];
+        renderTeamBuilderSection();
+        updateRosterKPI();
+      } else {
+        const proceedWithout = confirm(`Proceed and create the project WITHOUT adding "${pendingTeamName}"?`);
+        if (!proceedWithout) {
+          inputTeamName.focus();
+          return;
+        }
+      }
+    }
+
     btnInitProject.disabled = true;
     btnInitProject.textContent = "Initializing Project...";
 
@@ -1026,6 +1245,7 @@ function updateRosterKPI() {
     allAssigned.add(pmId);
     configuredTeams.forEach(t => {
       (t.member_ids || []).forEach(mid => allAssigned.add(String(mid)));
+      if (t.lead_id) allAssigned.add(String(t.lead_id));
     });
     designatedControllerIds.forEach(cid => allAssigned.add(String(cid)));
 

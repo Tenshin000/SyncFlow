@@ -10,7 +10,7 @@ from collections import OrderedDict
 from datetime import datetime, date, timedelta
 from typing import List, Optional, Dict, Any
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, status, Query, Body
+from fastapi import APIRouter, HTTPException, status, Query
 
 from backend.database.connection import get_db
 from backend.models.project import (
@@ -23,19 +23,15 @@ from backend.models.project import (
     UpdateProjectDependenciesRequest,
     UpdateScheduleSettingsRequest,
     ActivityStatusUpdateRequest,
-    DependencyModel,
     ProjectSummary,
     ProjectDetail,
     JoinProjectRequest,
-    CalendarSettingsModel,
     CreateBaselineRequest,
-    TimeLogEntry,
     StartTimerRequest,
     StopTimerRequest,
     UpdateTimeLogRequest
 )
 from backend.utility import (
-    to_object_id,
     build_id_query,
     parse_date,
     format_date,
@@ -43,7 +39,7 @@ from backend.utility import (
     add_working_days,
     get_nearest_business_day,
     clean_mongo_doc,
-    calculate_pert_statistics,
+    calculate_pert_statistics
 )
 
 router = APIRouter(prefix="/syncflow/projects", tags=["Projects Management"])
@@ -64,9 +60,7 @@ def _get_project_doc(project_id: str, col=None) -> Dict[str, Any]:
 
 
 
-# ------------------------------------------------------------------------------
-# HIGH-PERFORMANCE IN-MEMORY CPM & CONTROL SCHEDULE CACHE
-# ------------------------------------------------------------------------------
+# In-memory CPM and control schedule cache
 _CACHE_LOCK = threading.Lock()
 _COMPREHENSIVE_SCHEDULE_CACHE = OrderedDict()
 _CONTROL_SCHEDULE_CACHE = OrderedDict()
@@ -145,32 +139,71 @@ _fmt_dt = format_date
 
 
 def _format_summary(doc: Dict[str, Any]) -> ProjectSummary:
-    """Formats a MongoDB project document into a lightweight ProjectSummary model for dashboard listing."""
-    teams, m_set = doc.get("teams", []), set(str(u) for u in doc.get("assigned_user_ids", []))
-    for t in teams: m_set.update(str(m) for m in t.get("member_ids", []))
+    """
+    Formats a MongoDB project document into a lightweight ProjectSummary model.
+    Aggregates distinct participating member counts across both direct assignments
+    and configured team rosters for executive dashboard cards.
+    """
+    teams = doc.get("teams", [])
+    members_set = set(str(u) for u in doc.get("assigned_user_ids", []))
+    for t in teams:
+        members_set.update(str(m) for m in t.get("member_ids", []))
+
     return ProjectSummary(
-        id=str(doc.get("_id", "")), name=doc.get("name", "Untitled Project"), description=doc.get("description", ""),
-        start_date=_fmt_dt(doc.get("start_date")) or None, created_by=str(doc.get("created_by") or ""),
-        teams_count=len(teams), members_count=len(m_set), controllers_count=len(doc.get("controllers", [])),
-        activities_count=len(doc.get("activities", [])), deliverables_count=len(doc.get("deliverables", [])),
-        wbs_nodes_count=len(doc.get("wbs", [])), dependencies_count=len(doc.get("dependencies", [])),
-        open_participation=bool(doc.get("open_participation", False)), allow_multiteam=bool(doc.get("allow_multiteam", False)),
-        status=str(doc.get("status") or "in_progress"), created_at=_fmt_dt(doc.get("created_at")), updated_at=_fmt_dt(doc.get("updated_at"))
+        id=str(doc.get("_id", "")),
+        name=doc.get("name", "Untitled Project"),
+        description=doc.get("description", ""),
+        start_date=_fmt_dt(doc.get("start_date")) or None,
+        created_by=str(doc.get("created_by") or ""),
+        teams_count=len(teams),
+        members_count=len(members_set),
+        controllers_count=len(doc.get("controllers", [])),
+        activities_count=len(doc.get("activities", [])),
+        deliverables_count=len(doc.get("deliverables", [])),
+        wbs_nodes_count=len(doc.get("wbs", [])),
+        dependencies_count=len(doc.get("dependencies", [])),
+        open_participation=bool(doc.get("open_participation", False)),
+        allow_multiteam=bool(doc.get("allow_multiteam", False)),
+        status=str(doc.get("status") or "in_progress"),
+        created_at=_fmt_dt(doc.get("created_at")),
+        updated_at=_fmt_dt(doc.get("updated_at"))
     )
 
 
 def _format_detail(doc: Dict[str, Any]) -> ProjectDetail:
-    """Formats a full MongoDB project document into the comprehensive ProjectDetail model."""
-    teams = [{"team_id": str(t.get("team_id") or ""), "name": t.get("name", ""), "member_ids": [str(m) for m in t.get("member_ids", [])], "lead_id": str(t.get("lead_id")) if t.get("lead_id") else None} for t in doc.get("teams", [])]
+    """
+    Formats a full MongoDB project document into the comprehensive ProjectDetail model.
+    Maintains clean serialization for WBS trees, deliverables, activities, CPM dependencies,
+    and assigned team rosters with designated Team Leads.
+    """
+    teams = [
+        {
+            "team_id": str(t.get("team_id") or ""),
+            "name": t.get("name", ""),
+            "member_ids": [str(m) for m in t.get("member_ids", [])],
+            "lead_id": str(t.get("lead_id")) if t.get("lead_id") else None
+        }
+        for t in doc.get("teams", [])
+    ]
     return ProjectDetail(
-        id=str(doc.get("_id", "")), name=doc.get("name", ""), description=doc.get("description", ""),
-        start_date=_fmt_dt(doc.get("start_date")) or None, created_by=str(doc.get("created_by") or ""),
-        assigned_user_ids=[str(u) for u in doc.get("assigned_user_ids", [])], teams=teams,
-        controllers=[str(c) for c in doc.get("controllers", [])], open_participation=bool(doc.get("open_participation", False)),
-        allow_multiteam=bool(doc.get("allow_multiteam", False)), wbs=[_clean_wbs_item(n) for n in doc.get("wbs", [])],
-        deliverables=[_clean_wbs_item(d) for d in doc.get("deliverables", [])], activities=[_clean_wbs_item(a) for a in doc.get("activities", [])],
-        dependencies=doc.get("dependencies", []), schedule_settings=doc.get("schedule_settings"),
-        status=str(doc.get("status") or "in_progress"), created_at=_fmt_dt(doc.get("created_at"), "%Y-%m-%d %H:%M"), updated_at=_fmt_dt(doc.get("updated_at"), "%Y-%m-%d %H:%M")
+        id=str(doc.get("_id", "")),
+        name=doc.get("name", ""),
+        description=doc.get("description", ""),
+        start_date=_fmt_dt(doc.get("start_date")) or None,
+        created_by=str(doc.get("created_by") or ""),
+        assigned_user_ids=[str(u) for u in doc.get("assigned_user_ids", [])],
+        teams=teams,
+        controllers=[str(c) for c in doc.get("controllers", [])],
+        open_participation=bool(doc.get("open_participation", False)),
+        allow_multiteam=bool(doc.get("allow_multiteam", False)),
+        wbs=[_clean_wbs_item(n) for n in doc.get("wbs", [])],
+        deliverables=[_clean_wbs_item(d) for d in doc.get("deliverables", [])],
+        activities=[_clean_wbs_item(a) for a in doc.get("activities", [])],
+        dependencies=doc.get("dependencies", []),
+        schedule_settings=doc.get("schedule_settings"),
+        status=str(doc.get("status") or "in_progress"),
+        created_at=_fmt_dt(doc.get("created_at"), "%Y-%m-%d %H:%M"),
+        updated_at=_fmt_dt(doc.get("updated_at"), "%Y-%m-%d %H:%M")
     )
 
 
@@ -272,13 +305,19 @@ def create_project(payload: CreateProjectRequest):
     start_dt = datetime.combine(payload.start_date, datetime.min.time())
 
     teams_data = []
+    team_member_ids = set()
     for idx, t in enumerate(payload.teams):
         team_id = t.team_id or f"TEAM-{idx+1}"
+        m_ids = [str(m) for m in t.member_ids]
         lead_id = str(t.lead_id) if t.lead_id else None
+        for m in m_ids:
+            team_member_ids.add(m)
+        if lead_id:
+            team_member_ids.add(lead_id)
         team_entry = {
             "team_id": team_id,
             "name": t.name.strip(),
-            "member_ids": [str(m) for m in t.member_ids],
+            "member_ids": m_ids,
             "lead_id": lead_id
         }
         teams_data.append(team_entry)
@@ -305,6 +344,9 @@ def create_project(payload: CreateProjectRequest):
         controllers.insert(0, str(payload.created_by))
 
     assigned_users = [str(u) for u in payload.assigned_user_ids]
+    for tm in team_member_ids:
+        if tm not in assigned_users:
+            assigned_users.append(tm)
     if str(payload.created_by) not in assigned_users:
         assigned_users.insert(0, str(payload.created_by))
 
@@ -331,6 +373,32 @@ def create_project(payload: CreateProjectRequest):
 
     result = col.insert_one(doc)
     doc["_id"] = result.inserted_id
+
+    # Send in-app notification to any designated team leads
+    for t in teams_data:
+        lead_id = t.get("lead_id")
+        if lead_id:
+            try:
+                db["notifications"].insert_one({
+                    "project_id": str(result.inserted_id),
+                    "project_name": payload.name.strip(),
+                    "title": f"👑 Team Lead Assignment: {t.get('name')}",
+                    "message": f"You have been designated as Team Lead for '{t.get('name')}' in project '{payload.name.strip()}'. You are authorized to submit completed activities for review.",
+                    "type": "team_lead_assigned",
+                    "to_all": False,
+                    "to_pm": False,
+                    "recipient_teams": [],
+                    "recipient_users": [lead_id],
+                    "sender_id": str(payload.created_by),
+                    "sender_name": "Project Manager",
+                    "read_by": [],
+                    "deleted_by": [],
+                    "data": {"team_id": t.get("team_id"), "team_name": t.get("name"), "project_id": str(result.inserted_id)},
+                    "created_at": now
+                })
+            except Exception:
+                pass
+
     return _format_detail(doc)
 
 
@@ -457,6 +525,37 @@ def update_project_personnel(project_id: str, payload: UpdateProjectPersonnelReq
     if activities_reassigned:
         update_fields["activities"] = activities
 
+    # Identify newly appointed team leads to send assignment notifications
+    old_team_leads = {}
+    for old_t in current.get("teams", []):
+        old_team_leads[old_t.get("team_id") or old_t.get("name")] = str(old_t.get("lead_id") or "")
+
+    for t in teams_data:
+        curr_lead = t.get("lead_id")
+        t_key = t.get("team_id") or t.get("name")
+        old_lead = old_team_leads.get(t_key, "")
+        if curr_lead and curr_lead != old_lead:
+            try:
+                db["notifications"].insert_one({
+                    "project_id": str(current["_id"]),
+                    "project_name": proj_name,
+                    "title": f"👑 Team Lead Assignment: {t.get('name')}",
+                    "message": f"You have been designated as Team Lead for '{t.get('name')}' in project '{proj_name}'. You are authorized to submit completed activities for review.",
+                    "type": "team_lead_assigned",
+                    "to_all": False,
+                    "to_pm": False,
+                    "recipient_teams": [],
+                    "recipient_users": [curr_lead],
+                    "sender_id": created_by,
+                    "sender_name": "Project Manager",
+                    "read_by": [],
+                    "deleted_by": [],
+                    "data": {"team_id": t.get("team_id"), "team_name": t.get("name"), "project_id": str(current["_id"])},
+                    "created_at": now
+                })
+            except Exception:
+                pass
+
     updated = col.find_one_and_update(
         {"_id": current["_id"]},
         {"$set": update_fields},
@@ -548,6 +647,10 @@ def search_available_projects(
         s_sum = _format_summary(doc).dict()
         s_sum["membership_status"] = status
         s_sum["pm_name"] = pm_name
+        s_sum["teams"] = [
+            {"team_id": t.get("team_id"), "name": t.get("name"), "member_count": len(t.get("member_ids", []))}
+            for t in doc.get("teams", [])
+        ]
         results.append(s_sum)
 
     return results
@@ -557,6 +660,7 @@ def search_available_projects(
 def join_project(project_id: str, payload: JoinProjectRequest):
     """
     Handles a user's request to join a project.
+    Allows user to join as an Individual Contributor (team_id=None) or select an existing Team.
     - If open_participation is True: User joins immediately without PM notifications.
     - If open_participation is False (approval required): Creates a join_request notification for the PM.
     """
@@ -580,6 +684,15 @@ def join_project(project_id: str, payload: JoinProjectRequest):
     if user_id == pm_id or user_id in assigned_users:
         return {"status": "already_member", "message": "You are already a participant in this project."}
 
+    req_team_id = str(payload.team_id).strip() if payload.team_id else None
+    target_team = None
+    if req_team_id:
+        target_team = next((t for t in project.get("teams", []) if str(t.get("team_id")) == req_team_id), None)
+        if not target_team:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Team '{req_team_id}' not found in this project.")
+
+    team_name = target_team.get("name") if target_team else None
+
     # Open Participation: join immediately, no PM notification
     if project.get("open_participation", False):
         col.update_one(
@@ -589,10 +702,20 @@ def join_project(project_id: str, payload: JoinProjectRequest):
                 "$set": {"updated_at": datetime.utcnow()}
             }
         )
+        if req_team_id:
+            col.update_one(
+                {**q, "teams.team_id": req_team_id},
+                {"$addToSet": {"teams.$.member_ids": user_id}}
+            )
+            msg = f"Successfully joined '{project.get('name')}' as a member of team '{team_name}'."
+        else:
+            msg = f"Successfully joined '{project.get('name')}' as an individual contributor."
+
         return {
             "status": "joined",
-            "message": f"Successfully joined '{project.get('name')}'. You can now access your project tasks.",
-            "project_id": project_id
+            "message": msg,
+            "project_id": project_id,
+            "team_id": req_team_id
         }
 
     # Approval Required: check if a pending request already exists
@@ -617,11 +740,13 @@ def join_project(project_id: str, payload: JoinProjectRequest):
     u_role = user.get("role", "Member")
     proj_name = project.get("name", "Project")
 
+    team_desc = f"in team '{team_name}'" if team_name else "as an Individual Contributor"
+
     db["notifications"].insert_one({
         "project_id": str(project["_id"]),
         "project_name": proj_name,
         "title": f"Join Request: {u_name}",
-        "message": f"{u_name} (@{user.get('username')}, {u_role}) requested to join project '{proj_name}'.",
+        "message": f"{u_name} (@{user.get('username')}, {u_role}) requested to join project '{proj_name}' {team_desc}.",
         "type": "join_request",
         "to_all": False,
         "to_pm": True,
@@ -635,6 +760,8 @@ def join_project(project_id: str, payload: JoinProjectRequest):
             "requester_name": u_name,
             "requester_username": user.get("username"),
             "requester_role": u_role,
+            "requested_team_id": req_team_id,
+            "requested_team_name": team_name,
             "status": "pending"
         },
         "created_at": now
@@ -642,15 +769,12 @@ def join_project(project_id: str, payload: JoinProjectRequest):
 
     return {
         "status": "pending",
-        "message": f"Your request to join '{proj_name}' has been sent to the Project Manager for approval.",
-        "project_id": project_id
+        "message": f"Your request to join '{proj_name}' {team_desc} has been sent to the Project Manager for approval.",
+        "project_id": project_id,
+        "team_id": req_team_id
     }
 
 
-def _parse_date_or_none(val: Any) -> Optional[datetime]:
-    """Parses a date representation into a datetime at midnight, or returns None if invalid."""
-    d = parse_date(val)
-    return datetime.combine(d, datetime.min.time()) if d else None
 
 
 def _process_activities_payload(raw_activities: list) -> list:
@@ -668,7 +792,7 @@ def _process_activities_payload(raw_activities: list) -> list:
         assigned_users = [str(u).strip() for u in act.get("assigned_users", []) if str(u).strip()]
         controller_id = str(act.get("controller_id") or "").strip() or None
         tech = str(act.get("estimation_technique") or "three_point").strip().lower()
-        if tech not in ("three_point", "parametric", "analogous", "single_point"): tech = "three_point"
+        if tech not in ("three_point", "parametric", "analogous", "single_point", "milestone"): tech = "three_point"
 
         def _flt(k, default=0.0):
             """Safely extracts a float value from the activity dictionary, returning a default on error or None."""
@@ -678,9 +802,10 @@ def _process_activities_payload(raw_activities: list) -> list:
         a, m, b = _flt("optimistic", 3.0), _flt("most_likely", 5.0), _flt("pessimistic", 9.0)
         p_rate, p_qty = (_flt("parametric_rate", None) if act.get("parametric_rate") is not None else None), (_flt("parametric_quantity", None) if act.get("parametric_quantity") is not None else None)
         ana_actual_dur = _flt("analogous_actual_duration", None) if act.get("analogous_actual_duration") is not None else None
-        is_milestone = bool(act.get("is_milestone"))
+        is_milestone = bool(act.get("is_milestone") or tech == "milestone")
 
         if is_milestone:
+            tech = "milestone"
             te = sigma = var = 0.0
         elif tech == "three_point":
             if a <= 0:
@@ -2121,6 +2246,38 @@ def update_activity_execution_status(
     if norm_status not in ["not_started", "in_progress", "completed", "verified"]:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Status must be one of: 'not_started', 'in_progress', 'completed', 'verified'.")
 
+    # Enforce: Once a task has reached Work in Progress (WIP) or beyond, it cannot be reverted to Not Started
+    if old_status in ["in_progress", "completed", "verified"] and norm_status == "not_started":
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "A task that has reached Work in Progress (WIP) or beyond cannot be reverted to Not Started."
+        )
+
+    # Enforce Team Lead Authority: If an activity is assigned to teams that have a designated Team Lead,
+    # non-lead team members cannot submit the task for completion review (only Team Lead, PM, or Controllers can).
+    if norm_status == "completed" and payload.reviewer_id:
+        caller_id = str(payload.reviewer_id).strip()
+        pm_id = str(project.get("created_by") or "")
+        is_pm_or_ctrl = (caller_id == pm_id) or (caller_id in [str(c).strip() for c in project.get("controllers", [])])
+        if not is_pm_or_ctrl:
+            act_teams = set(str(t).strip() for t in (target_act.get("assigned_teams", []) or []))
+            user_in_lead_teams = []
+            for t in project.get("teams", []):
+                if str(t.get("team_id")).strip() in act_teams or str(t.get("name")).strip() in act_teams:
+                    t_members = [str(m).strip() for m in (t.get("member_ids") or [])]
+                    t_lead = str(t.get("lead_id") or "").strip()
+                    if t_lead and (caller_id in t_members or caller_id == t_lead):
+                        user_in_lead_teams.append((t.get("name"), t_lead))
+            direct_users = [str(u).strip() for u in (target_act.get("assigned_users", []) + target_act.get("assigned_user_ids", []))]
+            if user_in_lead_teams and caller_id not in direct_users:
+                leads = [lead for _, lead in user_in_lead_teams]
+                if caller_id not in leads:
+                    team_names = ", ".join(f"'{name}'" for name, _ in user_in_lead_teams)
+                    raise HTTPException(
+                        status.HTTP_403_FORBIDDEN,
+                        f"Only the designated Team Lead for {team_names} is authorized to submit completed activities for review."
+                    )
+
     now = datetime.utcnow()
     now_date_str = now.strftime("%Y-%m-%d")
     pm_id = str(project.get("created_by") or "")
@@ -2165,8 +2322,17 @@ def update_activity_execution_status(
         })
 
     # Notification & Transition Logic
-    assigned_targets = list({str(u) for u in (target_act.get("assigned_users", []) + target_act.get("assigned_user_ids", [])) if str(u).strip()})
-    pm_and_assigned = list(set(([pm_id] if pm_id else []) + assigned_targets))
+    assigned_targets = set(str(u) for u in (target_act.get("assigned_users", []) + target_act.get("assigned_user_ids", [])) if str(u).strip())
+    # Also resolve personnel from assigned teams (members and leads)
+    act_teams = set(str(t) for t in (target_act.get("assigned_teams", []) or []))
+    if act_teams:
+        for t in project.get("teams", []):
+            if str(t.get("team_id")) in act_teams or str(t.get("name")) in act_teams:
+                for m in (t.get("member_ids") or []):
+                    assigned_targets.add(str(m))
+                if t.get("lead_id"):
+                    assigned_targets.add(str(t.get("lead_id")))
+    pm_and_assigned = list(set(([pm_id] if pm_id else []) + list(assigned_targets)))
 
     if norm_status == "completed" and old_status != "completed":
         controllers = list({str(c) for c in (project.get("controllers", []) + ([target_act["controller_id"]] if target_act.get("controller_id") else []))})
@@ -2270,10 +2436,7 @@ def seed_realistic_activity_progress(project_id: str):
 
 
 
-# ==============================================================================
-# ==============================================================================
-# SINGLE PLANNED BASELINE SNAPSHOT & COMPARISON
-# ==============================================================================
+# Planned baseline snapshot and comparison
 
 @router.post("/{project_id}/baselines")
 def create_project_baseline(project_id: str, payload: CreateBaselineRequest, user_id: Optional[str] = Query(None)):
@@ -2350,9 +2513,7 @@ def delete_project_baseline(project_id: str, baseline_id: str, user_id: Optional
 
 
 
-# ==============================================================================
-# DCMA 14-POINT AUTOMATED SCHEDULE QUALITY DIAGNOSTIC
-# ==============================================================================
+# DCMA 14-point schedule quality audit
 
 @router.get("/{project_id}/schedule/dcma-quality")
 def get_dcma_quality_audit(project_id: str):
@@ -2535,9 +2696,7 @@ def get_dcma_quality_audit(project_id: str):
     }
 
 
-# ==============================================================================
-# TIME LOGS & TASK STOPWATCH (TRELLO-STYLE TIME TRACKING)
-# ==============================================================================
+# Time tracking and stopwatch logs
 
 def _is_user_assigned_to_activity(
     project: Dict[str, Any],
@@ -3010,3 +3169,93 @@ def get_user_project_time_logs(project_id: str, user_id: str):
 
 
 
+
+
+
+@router.post("/{project_id}/kickoff")
+def kickoff_project(project_id: str):
+    """
+    Officially starts project execution.
+    Transitions initial activities (activities with in-degree 0 in the CPM network,
+    or the first sequential activity) from 'not_started' to 'in_progress' (WIP).
+    Sets their actual_start_date to today.
+    Once a task is in WIP, it cannot be reverted to not_started.
+    """
+    col = _projects_col()
+    db = get_db()
+    project = _get_project_doc(project_id, col)
+
+    activities = project.get("activities", [])
+    if not activities:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Project has no activities to kick off.")
+
+    # Check if already kicked off
+    already_wip_or_done = [a for a in activities if a.get("status") in ["in_progress", "completed", "verified"]]
+    if already_wip_or_done:
+        return {
+            "status": "already_started",
+            "message": "Project execution has already begun.",
+            "kicked_off_activities": [a.get("activity_id") for a in already_wip_or_done],
+            "project": _format_detail(project)
+        }
+
+    # Find initial activities using CPM dependencies (predecessors)
+    dependencies = project.get("dependencies", [])
+    has_preds = set()
+    for dep in dependencies:
+        to_id = str(dep.get("to_activity_id") or dep.get("to") or "").strip()
+        if to_id:
+            has_preds.add(to_id)
+
+    initial_acts = [a for a in activities if a.get("activity_id") not in has_preds]
+    if not initial_acts:
+        initial_acts = [activities[0]]
+
+    now = datetime.utcnow()
+    now_date_str = now.strftime("%Y-%m-%d")
+    kicked_off_ids = []
+
+    for a in initial_acts:
+        a["status"] = "in_progress"
+        if not a.get("actual_start_date"):
+            a["actual_start_date"] = now_date_str
+        if not a.get("progress_pct") or a.get("progress_pct") == 0:
+            a["progress_pct"] = 5.0
+        kicked_off_ids.append(a.get("activity_id"))
+
+    updated = col.find_one_and_update(
+        {"_id": project["_id"]},
+        {"$set": {"activities": activities, "status": "in_progress", "updated_at": now}},
+        return_document=True
+    )
+
+    invalidate_project_schedule_cache(str(project["_id"]))
+
+    pm_id = str(project.get("created_by") or "")
+    proj_name = project.get("name", "Project")
+    db["notifications"].insert_one({
+        "project_id": str(project["_id"]),
+        "project_name": proj_name,
+        "title": f"🚀 Project Kicked Off: {proj_name}",
+        "message": f"Project execution has officially started! Initial task(s) [{', '.join(kicked_off_ids)}] moved to Work in Progress (WIP).",
+        "type": "project_update",
+        "to_all": True,
+        "to_pm": True,
+        "recipient_teams": [],
+        "recipient_users": [],
+        "sender_id": pm_id,
+        "sender_name": "Project Manager",
+        "read_by": [],
+        "data": {
+            "event": "project_kickoff",
+            "kicked_off_activities": kicked_off_ids
+        },
+        "created_at": now
+    })
+
+    return {
+        "status": "started",
+        "message": f"Project successfully started! Activity/activities {', '.join(kicked_off_ids)} moved to Work in Progress (WIP).",
+        "kicked_off_activities": kicked_off_ids,
+        "project": _format_detail(updated)
+    }

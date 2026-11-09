@@ -1,6 +1,6 @@
 """SyncFlow - AI NLP Pydantic Schemas."""
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 """Note: Models used with Gemini's response_schema must NOT use Field constraints like default, ge, le,
 as Google's protobuf Schema rejects those fields."""
@@ -70,20 +70,20 @@ class TextToWBSRequest(BaseModel):
     custom_prompt: Optional[str] = Field(default="", description="Optional PM custom instructions or focus areas")
     mode: str = Field(default="merge", description="'merge' (append & preserve) or 'replace' (recreate fresh)")
     api_key: Optional[str] = Field(default=None, description="Optional custom Gemini API key provided by PM")
-    model: Optional[str] = Field(default="gemini-flash-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
+    model: Optional[str] = Field(default="gemini-flash-lite-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
 
 class EstimateDurationsRequest(BaseModel):
     custom_prompt: Optional[str] = Field(default="", description="Optional PM guidance on complexity or resource speed")
     target_activity_ids: Optional[List[str]] = Field(default=None, description="Specific activity IDs to estimate (defaults to missing/all)")
     api_key: Optional[str] = Field(default=None, description="Optional custom Gemini API key provided by PM")
-    model: Optional[str] = Field(default="gemini-flash-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
+    model: Optional[str] = Field(default="gemini-flash-lite-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
 
 class ExtractDependenciesRequest(BaseModel):
     narrative_text: Optional[str] = Field(default="", description="Optional narrative describing activity order or handoffs")
     workflow_narrative: Optional[str] = Field(default="", description="Alias for narrative_text")
     custom_prompt: Optional[str] = Field(default="", description="Optional PM instructions for dependency generation")
     api_key: Optional[str] = Field(default=None, description="Optional custom Gemini API key provided by PM")
-    model: Optional[str] = Field(default="gemini-flash-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
+    model: Optional[str] = Field(default="gemini-flash-lite-latest", description="Gemini model to use: 'gemini-flash-latest' or 'gemini-flash-lite-latest'")
 
     def get_narrative(self) -> str:
         return (self.workflow_narrative or self.narrative_text or "").strip()

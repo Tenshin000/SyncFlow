@@ -6,6 +6,7 @@
 
 import {
   fetchProjectDetail,
+  kickoffProject,
   updateProjectDescription,
   fetchAllUsers,
   updateProjectPersonnel,
@@ -56,11 +57,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   const user = requireAuth();
   if (!user) return;
 
-  const projectId = sessionStorage.getItem("active_project_id");
+  // Resolve project ID from sessionStorage or URL query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const projectId = sessionStorage.getItem("active_project_id") || urlParams.get("project_id");
   if (!projectId) {
     window.location.href = "/project_manager/dashboard.html";
     return;
   }
+  sessionStorage.setItem("active_project_id", projectId);
 
   // Mount project notification bell scoped to this project
   initNotificationBell("#pm-workspace-notification-bell-container", user, projectId);
@@ -346,8 +350,10 @@ function renderPersonnelView() {
         resolvedMembers.forEach(m => {
           const mIdStr = String(m.id || m._id || m.username);
           const isCtrl = controllerSet.has(mIdStr);
+          const isLead = t.lead_id && (String(t.lead_id) === String(m.id || m._id) || String(t.lead_id) === String(m.username));
           const ctrlTag = isCtrl ? `<span class="badge badge-green" style="margin-right: 6px;">🛡️ Controller</span>` : "";
-          const badge = `${ctrlTag}<span class="badge badge-blue">${t.name}</span>`;
+          const leadTag = isLead ? `<span class="badge badge-amber" style="margin-right: 6px;">👑 Team Lead</span>` : "";
+          const badge = `${leadTag}${ctrlTag}<span class="badge badge-blue">${t.name}</span>`;
           membersCards += renderPersonCard(m, badge);
         });
 
@@ -572,7 +578,11 @@ function renderEditTeams() {
         const tIdx = parseInt(btn.getAttribute("data-team-idx"), 10);
         const mIdx = parseInt(btn.getAttribute("data-member-idx"), 10);
         if (draftTeams[tIdx]) {
+          const removedMid = draftTeams[tIdx].member_ids[mIdx];
           draftTeams[tIdx].member_ids.splice(mIdx, 1);
+          if (draftTeams[tIdx].lead_id && String(draftTeams[tIdx].lead_id) === String(removedMid)) {
+            draftTeams[tIdx].lead_id = null;
+          }
           renderEditTeams();
           renderEditUnassigned();
           renderEditControllers();
@@ -742,7 +752,8 @@ function renderEditControllers() {
     draftTeams.push({
       team_id: `TEAM-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       name: name,
-      member_ids: []
+      member_ids: [],
+      lead_id: null
     });
     inputNewTeamName.value = "";
     newTeamFormContainer.style.display = "none";
@@ -771,9 +782,37 @@ function renderEditControllers() {
   });
 
   // Modal Buttons
-  btnOpenPersonnelModal.addEventListener("click", () => {
+  btnOpenPersonnelModal.addEventListener("click", async () => {
+    btnOpenPersonnelModal.disabled = true;
+    try {
+      const { data: freshProject } = await fetchProjectDetail(projectId);
+      if (freshProject) {
+        project = freshProject;
+        renderPlanPersonnelStats();
+      }
+    } catch (err) {
+      console.warn("Could not refresh personnel:", err);
+    } finally {
+      btnOpenPersonnelModal.disabled = false;
+    }
     renderPersonnelView();
     personnelModal.style.display = "flex";
+  });
+
+  // Real-time listener for join approvals / personnel updates (Item 4)
+  window.addEventListener("syncflow:project_updated", async (e) => {
+    try {
+      const { data: freshProject } = await fetchProjectDetail(projectId);
+      if (freshProject) {
+        project = freshProject;
+        renderPlanPersonnelStats();
+        if (personnelModal && personnelModal.style.display === "flex") {
+          renderPersonnelView();
+        }
+      }
+    } catch (err) {
+      console.warn("Could not reload project after syncflow:project_updated:", err);
+    }
   });
 
   btnEditPersonnelModal.addEventListener("click", () => {
@@ -850,7 +889,7 @@ function renderEditControllers() {
 function switchView(viewIndex) {
     try {
       sessionStorage.setItem("syncflow_active_view", String(viewIndex));
-    } catch {}
+    } catch (err) {}
 
     navItems.forEach(item => item.classList.remove("active"));
     const activeItem = navContainer.querySelector(`[data-view="${viewIndex}"]`);
@@ -2054,6 +2093,7 @@ function closeActivityModal() {
         assigned_teams: assignedTeams,
         assigned_users: assignedUsers,
         is_milestone: isMilestone,
+        estimation_technique: isMilestone ? "milestone" : "three_point",
         duration: isMilestone ? 0.0 : 5.0,
         expected_time: isMilestone ? 0.0 : 5.0
       });
@@ -2068,11 +2108,16 @@ function closeActivityModal() {
         act.assigned_users = assignedUsers;
         act.is_milestone = isMilestone;
         if (isMilestone) {
+          act.estimation_technique = "milestone";
           act.duration = 0.0;
           act.expected_time = 0.0;
           act.optimistic = 0.0;
           act.most_likely = 0.0;
           act.pessimistic = 0.0;
+        } else if (act.estimation_technique === "milestone") {
+          act.estimation_technique = "three_point";
+          act.duration = act.duration || 5.0;
+          act.expected_time = act.expected_time || 5.0;
         }
       }
     }
@@ -3179,20 +3224,28 @@ function closeAnalogousModal() {
 function applyActivityDurationCalc(act, tech, { a, m, b, rate, qty, dur } = {}) {
     act.estimation_technique = tech;
     let te = 0, sigma = 0;
-    if (tech === "three_point") {
-      act.optimistic = a; act.most_likely = m; act.pessimistic = b;
-      te = round((a + 4 * m + b) / 6, 2);
-      sigma = round((b - a) / 6, 3);
-    } else if (tech === "parametric") {
-      act.parametric_rate = rate; act.parametric_quantity = qty;
-      te = round(rate * qty, 2);
-      sigma = round(te * 0.1, 3);
-    } else if (tech === "analogous") {
-      te = dur || act.duration || 75.0;
-      sigma = round(te * 0.15, 3);
+    if (tech === "milestone") {
+      act.is_milestone = true;
+      act.optimistic = 0.0; act.most_likely = 0.0; act.pessimistic = 0.0;
+      te = 0.0;
+      sigma = 0.0;
     } else {
-      te = m !== undefined ? m : (dur !== undefined ? dur : (act.duration || 35.0));
-      sigma = 0;
+      act.is_milestone = false;
+      if (tech === "three_point") {
+        act.optimistic = a; act.most_likely = m; act.pessimistic = b;
+        te = round((a + 4 * m + b) / 6, 2);
+        sigma = round((b - a) / 6, 3);
+      } else if (tech === "parametric") {
+        act.parametric_rate = rate; act.parametric_quantity = qty;
+        te = round(rate * qty, 2);
+        sigma = round(te * 0.1, 3);
+      } else if (tech === "analogous") {
+        te = dur || act.duration || 75.0;
+        sigma = round(te * 0.15, 3);
+      } else {
+        te = m !== undefined ? m : (dur !== undefined ? dur : (act.duration || 35.0));
+        sigma = 0;
+      }
     }
     act.duration = act.expected_time = te;
     act.std_dev = sigma;
@@ -3240,11 +3293,8 @@ function applyAnalogousBenchmark(aid, benchmark) {
     });
   }
 
-  // Error Function erf(x) using Abramowitz & Stegun 7.1.26
-  /**
- * Numerical approximation of Gauss error function for PERT probability calculation.
- */
-function erf(x) {
+  // Abramowitz & Stegun 7.1.26 erf approximation for PERT probability
+  function erf(x) {
     const a1 =  0.254829592;
     const a2 = -0.284496736;
     const a3 =  1.421413741;
@@ -3333,7 +3383,7 @@ function computePertScheduleClient(activities, dependencies) {
     actIds.forEach(id => { es[id] = ef[id] = 0.0; });
 
     topOrder.forEach(u => {
-      const d_u = parseFloat(actMap[u].duration || actMap[u].expected_time || 5.0);
+      const d_u = (actMap[u].is_milestone || actMap[u].estimation_technique === "milestone" || actMap[u].duration === 0) ? 0.0 : parseFloat(actMap[u].duration ?? actMap[u].expected_time ?? 5.0);
       let maxEs = 0.0;
       preds[u].forEach(({ from: p, type: rel, lag }) => {
         const cand = rel === "SS" ? es[p] + lag
@@ -3353,7 +3403,7 @@ function computePertScheduleClient(activities, dependencies) {
     actIds.forEach(id => { lf[id] = projectFinish; ls[id] = 0.0; });
 
     [...topOrder].reverse().forEach(u => {
-      const d_u = parseFloat(actMap[u].duration || actMap[u].expected_time || 5.0);
+      const d_u = (actMap[u].is_milestone || actMap[u].estimation_technique === "milestone" || actMap[u].duration === 0) ? 0.0 : parseFloat(actMap[u].duration ?? actMap[u].expected_time ?? 5.0);
       let minLf = succs[u].length > 0 ? Infinity : projectFinish;
       succs[u].forEach(({ to: s, type: rel, lag }) => {
         const cand = rel === "SS" ? ls[s] - lag + d_u
@@ -3378,7 +3428,8 @@ function computePertScheduleClient(activities, dependencies) {
     const criticalPathIds = actIds.filter(id => Math.abs(tf[id] - minFloat) <= 0.05);
     let mu = 0.0, varPath = 0.0;
     criticalPathIds.forEach(cid => {
-      mu += parseFloat(actMap[cid].duration || actMap[cid].expected_time || 5.0);
+      const d_cid = (actMap[cid].is_milestone || actMap[cid].estimation_technique === "milestone" || actMap[cid].duration === 0) ? 0.0 : parseFloat(actMap[cid].duration ?? actMap[cid].expected_time ?? 5.0);
+      mu += d_cid;
       varPath += parseFloat(actMap[cid].variance || 0.0);
     });
     const stdPath = varPath > 0 ? Math.sqrt(varPath) : 0.0;
@@ -3515,7 +3566,8 @@ function renderEstimateTable() {
         if (!text.includes(searchQuery)) return false;
       }
       if (wpFilterVal && a.work_package_id !== wpFilterVal) return false;
-      const tech = (a.estimation_technique || "three_point").toLowerCase();
+      const isMilestone = Boolean(a.is_milestone || (a.estimation_technique || "").toLowerCase() === "milestone");
+      const tech = isMilestone ? "milestone" : (a.estimation_technique || "three_point").toLowerCase();
       if (techFilterVal && tech !== techFilterVal) return false;
       const isCrit = activePertAnalysis.criticalPathIds.includes(a.activity_id);
       if (cpOnly && !isCrit) return false;
@@ -3549,11 +3601,11 @@ function renderEstimateTable() {
 
     filtered.forEach(act => {
       const aid = act.activity_id;
-      const isMilestone = Boolean(act.is_milestone);
+      const isMilestone = Boolean(act.is_milestone || (act.estimation_technique || "").toLowerCase() === "milestone");
       const isCrit = activePertAnalysis.criticalPathIds.includes(aid);
       const sched = activePertAnalysis.schedule[aid] || { float: 0 };
       const wpName = wpMap[act.work_package_id] || act.work_package_id || "Work Package";
-      const tech = (act.estimation_technique || "three_point").toLowerCase();
+      const tech = isMilestone ? "milestone" : (act.estimation_technique || "three_point").toLowerCase();
 
       const a = act.optimistic !== undefined ? act.optimistic : 3.0;
       const m = act.most_likely !== undefined ? act.most_likely : 5.0;
@@ -3686,12 +3738,34 @@ function bindEstimateTableEvents() {
         const aid = sel.getAttribute("data-id");
         const act = activities.find(a => a.activity_id === aid);
         if (act) {
-          act.estimation_technique = sel.value;
+          const newTech = sel.value;
+          act.estimation_technique = newTech;
+          if (newTech === "milestone") {
+            act.is_milestone = true;
+            act.optimistic = 0.0;
+            act.most_likely = 0.0;
+            act.pessimistic = 0.0;
+            act.duration = 0.0;
+            act.expected_time = 0.0;
+            act.std_dev = 0.0;
+            act.variance = 0.0;
+          } else {
+            act.is_milestone = false;
+            if (act.duration === 0.0 || !act.most_likely) {
+              act.optimistic = 3.0;
+              act.most_likely = 5.0;
+              act.pessimistic = 9.0;
+              act.duration = 5.0;
+              act.expected_time = 5.0;
+              act.std_dev = 1.0;
+              act.variance = 1.0;
+            }
+          }
           hasUnsavedEstimates = true;
           estimateSaveStatus.textContent = "Unsaved Changes";
           estimateSaveStatus.className = "badge badge-amber";
           estimateSaveStatus.style.display = "inline-block";
-          if (sel.value === "analogous" && !act.analogous_activity_id) {
+          if (newTech === "analogous" && !act.analogous_activity_id) {
             renderEstimateTable();
             updatePertSimulator();
             openAnalogousPicker(aid);
@@ -3729,13 +3803,14 @@ function updateRowValues(aid) {
       const row = estimateTableContainer.querySelector(`tr[data-row-id="${aid}"]`);
       if (!act || !row) return;
 
-      if (act.is_milestone) {
+      const techSel = row.querySelector(".pert-select-tech");
+      const tech = (techSel ? techSel.value : (act.estimation_technique || "three_point")).toLowerCase();
+
+      if (tech === "milestone" || act.is_milestone) {
         row.classList.remove("row-invalid-estimate");
         delete act.has_validation_error;
         return;
       }
-
-      const tech = (act.estimation_technique || "three_point").toLowerCase();
       const inA = row.querySelector(".pert-input-a"), inM = row.querySelector(".pert-input-m"), inB = row.querySelector(".pert-input-b");
       const inRate = row.querySelector(".pert-input-prate"), inQty = row.querySelector(".pert-input-pqty");
 
@@ -3999,7 +4074,13 @@ function updateRowValues(aid) {
       const act = (project.activities || []).find(a => a.activity_id === aid);
       if (!act) return;
 
-      if (act.is_milestone) {
+      const techSel = row.querySelector(".pert-select-tech");
+      const tech = (techSel ? techSel.value : (act.is_milestone ? "milestone" : (act.estimation_technique || "three_point"))).toLowerCase();
+      act.estimation_technique = tech;
+
+      if (tech === "milestone" || act.is_milestone) {
+        act.is_milestone = true;
+        act.estimation_technique = "milestone";
         act.optimistic = 0.0;
         act.most_likely = 0.0;
         act.pessimistic = 0.0;
@@ -4009,10 +4090,7 @@ function updateRowValues(aid) {
         act.variance = 0.0;
         return;
       }
-
-      const techSel = row.querySelector(".pert-select-tech");
-      const tech = (techSel ? techSel.value : (act.estimation_technique || "three_point")).toLowerCase();
-      act.estimation_technique = tech;
+      act.is_milestone = false;
 
       const inA = row.querySelector(".pert-input-a");
       const inM = row.querySelector(".pert-input-m");
@@ -4049,7 +4127,7 @@ function updateRowValues(aid) {
     // 2. Strict Pre-save Check: Opt (a) < Likely (m) < Pess (b)
     const invalidList = [];
     (project.activities || []).forEach(act => {
-      if (act.is_milestone) return;
+      if (act.is_milestone || act.estimation_technique === "milestone") return;
       const tech = (act.estimation_technique || "three_point").toLowerCase();
       if (tech === "three_point") {
         const a = parseFloat(act.optimistic);
@@ -4121,8 +4199,19 @@ function renderEstimateView() {
     activities.forEach(act => {
       if (act.duration === undefined || act.optimistic === undefined) {
         missingEstimates = true;
-        const cfg = STANDARD_PERT_BASELINE[act.activity_id] || { opt: 20.0, likely: 35.0, pess: 60.0, tech: "three_point" };
-        act.estimation_technique = cfg.tech || "three_point";
+        if (act.is_milestone || act.estimation_technique === "milestone") {
+          act.is_milestone = true;
+          act.estimation_technique = "milestone";
+          act.optimistic = 0.0;
+          act.most_likely = 0.0;
+          act.pessimistic = 0.0;
+          act.duration = 0.0;
+          act.expected_time = 0.0;
+          act.std_dev = 0.0;
+          act.variance = 0.0;
+        } else {
+          const cfg = STANDARD_PERT_BASELINE[act.activity_id] || { opt: 20.0, likely: 35.0, pess: 60.0, tech: "three_point" };
+          act.estimation_technique = cfg.tech || "three_point";
         act.optimistic = cfg.opt;
         act.most_likely = cfg.likely;
         act.pessimistic = cfg.pess;
@@ -4159,7 +4248,8 @@ function renderEstimateView() {
           act.variance = 0;
         }
       }
-    });
+    }
+  });
 
     // 1. Compute CPM and PERT path
     activePertAnalysis = computePertScheduleClient(activities, dependencies);
@@ -4183,7 +4273,7 @@ function renderEstimateView() {
 
     // Auto-correct any legacy values that violate strict a < m < b
     activities.forEach(act => {
-      if (act.is_milestone) return;
+      if (act.is_milestone || act.estimation_technique === "milestone") return;
       const tech = (act.estimation_technique || "three_point").toLowerCase();
       if (tech === "three_point") {
         let a = parseFloat(act.optimistic);
@@ -4295,7 +4385,121 @@ function renderEstimateView() {
   /**
  * Main render dispatcher for Section 4 Develop Schedule (CPM, Floats, AON, AOA, Gantt, DCMA).
  */
-async function renderScheduleView() {
+  // =========================================================================
+  // PROJECT KICK-OFF & WIP TRANSITION LOGIC (Item 8)
+  // =========================================================================
+  function updateKickoffButtonsState() {
+    const btnV5 = document.getElementById("btn-kickoff-project");
+    const btnV6 = document.getElementById("btn-ctrl-kickoff-project");
+    const bannerV5 = document.getElementById("sched-kickoff-container");
+
+    const acts = (currentControlModel && currentControlModel.activities) || (project && project.activities) || [];
+    const hasStartedTasks = acts.some(a => a.status === "in_progress" || a.status === "completed" || a.status === "verified");
+    const totalActs = acts.length;
+
+    [btnV5, btnV6].forEach(btn => {
+      if (!btn) return;
+      if (totalActs === 0) {
+        btn.disabled = true;
+        btn.classList.add("disabled");
+        btn.style.opacity = "0.65";
+        btn.style.cursor = "not-allowed";
+        btn.title = "Please create and sequence activities before starting the project.";
+        btn.innerHTML = "🚀 Start Project (No Activities)";
+      } else if (hasStartedTasks) {
+        btn.disabled = true;
+        btn.classList.add("disabled");
+        btn.style.opacity = "0.65";
+        btn.style.cursor = "not-allowed";
+        btn.title = "Project has already commenced: initial tasks are in WIP or completed.";
+        btn.innerHTML = "✅ Project Already In Progress (WIP)";
+      } else {
+        btn.disabled = false;
+        btn.classList.remove("disabled");
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+        btn.title = "Begin initial project activities and transition them to WIP.";
+        btn.innerHTML = "🚀 Start Project (Begin Initial Tasks)";
+      }
+    });
+
+    if (bannerV5) {
+      const hintEl = bannerV5.querySelector(".kickoff-hint-text");
+      if (hintEl) {
+        if (hasStartedTasks) {
+          hintEl.innerHTML = "<strong>Status: Active.</strong> Initial task(s) have commenced. Project execution is actively monitored under Process 6 (Control Schedule).";
+        } else {
+          hintEl.innerHTML = "Ready to launch? Clicking this button officially transitions initial topological task(s) into <strong>WIP (Work in Progress)</strong>.";
+        }
+      }
+    }
+  }
+
+  async function handleKickoffProject() {
+    const acts = (project && project.activities) || [];
+    if (acts.length === 0) {
+      alert("Cannot start project: No activities have been created yet.");
+      return;
+    }
+
+    const confirmed = confirm(
+      "Are you sure you want to officially kick off this project?\n\n" +
+      "• Initial sequenced task(s) in the CPM network will transition directly into WIP (Work in Progress).\n" +
+      "• Actual start date will be recorded as today.\n" +
+      "• Once started, tasks cannot be reverted to 'Not Started'.\n\n" +
+      "Click OK to begin project execution."
+    );
+
+    if (!confirmed) return;
+
+    const btnV5 = document.getElementById("btn-kickoff-project");
+    const btnV6 = document.getElementById("btn-ctrl-kickoff-project");
+    if (btnV5) { btnV5.disabled = true; btnV5.innerHTML = "⏳ Starting Project..."; }
+    if (btnV6) { btnV6.disabled = true; btnV6.innerHTML = "⏳ Starting Project..."; }
+
+    try {
+      const projId = (project && (project.id || project._id)) || projectId;
+      const { data, error } = await kickoffProject(projId);
+      if (error) {
+        alert("Failed to start project: " + error);
+        updateKickoffButtonsState();
+        return;
+      }
+
+      const initNames = (data.initial_activities || []).map(a => `${a.activity_id}: ${a.name}`).join("\n• ");
+      alert(
+        "🚀 Project successfully kicked off!\n\n" +
+        "The following initial task(s) have been moved to WIP (Work in Progress):\n• " +
+        (initNames || "Initial CPM tasks") +
+        "\n\nYou can track and control execution in '6. Control Schedule'."
+      );
+
+      // Refresh project details
+      const { data: freshProject } = await fetchProjectDetail(projId);
+      if (freshProject) project = freshProject;
+
+      // Refresh schedule models and control schedule
+      await renderScheduleView();
+      if (typeof renderControlScheduleView === "function") {
+        await renderControlScheduleView();
+      }
+
+      updateKickoffButtonsState();
+    } catch (err) {
+      alert("Error starting project: " + err.message);
+      updateKickoffButtonsState();
+    }
+  }
+
+  // Attach click listeners for Kick-off buttons
+  const btnKickoffV5 = document.getElementById("btn-kickoff-project");
+  if (btnKickoffV5) btnKickoffV5.addEventListener("click", handleKickoffProject);
+
+  const btnKickoffV6 = document.getElementById("btn-ctrl-kickoff-project");
+  if (btnKickoffV6) btnKickoffV6.addEventListener("click", handleKickoffProject);
+
+
+  async function renderScheduleView() {
     if (!project) return;
 
     const params = {};
@@ -4325,6 +4529,7 @@ async function renderScheduleView() {
         setupScheduleEventListeners();
         isScheduleInitialized = true;
       }
+      updateKickoffButtonsState();
     } catch (err) {
       showSchedAlert("Error calculating schedule: " + err.message, "danger");
     }
@@ -5226,6 +5431,7 @@ async function renderControlScheduleView() {
         setupControlEventListeners();
         isControlInitialized = true;
       }
+      updateKickoffButtonsState();
     } catch (err) {
       showCtrlAlert("Error loading Control Schedule: " + err.message, "danger");
     }
@@ -6054,6 +6260,19 @@ function openActivityStatusModal(act) {
     ctrlModalSub.textContent = `${act.name} (WP: ${act.work_package_id || "-"})`;
 
     ctrlModalStatus.value = act.status || "not_started";
+
+    // Item 8: Once a task has reached WIP or beyond, it cannot be reverted to Not Started
+    const notStartedOpt = ctrlModalStatus.querySelector('option[value="not_started"]');
+    if (notStartedOpt) {
+      if (act.status && act.status !== "not_started") {
+        notStartedOpt.disabled = true;
+        notStartedOpt.style.display = "none";
+      } else {
+        notStartedOpt.disabled = false;
+        notStartedOpt.style.display = "";
+      }
+    }
+
     ctrlModalProgress.value = act.progress_pct || 0;
     ctrlModalProgVal.textContent = `${(act.progress_pct || 0).toFixed(0)}%`;
 

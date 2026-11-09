@@ -78,18 +78,31 @@ export function initNotificationBell(mountTarget, user, projectId = null) {
    */
   async function refreshBadge() {
     const { data, error } = await fetchUnreadNotificationsCount(userId, projectId);
-    if (error || !data) {
-      badgeEl.style.display = "none";
-      return;
+    const count = (!error && data) ? (data.unread_count || 0) : 0;
+
+    // 1. Update top navigation bell badge
+    if (badgeEl) {
+      if (count > 0) {
+        badgeEl.textContent = count > 99 ? "99+" : String(count);
+        badgeEl.style.display = "flex";
+      } else {
+        badgeEl.style.display = "none";
+      }
     }
 
-    const count = data.unread_count || 0;
-    if (count > 0) {
-      badgeEl.textContent = count > 99 ? "99+" : String(count);
-      badgeEl.style.display = "flex";
-    } else {
-      badgeEl.style.display = "none";
+    // 2. Update sidebar notification badge immediately without reload (e.g., non-admin member workspace)
+    const sidebarBadge = document.getElementById("sidebar-notif-badge");
+    if (sidebarBadge) {
+      if (count > 0) {
+        sidebarBadge.textContent = count > 99 ? "99+" : String(count);
+        sidebarBadge.style.display = "inline-block";
+      } else {
+        sidebarBadge.style.display = "none";
+      }
     }
+
+    // 3. Dispatch global notifications updated event for active views
+    window.dispatchEvent(new CustomEvent("syncflow:notifications_updated", { detail: { unread_count: count, userId, projectId } }));
   }
 
   /**
@@ -245,6 +258,7 @@ export function initNotificationBell(mountTarget, user, projectId = null) {
           return;
         }
         alert(data.message || "User approved and added to the project!");
+        window.dispatchEvent(new CustomEvent("syncflow:project_updated", { detail: { projectId, action: "join_approved" } }));
         await loadNotifications();
       });
     });
