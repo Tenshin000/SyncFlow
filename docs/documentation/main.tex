@@ -1,0 +1,170 @@
+\documentclass[11pt,a4paper]{report}
+
+% Essential Encoding & Language Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+% Page Geometry & Margins
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.5cm,
+    right=2.5cm,
+    headheight=14pt
+}
+
+% Typography & Math
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{microtype}
+\usepackage{lmodern}
+
+% Graphics & Figures
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup[figure]{labelformat=empty,labelsep=none,font=small}
+\captionsetup[table]{labelformat=empty,labelsep=none,font=small}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc,fit}
+
+% Tables & Lists
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xltabular}
+\usepackage{multirow}
+\usepackage{enumitem}
+\setlist{itemsep=2pt, topsep=2pt, parsep=1pt}
+\setlist[itemize,1]{leftmargin=2.3em, labelsep=0.6em}
+\setlist[itemize,2]{leftmargin=1.8em, labelsep=0.5em}
+
+% Code Listings
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.96,0.97,0.98}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+% Headers & Footers
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small \textit{SyncFlow - Project Documentation}}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\small \thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% Hyperlinks
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!75!black,
+    citecolor=blue!75!black,
+    urlcolor=blue!75!black
+}
+
+% Titles & Headings Formatting
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\LARGE\bfseries}{\chaptertitlename\ \thechapter}{10pt}{\huge}
+\titlespacing*{\chapter}{0pt}{-15pt}{15pt}
+\titlespacing*{\section}{0pt}{10pt}{6pt}
+\titlespacing*{\subsection}{0pt}{8pt}{4pt}
+
+% Prevent automatic word hyphenation
+\usepackage[none]{hyphenat}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+
+\begin{document}
+% 1. Academic Frontispiece / Title Page
+\pagenumbering{roman}
+\input{chapters/0_Frontispiece.tex}
+
+% 2. Table of Contents
+\pagenumbering{arabic}
+\footnotesize
+\tableofcontents
+\normalsize
+
+\newpage
+
+% Main Body Chapters
+\input{chapters/1_Introduction.tex}
+\input{chapters/2_Project_Planning.tex}
+\input{chapters/3_Theoretical_Foundations.tex}
+\input{chapters/4_Implementation.tex}
+\input{chapters/5_NLP.tex}
+\input{chapters/6_User_Guide.tex}
+\input{chapters/7_Conclusion.tex}
+
+% Bibliography
+\begin{thebibliography}{99}
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibitem{pmbok}
+Project Management Institute. (2021). \textit{A Guide to the Project Management Body of Knowledge (PMBOK\textsuperscript{\textregistered} Guide) -- Seventh Edition}. Project Management Institute, Newtown Square, PA.
+
+\bibitem{dcma14}
+Defense Contract Management Agency (DCMA). (2012). \textit{DCMA-INST 102: Schedule Health Assessment Framework (14-Point Assessment)}. DCMA Enterprise Performance Division, Fort Lee, VA.
+
+\bibitem{malcolm1959}
+Malcolm, D. G., Roseboom, J. H., Clark, C. E., \& Fazar, W. (1959). Application of a Technique for Research and Development Program Evaluation (PERT). \textit{Operations Research}, 7(5), 646--669.
+
+\bibitem{kelley1959}
+Kelley, J. E., \& Walker, M. R. (1959). Critical-Path Planning and Scheduling. \textit{Proceedings of the Eastern Joint Computer Conference}, 160--173.
+
+\bibitem{fleming2010}
+Fleming, Q. W., \& Koppelman, J. M. (2010). \textit{Earned Value Project Management (4th Edition)}. Project Management Institute.
+
+\bibitem{kahn1962}
+Kahn, A. B. (1962). Topological Sorting of Large Networks. \textit{Communications of the ACM}, 5(11), 558--562.
+
+\bibitem{tarjan1972}
+Tarjan, R. (1972). Depth-First Search and Linear Graph Algorithms. \textit{SIAM Journal on Computing}, 1(2), 146--160.
+
+\bibitem{gemini2024}
+Gemini Team, Google DeepMind. (2024). \textit{Gemini 1.5: Unlocking Multimodal Understanding Across Millions of Tokens of Context}. arXiv preprint arXiv:2403.05530.
+
+\bibitem{mongodb7}
+MongoDB, Inc. (2024). \textit{MongoDB Documentation: \$jsonSchema Validation \& BSON Extended JSON}. Available at: \url{https://www.mongodb.com/docs/manual/core/schema-validation/}.
+
+\bibitem{fastapi}
+Ramírez, S. (2024). \textit{FastAPI: High Performance Modern Python Web Framework}. Available at: \url{https://fastapi.tiangolo.com/}.
+
+\bibitem{docker}
+Docker Inc. (2024). \textit{Docker Compose File Specification and Multi-Container Orchestration}. Available at: \url{https://docs.docker.com/compose/}.
+
+\bibitem{bpm}
+Business and Project Management course material. 
+\end{thebibliography}
+\end{document}

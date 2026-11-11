@@ -1,0 +1,154 @@
+\chapter{Theoretical Foundations}
+\section{The Schedule Management Lifecycle}
+\textit{SyncFlow} pairs classical Operations Research (OR) techniques with the scheduling framework introduced in the PMBOK\textsuperscript{\textregistered} Guide. Rather than tracking tasks with informal dates and spreadsheets, the backend treats schedules as formal graphs and statistical models so network validity, duration uncertainty, execution variance, and schedule quality can all be checked automatically.
+
+\vspace{4mm}
+
+In this model, turning high-level project scope into a monitored schedule follows six sequential stages:
+\begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=1pt]
+    \item \textbf{Plan Schedule Management}: Defining working weekdays, daily shift hours, holidays, and team responsibility rules before building any schedule;
+    
+    \vspace{1mm}
+    
+    \item \textbf{Define Activities}: Breaking down terminal Work Breakdown Structure (WBS) work packages into discrete, schedulable activities;
+    
+    \vspace{1mm}
+    
+    \item \textbf{Sequence Activities}: Recording technical precedence links among those activities using the Precedence Diagramming Method (PDM);
+    
+    \vspace{1mm}
+    
+    \item \textbf{Estimate Activity Durations}: Quantifying expected effort and uncertainty through Three-Point parameters under a Beta probability model;
+    
+    \vspace{1mm}
+    
+    \item \textbf{Develop Schedule}: Computing early and late execution bounds, float margins, and critical paths across the network before freezing an approved baseline;
+    
+    \vspace{1mm}
+    
+    \item \textbf{Control Schedule}: Monitoring ongoing delivery against the baseline using Earned Value metrics, execution states, and deliverable sign-off.
+\end{enumerate}
+
+\vspace{6mm}
+
+\section{Critical Path Method and Precedence Networks}
+\subsection{Topological Sorting and Cycle Detection}
+The analytical scheduling engine models the project as a directed acyclic graph (DAG) $G = (V, E)$, where $V = \{v_1, \dots, v_n\}$ represents activities and $E \subseteq V \times V$ represents precedence constraints. Each edge $e = (u, v) \in E$ denotes a logical constraint where $u$ precedes $v$, qualified by dependency type $\text{Type}(e) \in \{\text{FS}, \text{SS}, \text{FF}, \text{SF}\}$ and lead/lag $L_{u,v} \in \mathbb{R}$.
+
+\vspace{2mm}
+
+Before scheduling passes execute, graph $G$ is verified as acyclic via combined Kahn's in-degree evaluation and Depth-First Search (DFS) three-color traversal ($\textit{White} \to \textit{Gray} \to \textit{Black}$). If a back-edge to a node in the active recursion stack (\textit{Gray}) is detected, a cyclic deadlock is flagged:
+$$
+    \text{Cycle}(G) \iff \exists (u, v) \in E \text{ such that } \text{Color}(v) = \textit{Gray}
+$$
+A topological ordering $\tau: V \to \{1, \dots, |V|\}$ ensures that for every directed edge $(u, v) \in E$, $\tau(u) < \tau(v)$.
+
+\newpage
+
+\subsection{Forward and Backward Pass Calculations}
+Given a topologically sorted sequence and calendar working durations $d_v \ge 0$, the \textbf{Forward Pass} computes Early Start ($ES$) and Early Finish ($EF$):
+$$
+    ES_v = \max_{u \in \text{pred}(v)} (\text{Candidate}_{u,v}) \qquad \qquad ES_{\text{root}} = 0 \qquad \qquad EF_v = ES_v + d_v
+$$
+Where the predecessor constraint candidate value $\text{Candidate}_{u,v}$ is defined by relationship type:
+$$
+    \text{Candidate}_{u,v} = \begin{cases}
+        EF_u + L_{u,v} & (\text{FS}) \quad \mid \quad ES_u + L_{u,v} \quad (\text{SS}) \\
+        EF_u + L_{u,v} - d_v & (\text{FF}) \quad \mid \quad ES_u + L_{u,v} - d_v \quad (\text{SF})
+    \end{cases}
+$$
+Total project duration is $T_{\text{project}} = \max_{v \in V} (EF_v)$. The \textbf{Backward Pass} propagates from terminal nodes, computing Late Finish ($LF$) and Late Start ($LS$):
+$$
+    LF_u = \min_{v \in \text{succ}(u)} (\text{Required}_{u,v}) \qquad \qquad LF_{\text{terminal}} = T_{\text{project}} \qquad \qquad LS_u = LF_u - d_u
+$$
+$$
+    \text{Required}_{u,v} = \begin{cases}
+        LS_v - L_{u,v} & (\text{FS}) \quad \mid \quad LS_v - L_{u,v} + d_u \quad (\text{SS}) \\
+        LF_v - L_{u,v} & (\text{FF}) \quad \mid \quad LF_v - L_{u,v} + d_u \quad (\text{SF})
+    \end{cases}
+$$
+
+\vspace{4mm}
+
+\subsection{Float Formulation and Path Criticality}
+For each activity $i \in V$, the platform computes \textbf{Total Float} ($TF$) and \textbf{Free Float} ($FF$):
+$$
+    TF_i = LS_i - ES_i = LF_i - EF_i \qquad \qquad FF_i = \min_{j \in \text{succ}(i)} \left( ES_j - L_{i,j} \right) - EF_i
+$$
+An activity is defined as \textbf{Critical} if its Total Float is zero within numerical tolerance:
+$$
+    \text{Critical}(i) \iff |TF_i| \le \varepsilon \quad (\varepsilon = 10^{-4} \text{ days})
+$$
+The \textbf{Critical Path} is the contiguous sequence of critical activities from project start to finish. Any delay along this chain propagates day-for-day to the final delivery date.
+
+\vspace{4mm}
+
+\section{PERT Statistical Risk Engine and Probability Modeling}
+Single-point duration estimates rarely hold up in practice when tasks carry technical uncertainty. \textit{SyncFlow} implements the Program Evaluation and Review Technique (PERT), modeling each task duration as a Beta random variable bounded by three estimates: Optimistic ($a_i$), Most Likely ($m_i$), and Pessimistic ($b_i$), with $0 \le a_i \le m_i \le b_i$. From these parameters, the mean expected duration ($t_{e,i}$), standard deviation ($\sigma_i$), and variance ($\sigma_i^2$) follow directly:
+$$
+    t_{e,i} = \frac{a_i + 4m_i + b_i}{6} \qquad \qquad \sigma_i = \frac{b_i - a_i}{6} \qquad \qquad \sigma_i^2 = \left(\frac{b_i - a_i}{6}\right)^2
+$$
+Assuming activity durations along Critical Path $CP \subseteq V$ vary independently, the Central Limit Theorem allows total critical path duration to be approximated by a normal distribution:
+$$
+    T_{CP} \sim \mathcal{N}(\mu_{CP}, \sigma_{CP}^2) \qquad \qquad \mu_{CP} = \sum_{i \in CP} t_{e,i} \qquad \qquad \sigma_{CP} = \sqrt{\sum_{i \in CP} \sigma_i^2}
+$$
+For any target deadline $T_{\text{target}}$, the standardized deviate $Z = \frac{T_{\text{target}} - \mu_{CP}}{\sigma_{CP}}$ gives the probability of finishing on or before that date:
+$$
+    P(T_{CP} \le T_{\text{target}}) = \Phi(Z) = \frac{1}{2} \left[ 1 + \text{erf}\left(\frac{Z}{\sqrt{2}}\right) \right]
+$$
+$\text{erf}(x)=\frac{2}{\sqrt{\pi }}\int _{0}^{x}e^{-t^{2}}\,dt$
+
+\newpage
+
+\section{Earned Value Management and the S-Curve Banana Envelope}
+During execution, \textit{SyncFlow} tracks schedule performance using time-based Earned Value Management (EVM) rather than relying solely on subjective status percentages. Over $t$ elapsed working days, progress is measured with five standard metrics:
+\begin{itemize}[itemsep=1pt,topsep=1pt]
+    \item \textbf{Planned Value}: $PV(t) = \sum_{i \in V} d_i \cdot \text{PlannedProgress\%}_i(t)$
+    \item \textbf{Earned Value}: $EV(t) = \sum_{i \in V} d_i \cdot (\text{ActualProgress\%}_i / 100)$
+    \item \textbf{Schedule Variance}: $SV = EV - PV$
+    \item \textbf{Schedule Performance Index}: $SPI = \frac{EV}{PV}$ 
+    \item \textbf{Time Estimate at Completion}: $EAC_t = \frac{\text{Planned Duration}}{SPI}$
+\end{itemize}
+
+\vspace{3mm}
+
+Non-critical activities have room to slide within their available float without delaying the final deadline, so \textit{SyncFlow} plots the \textbf{Banana Envelope} between two boundary curves:
+\begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=1pt]
+    \item \textbf{Early S-Curve ($PV_{\text{Early}}$)}: Cumulative progress when every activity runs as early as possible ($ES$).
+    \item \textbf{Late S-Curve ($PV_{\text{Late}}$)}: Cumulative progress when every activity is shifted as late as possible ($LS$) without moving the project finish date.
+\end{enumerate}
+The region between $PV_{\text{Early}}$ and $PV_{\text{Late}}$ forms the ``Banana Envelope''. As long as Earned Value ($EV$) stays inside this band, minor delays can still be absorbed by float. Dropping below $PV_{\text{Late}}$ means the final deadline is at risk unless schedule compression is applied.
+
+\vspace{4mm}
+
+\section{DCMA 14-Point Schedule Quality Assessment}
+Before locking a baseline, \textit{SyncFlow} also runs an automated quality audit modeled on the \textbf{Defense Contract Management Agency (DCMA)} 14-Point Assessment. Each check evaluates structural or temporal discipline directly from the activity graph, as summarized in the table below.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{0.90}
+\caption*{Mathematical Formulations of the Automated DCMA 14-Point Quality Assessment.}
+\begin{tabularx}{\textwidth}{c l X c}
+\toprule
+\textbf{\#} & \textbf{DCMA Metric} & \textbf{Mathematical Definition \& Evaluation Rule} & \textbf{Threshold} \\
+\midrule
+1 & Logic (Open Ends) & $\frac{|\{i \in V \mid \text{in-deg}(i)=0 \land ES_i>0\} \cup \{i \in V \mid \text{out-deg}(i)=0 \land EF_i < \max EF\}|}{|V|}$ & $\le 5\%$ \\
+2 & Leads (Negative Lags) & $\frac{|\{e \in E \mid L_e < 0\}|}{|E|}$ & $= 0\%$ \\
+3 & Lags (Positive Lags) & $\frac{|\{e \in E \mid L_e > 0\}|}{|E|}$ & $\le 5\%$ \\
+4 & Relationship Types & $\frac{|\{e \in E \mid \text{Type}(e) = \text{FS}\}|}{|E|}$ & $\ge 90\%$ \\
+5 & Hard Constraints & Percentage of activities constrained by rigid calendar date overrides & $\le 5\%$ \\
+6 & High Float & $\frac{|\{i \in V \mid TF_i > 44 \text{ days}\}|}{|V|}$ & $\le 5\%$ \\
+7 & Negative Float & $\frac{|\{i \in V \mid TF_i < -0.05 \text{ days}\}|}{|V|}$ & $= 0\%$ \\
+8 & High Duration & $\frac{|\{i \in V \mid d_i > 44 \text{ days} \land \neg \text{Milestone}_i\}|}{|V|}$ & $\le 5\%$ \\
+9 & Invalid Dates & $\frac{|\{i \in V \mid EF_i < ES_i\}|}{|V|}$ & $= 0\%$ \\
+10 & Resource Loaded & $\frac{|\{i \in V \mid \text{Assignees}(i) \ne \emptyset \lor \text{Milestone}_i\}|}{|V|}$ & $\ge 95\%$ \\
+11 & Missed Tasks & $\frac{|\{i \in V \mid \text{Status}_i \ne \text{Done} \land EF_i < t_{\text{status}}\}|}{|V|}$ & $\le 5\%$ \\
+12 & Critical Path Continuity & Verification that a contiguous chain of critical activities spans start to finish & Pass \\
+13 & Critical Float Index (CFIX) & $\text{CFIX} = \frac{T_{\text{project}} + PF}{T_{\text{project}}}$ & $\ge 0.95$ \\
+14 & Schedule Index (SPI) & Earned Value velocity ratio $SPI = \frac{EV}{PV}$ & $0.95 \le SPI$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The diagnostic calculates compliance percentages, assigns an aggregate grade (A--F), and flags specific culprit activities in the interface to enable rapid remediation before baseline formalization.

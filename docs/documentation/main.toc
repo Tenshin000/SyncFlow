@@ -1,0 +1,52 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{\numberline {1}Introduction}{2}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Project Planning and Management}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}The Triple Constraint Governance Model}{3}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Chronological Development Schedule and Execution}{4}{section.2.2}%
+\contentsline {chapter}{\numberline {3}Theoretical Foundations}{5}{chapter.3}%
+\contentsline {section}{\numberline {3.1}The Schedule Management Lifecycle}{5}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Critical Path Method and Precedence Networks}{5}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Topological Sorting and Cycle Detection}{5}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Forward and Backward Pass Calculations}{6}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Float Formulation and Path Criticality}{6}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}PERT Statistical Risk Engine and Probability Modeling}{6}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Earned Value Management and the S-Curve Banana Envelope}{7}{section.3.4}%
+\contentsline {section}{\numberline {3.5}DCMA 14-Point Schedule Quality Assessment}{7}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Implementation}{8}{chapter.4}%
+\contentsline {section}{\numberline {4.1}System Architecture and Container Topology}{8}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Database Layer and Data Integrity}{9}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Backend Architecture and Computation Engine}{9}{section.4.3}%
+\contentsline {section}{\numberline {4.4}RESTful API Architecture and Endpoints}{10}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}User Management and Authentication APIs}{10}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Project Lifecycle APIs}{11}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Schedule Planning, Sequencing, and Operations Research APIs}{12}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Schedule Control, Live Time Tracking, and Enterprise APIs}{13}{subsection.4.4.4}%
+\contentsline {subsection}{\numberline {4.4.5}Natural Language Processing and AI Service APIs}{14}{subsection.4.4.5}%
+\contentsline {section}{\numberline {4.5}Frontend Architecture and Data Visualizations}{15}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}Interactive Network Visualizations via Vis-Network}{15}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}Earned Value S-Curve Visualization via Chart.js}{15}{subsection.4.5.2}%
+\contentsline {subsection}{\numberline {4.5.3}Client-Side Event Bus and State Synchronization}{15}{subsection.4.5.3}%
+\contentsline {chapter}{\numberline {5}Generative AI and Natural Language Processing}{16}{chapter.5}%
+\contentsline {section}{\numberline {5.1}NLP Pipeline Architecture}{16}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Schema-Enforced Information Extraction}{16}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Core NLP Features in Schedule Planning}{17}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}NLP Assistant Overview}{17}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Turning Scope Text into a WBS}{17}{subsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.3.3}Estimating Activity Durations (PERT)}{17}{subsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.3.4}Extracting Activity Dependencies from Notes}{18}{subsection.5.3.4}%
+\contentsline {section}{\numberline {5.4}Reliable Model Execution and Browser Controls}{18}{section.5.4}%
+\contentsline {chapter}{\numberline {6}User Guide}{19}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Getting Started and Signing In}{19}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Project Manager Dashboard and New Project Setup}{20}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Planning and Tracking a Project}{21}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Manage Personnel (Step 1)}{21}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Breaking the Project into Manageable Pieces (Step 2)}{21}{subsection.6.3.2}%
+\contentsline {subsection}{\numberline {6.3.3}Putting Activities in Order (Step 3)}{22}{subsection.6.3.3}%
+\contentsline {subsection}{\numberline {6.3.4}Estimating Time (Step 4)}{23}{subsection.6.3.4}%
+\contentsline {subsection}{\numberline {6.3.5}Viewing the Timeline (Step 5)}{23}{subsection.6.3.5}%
+\contentsline {subsection}{\numberline {6.3.6}Monitoring Live Progress (Step 6)}{24}{subsection.6.3.6}%
+\contentsline {section}{\numberline {6.4}Daily Workflow for Team Members}{25}{section.6.4}%
+\contentsline {chapter}{\numberline {7}Conclusion and Future Developments}{26}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Summary of Contributions}{26}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Future Developments}{26}{section.7.2}%
+\contentsline {chapter}{Bibliography}{27}{chapter*.22}%

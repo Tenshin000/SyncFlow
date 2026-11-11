@@ -1,0 +1,107 @@
+\chapter{Generative AI and Natural Language Processing}
+\section{NLP Pipeline Architecture}
+Writing a complete project schedule by hand takes time, especially when starting from a rough brief, meeting notes, or a multi-page scope document. \textit{SyncFlow} eases that setup step with a built-in \textbf{Natural Language Processing} (\textbf{NLP}) \textbf{pipeline} that turns everyday project descriptions into structured scheduling data. Rather than adding an open chat window that replies in free text, the platform uses language models strictly behind the scenes as structured parsers: they read human prose, pull out deliverables, durations, and activity relationships, and hand clean records to the math engine.
+
+\vspace{4mm}
+
+Because language-model outputs are probabilistic, raw text cannot go straight into CPM or PERT formulas. To keep results dependable, every AI request passes through a four-stage pipeline built across \texttt{backend/\allowbreak nlp/} (\texttt{prompts.py}, \texttt{schemas.py}, \texttt{gemini\_\allowbreak client.py}) and the \texttt{routers/\allowbreak nlp.py} folders:
+\begin{enumerate}[leftmargin=2.3em,labelsep=0.6em,itemsep=1.5pt,topsep=1pt]
+    \item \textbf{Guided Prompt Building}: Dedicated prompt builders (\texttt{build\_\allowbreak wbs\_\allowbreak prompt}, \texttt{build\_\allowbreak estimation\_\allowbreak prompt}, and \texttt{build\_\allowbreak dependency\_\allowbreak prompt}) mix the user's input with layout rules, short examples, and live project state (such as existing WBS branches when merging, or the exact list of valid \texttt{activity\_id} keys). Simple grammar hints keep titles consistent: broad noun phrases for deliverables, concrete component names for work packages, and action-oriented \textit{verb + noun} titles for activities;
+    
+    \vspace{1mm}
+    
+    \item \textbf{Constrained JSON Generation}: Requests run through \texttt{GeminiClient.\allowbreak generate\_\allowbreak structured} using \texttt{gemini-\allowbreak flash-\allowbreak latest} or \texttt{gemini-\allowbreak flash-\allowbreak lite-\allowbreak latest} at low sampling temperature (\texttt{temperature=\allowbreak 0.2}, \texttt{max\_\allowbreak output\_\allowbreak tokens=\allowbreak 8192}). Passing \texttt{response\_\allowbreak mime\_\allowbreak type=\allowbreak "application/\allowbreak json"} alongside a typed \texttt{response\_\allowbreak schema} steers decoding so tokens always form valid JSON;
+    
+    \vspace{1mm}
+    
+    \item \textbf{Cleanup and Automatic Repairs}: Raw responses pass through \texttt{\_clean\_\allowbreak json\_\allowbreak text} (which strips stray Markdown fences) and \texttt{\_normalize\_\allowbreak ai\_\allowbreak output} to smooth over wrapper differences. If the model falls back on empty placeholder titles like \texttt{"Deliverable 1"} or \texttt{"Work Package 2.1"}, \texttt{\_is\_\allowbreak generic\_\allowbreak name} catches them with \textbf{regular expressions} and builds descriptive headings from their child elements;
+    
+    \vspace{1mm}
+    
+    \item \textbf{ID Matching, Range Checks, and Cycle Validation}: Parsed entries are linked back to real project identifiers (\texttt{wp\_\allowbreak id\_\allowbreak map} for packages and \texttt{valid\_\allowbreak act\_\allowbreak ids} for links), durations pass through \texttt{\_enforce\_\allowbreak pert\_\allowbreak strict\_\allowbreak ordering}, and proposed edges are checked for loops with \texttt{\_detect\_\allowbreak schedule\_\allowbreak cycles} before saving to MongoDB and clearing the schedule cache.
+\end{enumerate}
+
+\vspace{4mm}
+
+\section{Schema-Enforced Information Extraction}
+Schedule calculations depend on exact keys and numeric types, so even a small slip from an AI model (like renaming a field or returning text instead of a decimal) would cause errors downstream. To keep \textbf{Information Extraction} (\textbf{IE}) reliable across runs, \textit{SyncFlow} compiles Python Pydantic models (\texttt{backend/\allowbreak nlp/\allowbreak schemas.py}) straight into Gemini decoding schemas. Once Python finishes cleaning the output, \texttt{response\_\allowbreak schema.\allowbreak model\_\allowbreak validate} checks every parsed field before anything enters the database.
+
+\vspace{2mm}
+
+\noindent\begin{minipage}{\textwidth}
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\scriptsize, frame=single, aboveskip=2pt, belowskip=2pt]
+class AIActivityItem(BaseModel):
+    name: str = Field(description="Imperative verb + noun activity title")
+    work_package_ref: str = Field(description="WBS reference code, e.g. '1.1'")
+    is_milestone: bool = Field(description="True if zero-duration milestone")
+    optimistic_days: float = Field(description="Optimistic days (a), a < m")
+    most_likely_days: float = Field(description="Most likely days (m), a < m < b")
+    pessimistic_days: float = Field(description="Pessimistic days (b), b <= 44.0")
+
+class AIWorkPackageItem(BaseModel):
+    wbs_number: str = Field(description="Hierarchical package code, e.g. '1.1'")
+    name: str = Field(description="Domain-specific Work Package title")
+    activities: List[AIActivityItem]
+
+class AIDeliverableItem(BaseModel):
+    wbs_number: str = Field(description="Major deliverable index, e.g. '1'")
+    name: str = Field(description="Domain-specific noun phrase deliverable")
+    work_packages: List[AIWorkPackageItem]
+\end{lstlisting}
+\begin{center}
+\small\textit{Constrained Extraction Grammar for Scope-to-WBS Parsing (\texttt{backend/nlp/schemas.py}).}
+\end{center}
+\end{minipage}
+
+\vspace{2mm}
+
+\section{Core NLP Features in Schedule Planning}
+\subsection{NLP Assistant Overview}
+Using this four-stage flow, \textit{SyncFlow} offers three AI assistants directly inside the Project Manager dashboards. The table below summarizes what each tool reads, outputs, and verifies before updating a project.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.28}
+\caption*{Overview of SyncFlow's NLP Assistants, Schemas, and Safety Checks.}
+\vspace{-2pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.7cm} >{\raggedright\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}p{3.5cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{NLP Assistant} & \textbf{What It Reads} & \textbf{Output Schema} & \textbf{Safety Checks} \\
+\midrule
+\textbf{Text-to-WBS Decomposition} & Project charters, scope text, naming hints & \texttt{AIWbsDecomposition-\allowbreak Output} & \texttt{\_is\_\allowbreak generic\_\allowbreak name} title repair, \texttt{wp\_id\_map}, \texttt{del\_offset} \\
+\textbf{PERT Duration Estimation} & Activity titles, notes, project context & \texttt{AIEstimationOutput} & Strict ordering ($0.5 \le a < m < b \le 44.0$), risk rationale text \\
+\textbf{Dependency Extraction} & Activity list, handoff notes, time cues & \texttt{AIDependency-\allowbreak ExtractionOutput} & ID checks via \texttt{valid\_\allowbreak act\_\allowbreak ids}, $L \ge 0$, cycle detection \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\vspace{4mm}
+
+\subsection{Turning Scope Text into a WBS}
+At \texttt{POST /syncflow/\allowbreak projects/\allowbreak \{project\_id\}/\allowbreak nlp/\allowbreak text-\allowbreak to-\allowbreak wbs}, the scope parser relies on \texttt{build\_\allowbreak wbs\_\allowbreak prompt} to turn multi-paragraph briefs into a complete hierarchy (Major Deliverables $\to$ Work Packages $\to$ Activities). Users can either merge new items into an existing tree (where \texttt{wp\_\allowbreak id\_\allowbreak map} and numeric offsets such as \texttt{del\_offset} keep existing branches intact) or choose \texttt{replace} mode to rebuild the WBS from scratch.
+
+\vspace{4mm}
+
+\subsection{Estimating Activity Durations (PERT)}
+At \texttt{POST /syncflow/\allowbreak projects/\allowbreak \{project\_id\}/\allowbreak nlp/\allowbreak estimate-\allowbreak durations}, \texttt{build\_\allowbreak estimation\_\allowbreak prompt} reviews activity titles and project notes to suggest Three-Point PERT bounds $(a, m, b)$ together with a short \texttt{rationale} explaining likely risks. Python then applies \texttt{\_enforce\_\allowbreak pert\_\allowbreak strict\_\allowbreak ordering} so every estimate stays within $0.5 \le a < m < b \le 44.0$ working days, avoiding flat point values or overly long activities before computing Beta averages and variances.
+
+\newpage
+
+\subsection{Extracting Activity Dependencies from Notes}
+At \texttt{POST /syncflow/\allowbreak projects/\allowbreak \{project\_id\}/\allowbreak nlp/\allowbreak extract-\allowbreak dependencies}, \texttt{build\_\allowbreak dependency\_\allowbreak prompt} reads existing activities alongside optional handoff notes (\texttt{narrative\_text}) to find ordering cues and prerequisites. Candidate links map onto standard PDM types (\texttt{FS}, \texttt{SS}, \texttt{FF}, \texttt{SF}) with non-negative lags ($L \ge 0$). Unknown activity IDs outside \texttt{valid\_\allowbreak act\_\allowbreak ids}, self-loops, duplicates, and cycles (checked via Kahn's algorithm) are dropped automatically.
+
+\vspace{6mm}
+
+\section{Reliable Model Execution and Browser Controls}
+Because public LLM endpoints can slow down or hit quota caps, \texttt{GeminiClient} sticks to \texttt{gemini-\allowbreak flash-\allowbreak latest} and \texttt{gemini-\allowbreak flash-\allowbreak lite-\allowbreak latest} (discovered dynamically via \texttt{find\_\allowbreak supported\_\allowbreak models}), balancing fast replies, wide context limits, and free-tier availability. Keys are checked in order from: (1) a user-supplied key in the request, (2) \texttt{settings.\allowbreak GEMINI\_\allowbreak API\_\allowbreak KEY}, or (3) the \texttt{GEMINI\_\allowbreak API\_\allowbreak KEY} and \texttt{GOOGLE\_\allowbreak API\_\allowbreak KEY} environment variables. If quota limits (\texttt{429}), timeouts (\texttt{120.0s}), or \texttt{404} errors appear, the client switches smoothly to the backup Flash variant, while invalid keys (\texttt{API\_\allowbreak KEY\_\allowbreak INVALID}) report back immediately.
+
+\vspace{2mm}
+
+\noindent In the browser, \texttt{frontend/\allowbreak js/\allowbreak ai-\allowbreak modals.js} keeps longer AI runs pleasant to work with:
+\begin{itemize}[itemsep=1pt,topsep=1pt]
+    \item \textbf{Instant Cancel via \texttt{AbortController}}: Pressing ``Cancel'' stops active requests right away without leaving partial edits behind;
+    \item \textbf{Live Step Indicators}: Status updates track progress step by step (\textit{``Analyzing scope narrative''}, \textit{``Decomposing deliverables''}, \textit{``Enforcing DCMA criteria''});
+    \item \textbf{Local Key Saving}: Verified user API keys stay saved in browser \texttt{localStorage} so contributors do not need to paste them every session.
+\end{itemize}

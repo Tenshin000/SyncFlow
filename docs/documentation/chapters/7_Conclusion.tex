@@ -1,0 +1,36 @@
+\chapter{Conclusion and Future Developments}
+\section{Summary of Contributions}
+In its current release, \textit{SyncFlow} brings together six core capabilities inside a single open-source web platform:
+\begin{enumerate}[leftmargin=*,itemsep=0.5pt,topsep=1pt,parsep=0pt,partopsep=0pt]
+    \item Full support for all six PMBOK\textsuperscript{\textregistered} Schedule Management processes across role-specific web dashboards;
+    
+    \vspace{1mm}
+    
+    \item Deterministic network analysis combining Kahn's topological sort, three-color DFS cycle detection, CPM forward and backward passes, Total and Free Float margins, and interactive AON/AOA diagram views;
+    
+    \vspace{1mm}
+    
+    \item Statistical risk estimation through PERT Three-Point Beta calculations and Central Limit Theorem target-deadline probability curves;
+    
+    \vspace{1mm}
+    
+    \item Automated schedule quality diagnostics covering all 14 criteria of the Defense Contract Management Agency (DCMA) benchmark;
+    
+    \vspace{1mm}
+    
+    \item Constrained Google Gemini Flash NLP helpers with schema-enforced JSON decoding for Text-to-WBS decomposition, duration estimation, and dependency extraction, always subject to human review;
+    
+    \vspace{1mm}
+    
+    \item Execution tracking that connects daily stopwatch timers and Controller deliverable checks directly to 4-tier activity states and Earned Value S-Curves.
+\end{enumerate}
+
+\section{Future Developments}
+With the core Schedule Management workflow established, several practical extensions would broaden \textit{SyncFlow} into a more complete project control platform:
+\begin{itemize}[itemsep=2.5pt,topsep=2pt,parsep=0pt]
+    \item \textbf{Cost Management Integration (PMBOK Chapter 7)}: Extending duration-based Earned Value with hourly labor rates, fixed resource expenses, and approved cost baselines would unlock financial Cost Variance ($CV = EV - AC$), Cost Performance Index ($CPI = EV / AC$), financial Estimate at Completion ($EAC = \text{BAC} / CPI$), and capital drawdown tracking;
+    \item \textbf{Risk Management (PMBOK Chapter 11)}: Alongside per-activity PERT estimates, a Risk Register with probability-\allowbreak impact matrices, mitigation owners, and a Monte Carlo simulator sampling Beta or Triangular distributions across the whole network would surface P50, P80, and P90 deadline confidence bounds when near-critical paths converge;
+    \item \textbf{Agile and SCRUM Workflow Integration}: Supporting sprint backlogs, story-point Planning Poker estimation, and burndown charts tied directly to CPM milestone gates would let hybrid software and game teams iterate in short sprints while preserving project-wide schedule forecasting;
+    \item \textbf{Standard Schedule Interchange and Executive Reporting}: Adding import/export pipelines for Microsoft Project \texttt{XML}, structured CSV activity data, and downloadable PDF audit packs (DCMA 14-point scorecards and EVM curves) would ease migration from legacy desktop tools and stakeholder reporting;
+    \item \textbf{Multimodal Document Ingestion for NLP}: Expanding the Gemini Flash pipeline beyond pasted text to parse uploaded PDF charters, spreadsheet scope logs, and whiteboard snapshots across multiple languages would make initial schedule drafting faster on real enterprise briefs.
+\end{itemize}
