@@ -5,7 +5,7 @@
 > **UNIVERSITY OF PISA — DEPARTMENT OF INFORMATION ENGINEERING**  
 > *Master's Degree in Artificial Intelligence and Data Engineering*  
 > **Course:** Business and Project Management | **Academic Year:** 2025 / 2026  
-> **Author:** Francesco Panattoni (`f.panattoni2@studenti.unipi.it`)  
+> **Author:** Francesco Panattoni
 
 Designed to bridge the gap between lightweight task boards and complex enterprise desktop suites, SyncFlow combines deterministic Operations Research scheduling engines, time-based Earned Value monitoring, and role-separated web workspaces inside a zero-cost, Dockerized open-source stack:
 - **Deterministic Scheduling & Risk Analytics**: Kahn's topological sort and three-color DFS cycle detection, Critical Path Method (CPM) forward/backward passes supporting `FS`/`SS`/`FF`/`SF` relationships with lags, Total/Free/Project Float computation, interactive Activity-on-Node (AON) and Activity-on-Arrow (AOA) graphs, and PERT Three-Point Beta probability simulations.
