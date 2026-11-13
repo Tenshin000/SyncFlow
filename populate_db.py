@@ -217,21 +217,143 @@ def populate_database(mongo_uri: Optional[str] = None, clean: bool = False) -> N
     notifs_path = _find_file("notifications.json")
     notif_count = populate_collection(db, "notifications", notifs_path, clean=clean)
 
+    # 4. Teams (Reusable Library)
+    try:
+        teams_path = _find_file("teams.json")
+        team_count = populate_collection(db, "teams", teams_path, clean=clean)
+    except FileNotFoundError:
+        team_count = 0
+
+    # 5. Audit Logs (if available)
+    try:
+        audit_path = _find_file("audit_logs.json")
+        audit_count = populate_collection(db, "audit_logs", audit_path, clean=clean)
+    except FileNotFoundError:
+        audit_count = 0
+
     print("\n" + "=" * 65)
     print("Database population completed successfully:")
     print(f"  - Users collection:         {user_count} documents")
     print(f"  - Projects collection:      {project_count} documents (with complete WBS & activities)")
     print(f"  - Notifications collection: {notif_count} documents")
+    if team_count > 0:
+        print(f"  - Teams collection:         {team_count} documents (reusable library)")
+    if audit_count > 0:
+        print(f"  - Audit logs collection:    {audit_count} documents")
+    print("=" * 65 + "\n")
+
+
+def dump_database(mongo_uri: Optional[str] = None, target_dir: Optional[str] = None) -> None:
+    """
+    Dumps all current collections in MongoDB to JSON files in docker/mongo-init in Extended JSON format.
+    Excludes test projects, orphan test notifications, and test runner teams.
+    """
+    from bson import json_util
+
+    out_dir = target_dir or DOCKER_INIT_DIR
+    os.makedirs(out_dir, exist_ok=True)
+
+    print("=" * 65)
+    print("           SYNCFLOW DATABASE DUMP TOOL")
+    print("=" * 65)
+
+    uri = mongo_uri or _get_mongo_uri()
+    display_uri = uri
+    if "@" in uri:
+        prefix, host_part = uri.split("@", 1)
+        scheme_user = prefix.split(":")[0] + "://***:***"
+        display_uri = f"{scheme_user}@{host_part}"
+
+    print(f"Connecting to MongoDB: {display_uri}")
+    try:
+        client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+        client.admin.command("ping")
+        db_name = client.get_default_database().name if client.get_default_database() is not None else "syncflow_db"
+        db = client[db_name]
+        print(f"Connected to database: '{db.name}'")
+    except Exception as exc:
+        print(f"\n[ERROR] Failed to connect to MongoDB: {exc}")
+        print("Please ensure MongoDB container is running ('docker compose up -d').")
+        sys.exit(1)
+
+    print(f"\nDumping collections to: {out_dir}\n")
+
+    # 1. Projects (strictly excluding test projects)
+    valid_projs = []
+    for p in db.projects.find().sort("name", 1):
+        name = (p.get("name") or "").strip().lower()
+        if "test project" in name:
+            continue
+        valid_projs.append(p)
+    valid_proj_ids = set(str(p["_id"]) for p in valid_projs)
+
+    # 2. Users (all registered accounts with sample password hint retained)
+    valid_users = list(db.users.find().sort("username", 1))
+    for u in valid_users:
+        if u.get("password_hash") == DEFAULT_BCRYPT_HASH and "password" not in u:
+            u["password"] = "Mhanz0_0"
+    valid_user_ids = set(str(u["_id"]) for u in valid_users)
+
+    # 3. Notifications (strictly scoped to valid, non-test projects)
+    valid_notifs = []
+    for n in db.notifications.find().sort("created_at", 1):
+        pid = str(n.get("project_id", ""))
+        pname = (n.get("project_name") or "").lower()
+        if pid and pid not in valid_proj_ids:
+            continue
+        if "test project" in pname or "enterprise cloud gateway" in pname or "restricted defense gateway" in pname:
+            continue
+        valid_notifs.append(n)
+
+    # 4. Teams (reusable library teams created by registered PMs, excluding test runner teams)
+    valid_teams = []
+    for t in db.teams.find().sort("name", 1):
+        c_by = str(t.get("created_by", ""))
+        t_name = (t.get("name") or "").lower()
+        if c_by not in valid_user_ids:
+            continue
+        if "test team" in t_name:
+            continue
+        valid_teams.append(t)
+
+    # 5. Audit logs (excluding test projects)
+    valid_audit = []
+    for a in db.audit_logs.find().sort("timestamp", 1):
+        pid = str(a.get("project_id", ""))
+        if pid in valid_proj_ids:
+            valid_audit.append(a)
+
+    dump_targets = {
+        "projects.json": valid_projs,
+        "users.json": valid_users,
+        "notifications.json": valid_notifs,
+        "teams.json": valid_teams
+    }
+    if valid_audit:
+        dump_targets["audit_logs.json"] = valid_audit
+
+    for filename, doc_list in dump_targets.items():
+        file_path = os.path.join(out_dir, filename)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(json_util.dumps(doc_list, indent=2) + "\n")
+        print(f"  [+] Dumped {len(doc_list):>3} documents -> {filename}")
+
+    print("\n" + "=" * 65)
+    print("Database dump completed successfully.")
     print("=" * 65 + "\n")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Populate SyncFlow MongoDB collections from JSON files.")
+    parser = argparse.ArgumentParser(description="Populate or dump SyncFlow MongoDB collections from/to JSON files.")
     parser.add_argument("--clean", action="store_true", help="Clean/empty collections before importing.")
+    parser.add_argument("--dump", action="store_true", help="Dump current MongoDB collections to docker/mongo-init JSON files.")
     parser.add_argument("--uri", type=str, default=None, help="Custom MongoDB connection URI.")
     args = parser.parse_args()
 
-    populate_database(mongo_uri=args.uri, clean=args.clean)
+    if args.dump:
+        dump_database(mongo_uri=args.uri)
+    else:
+        populate_database(mongo_uri=args.uri, clean=args.clean)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+import os
 import logging
 from typing import Optional
 from pymongo import MongoClient
@@ -25,6 +26,8 @@ class DatabaseConnection:
             return self._db
 
         connection_uri = uri or settings.MONGO_URI
+        if "@mongodb:" in connection_uri and not os.path.exists("/.dockerenv"):
+            connection_uri = connection_uri.replace("@mongodb:", "@localhost:")
         try:
             logger.info("Connecting to MongoDB at: %s", connection_uri.split("@")[-1])
             self._client = MongoClient(

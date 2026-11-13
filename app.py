@@ -148,8 +148,13 @@ def main():
     parser = argparse.ArgumentParser(description="SyncFlow Full Stack Application Launcher")
     parser.add_argument("--populate", "-p", action="store_true", help="Populate MongoDB with sample data after launch")
     parser.add_argument("--clean", action="store_true", help="Clean and re-populate MongoDB collections")
+    parser.add_argument("--dump", action="store_true", help="Dump current MongoDB collections to docker/mongo-init JSON files and exit")
     parser.add_argument("--build", "-b", action="store_true", help="Force rebuild Docker containers before starting")
     args = parser.parse_args()
+
+    if args.dump:
+        subprocess.run([sys.executable, POPULATE_SCRIPT, "--dump"])
+        sys.exit(0)
 
     print("=" * 65)
     print("                 SYNCFLOW APPLICATION LAUNCHER")

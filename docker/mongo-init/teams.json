@@ -1,0 +1,295 @@
+[
+  {
+    "_id": {
+      "$oid": "6ad1fee82c6cccd5b2b138d8"
+    },
+    "created_by": "6acfb05eb1e16744cbcd0654",
+    "name": "Alpha Engineering",
+    "created_at": {
+      "$date": "2026-10-16T10:39:36.925Z"
+    },
+    "lead_id": "6ad4abed56370682ab30ca71",
+    "member_ids": [
+      "6ad4ac0856370682ab30ca78",
+      "6ad4abed56370682ab30ca71"
+    ],
+    "team_id": "TEAM-1",
+    "updated_at": {
+      "$date": "2026-11-07T17:01:16.618Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6acfe143dbd67cabbe9085a4"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "name": "Art Team",
+    "created_at": {
+      "$date": "2026-10-14T20:08:35.608Z"
+    },
+    "member_ids": [
+      "6acfb05eb1e16744cbcd0682",
+      "6acfb05eb1e16744cbcd0659",
+      "6acfb05eb1e16744cbcd0683",
+      "6acfb05eb1e16744cbcd0679",
+      "6acfb05eb1e16744cbcd0664",
+      "6acfb05eb1e16744cbcd0667",
+      "6acfb05eb1e16744cbcd0656",
+      "6acfb05eb1e16744cbcd0663",
+      "6acfb05eb1e16744cbcd0666",
+      "6acfb05eb1e16744cbcd0658",
+      "6acfb05eb1e16744cbcd0674",
+      "6acfb05eb1e16744cbcd0681",
+      "6acfb05eb1e16744cbcd065a",
+      "6acfb05eb1e16744cbcd067f",
+      "6acfb05eb1e16744cbcd065f",
+      "6acfb05eb1e16744cbcd0670",
+      "6acfb05eb1e16744cbcd0668",
+      "6acfb05eb1e16744cbcd0685"
+    ],
+    "team_id": "TEAM-86273",
+    "updated_at": {
+      "$date": "2026-10-27T15:12:40.543Z"
+    },
+    "lead_id": null
+  },
+  {
+    "_id": {
+      "$oid": "6ad214ac2c6cccd5b2b15e84"
+    },
+    "created_by": "6acfb05eb1e16744cbcd0654",
+    "name": "Beta Core Team",
+    "created_at": {
+      "$date": "2026-10-16T12:12:28.120Z"
+    },
+    "lead_id": "6ad1efce883079c41af4affc",
+    "member_ids": [
+      "6ad1efce883079c41af4affc"
+    ],
+    "team_id": "TEAM-BETA",
+    "updated_at": {
+      "$date": "2026-10-16T13:00:53.317Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6aef3c038f0fd16082cb0e16"
+    },
+    "created_by": "6acfb05eb1e16744cbcd0654",
+    "name": "Construction Team",
+    "created_at": {
+      "$date": "2026-11-07T14:56:03.478Z"
+    },
+    "lead_id": "6acfb05eb1e16744cbcd0666",
+    "member_ids": [
+      "6acfb05eb1e16744cbcd066e",
+      "6acfb05eb1e16744cbcd0671",
+      "6acfb05eb1e16744cbcd0686",
+      "6acfb05eb1e16744cbcd0666"
+    ],
+    "team_id": "TEAM-2",
+    "updated_at": {
+      "$date": "2026-11-07T16:34:51.647Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad1f0242c6cccd5b2b11e5d"
+    },
+    "name": "Core Physics (Empty)",
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "created_at": {
+      "$date": "2026-10-16T09:36:36.396Z"
+    },
+    "member_ids": [],
+    "team_id": "TEAM-1",
+    "updated_at": {
+      "$date": "2026-10-16T09:36:36.396Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6aef532b8f0fd16082cb344f"
+    },
+    "created_by": "6acfb05eb1e16744cbcd0654",
+    "name": "Engineer Team",
+    "created_at": {
+      "$date": "2026-11-07T16:34:51.647Z"
+    },
+    "lead_id": "6acfb05eb1e16744cbcd0661",
+    "member_ids": [
+      "6acfb05eb1e16744cbcd0661",
+      "6acfb05eb1e16744cbcd066b",
+      "6acfb05eb1e16744cbcd0675",
+      "6acfb05eb1e16744cbcd0669"
+    ],
+    "team_id": "TEAM-1",
+    "updated_at": {
+      "$date": "2026-11-07T16:34:51.647Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad21b362c6cccd5b2b169c2"
+    },
+    "name": "Engineering Team",
+    "created_by": "6acfb05eb1e16744cbcd0654",
+    "created_at": {
+      "$date": "2026-10-16T12:40:22.714Z"
+    },
+    "lead_id": null,
+    "member_ids": [
+      "6acfb05eb1e16744cbcd0673",
+      "6acfb05eb1e16744cbcd0661",
+      "6acfb05eb1e16744cbcd066b",
+      "6acfb05eb1e16744cbcd0675",
+      "6acfb05eb1e16744cbcd0669"
+    ],
+    "team_id": "TEAM-1",
+    "updated_at": {
+      "$date": "2026-11-07T14:59:03.138Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6acfe143dbd67cabbe9085a0"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "name": "Game Design Team",
+    "created_at": {
+      "$date": "2026-10-14T20:08:35.608Z"
+    },
+    "member_ids": [
+      "6acfb05eb1e16744cbcd067e",
+      "6acfb05eb1e16744cbcd067a",
+      "6acfb05eb1e16744cbcd0680",
+      "6acfb05eb1e16744cbcd0672",
+      "6acfb05eb1e16744cbcd067b",
+      "6acfb05eb1e16744cbcd066a",
+      "6acfb05eb1e16744cbcd0657"
+    ],
+    "team_id": "TEAM-97806",
+    "updated_at": {
+      "$date": "2026-10-27T15:12:40.543Z"
+    },
+    "lead_id": "6ae0bf672e5b2e3b2b374c04"
+  },
+  {
+    "_id": {
+      "$oid": "6ad1f0f42c6cccd5b2b11fe2"
+    },
+    "name": "Il team dei Pezzati",
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "created_at": {
+      "$date": "2026-10-16T09:40:04.936Z"
+    },
+    "member_ids": [],
+    "team_id": "TEAM-1",
+    "updated_at": {
+      "$date": "2026-10-16T09:40:04.936Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6ad1f0f42c6cccd5b2b11fe4"
+    },
+    "name": "No Pezze no Party",
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "created_at": {
+      "$date": "2026-10-16T09:40:04.936Z"
+    },
+    "member_ids": [],
+    "team_id": "TEAM-2",
+    "updated_at": {
+      "$date": "2026-10-16T09:40:04.936Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6acfe143dbd67cabbe9085a2"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "name": "Programmer Team",
+    "created_at": {
+      "$date": "2026-10-14T20:08:35.608Z"
+    },
+    "member_ids": [
+      "6acfb05eb1e16744cbcd0653",
+      "6acfb05eb1e16744cbcd066f",
+      "6acfb05eb1e16744cbcd0665",
+      "6acfb05eb1e16744cbcd0673",
+      "6acfb05eb1e16744cbcd065d",
+      "6acfb05eb1e16744cbcd0652",
+      "6acfb05eb1e16744cbcd0662",
+      "6acfb05eb1e16744cbcd065e",
+      "6acfb05eb1e16744cbcd067d",
+      "6acfb05eb1e16744cbcd0651",
+      "6acfb05eb1e16744cbcd065c",
+      "6acfb05eb1e16744cbcd0655",
+      "6acfb05eb1e16744cbcd0661",
+      "6acfb05eb1e16744cbcd066b",
+      "6acfb05eb1e16744cbcd0675",
+      "6acfb05eb1e16744cbcd0669"
+    ],
+    "team_id": "TEAM-85770",
+    "updated_at": {
+      "$date": "2026-10-27T15:12:40.543Z"
+    },
+    "lead_id": null
+  },
+  {
+    "_id": {
+      "$oid": "6ad1f0242c6cccd5b2b11e5f"
+    },
+    "name": "Rendering & Shaders (Empty)",
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "created_at": {
+      "$date": "2026-10-16T09:36:36.396Z"
+    },
+    "member_ids": [],
+    "team_id": "TEAM-2",
+    "updated_at": {
+      "$date": "2026-10-16T09:36:36.396Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6acfe143dbd67cabbe9085a6"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "name": "Sound Design Team",
+    "created_at": {
+      "$date": "2026-10-14T20:08:35.608Z"
+    },
+    "member_ids": [
+      "6acfb05eb1e16744cbcd066e",
+      "6acfb05eb1e16744cbcd0671",
+      "6acfb05eb1e16744cbcd0686"
+    ],
+    "team_id": "TEAM-64029",
+    "updated_at": {
+      "$date": "2026-10-27T15:12:40.543Z"
+    },
+    "lead_id": null
+  },
+  {
+    "_id": {
+      "$oid": "6acfe143dbd67cabbe9085a8"
+    },
+    "created_by": "6acfb05eb1e16744cbcd064f",
+    "name": "Testing Team",
+    "created_at": {
+      "$date": "2026-10-14T20:08:35.608Z"
+    },
+    "member_ids": [
+      "6acfb05eb1e16744cbcd0684",
+      "6acfb05eb1e16744cbcd0677",
+      "6acfb05eb1e16744cbcd065b"
+    ],
+    "team_id": "TEAM-77417",
+    "updated_at": {
+      "$date": "2026-10-27T15:12:40.543Z"
+    },
+    "lead_id": null
+  }
+]
