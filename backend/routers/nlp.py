@@ -88,12 +88,6 @@ def generate_wbs_from_text(project_id: str, payload: TextToWBSRequest):
             f"Model '{payload.model}' is not supported. The system is strictly configured to use only 'gemini-flash-latest' and 'gemini-flash-lite-latest'."
         )
 
-    if payload.model and payload.model not in ["gemini-flash-latest", "gemini-flash-lite-latest"]:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            f"Model '{payload.model}' is not supported. The system is strictly configured to use only 'gemini-flash-latest' and 'gemini-flash-lite-latest'."
-        )
-
     proj_name = project.get("name", "Project")
     proj_desc = project.get("description", "")
     existing_wbs = project.get("wbs", [])

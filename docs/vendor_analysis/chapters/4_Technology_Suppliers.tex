@@ -1,0 +1,131 @@
+\chapter{Supply-Chain Audit of the Make Candidate}
+In a formal Make-or-Buy procurement evaluation, choosing an in-house candidate requires auditing its underlying software supply chain with the same scrutiny applied to commercial SaaS vendors. An organization that commits to developing and maintaining an internal platform does not operate in a vacuum. It inherits the architectural strengths, failure modes, licensing constraints, and dependency vulnerabilities of its constituent technologies. Rather than relying on arbitrary numerical grades, this audit provides an objective, qualitative, and economic evaluation of candidate technologies across each core tier of \textit{SyncFlow}'s architecture: generative language models, database persistence, backend execution, frontend visualization, and container orchestration.
+
+\section{Generative Language Model Providers}
+\textbf{Google Gemini 3.8 Flash} is selected as the primary generative NLP engine for automated project scheduling operations, including \textit{Text-to-WBS} hierarchy drafting, \textit{Three-Point PERT} estimation, and predecessor-successor \textit{Dependency Extraction}. All LLM interactions route through an isolated client adapter (\texttt{GeminiClient}). Alternative options evaluated include \textbf{OpenAI (\texttt{GPT-4o mini})}, \textbf{Anthropic (\texttt{Claude Haiku})}, and local self-hosted inference via \textbf{Ollama}.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.10}
+\caption*{Generative AI Provider Comparative Architectural and Economic Evaluation.}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X c}
+\toprule
+\textbf{AI Supplier} & \textbf{Token Pricing} & \textbf{Schema Decoding} & \textbf{Key Evaluation Trade-off} & \textbf{Selection} \\
+\midrule
+\textbf{Google Gemini 3.8 Flash} & \$0.30 / \$2.50 (Free Tier) & Native Pydantic \texttt{response\_schema} & Ongoing free tier in AI Studio. Client-side BYOK key entry. Rapid structured JSON output. & \textbf{Primary} \\
+OpenAI \texttt{GPT-4o mini} & \$0.15 / \$0.60 & Structured Outputs (JSON Schema) & Lower paid token rates, but lacks an ongoing free tier. Requires credit card billing from day one. & Fallback \\
+Anthropic \texttt{Claude Haiku} & \$1.00 / \$5.00 & Tool Use / JSON Prompting & Over $3\times$ higher input and $2\times$ output costs. Less flexible constrained schema decoding. & Discarded \\
+Self-Hosted Ollama & €0 Software (Local Hardware) & GBNF / Outlines grammar & Full data sovereignty and zero cloud exposure, but requires 24\,GB GPU unviable on CPU VPS. & On-Prem \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent \textbf{Comparative Trade-off Analysis}: The selection of Gemini 3.8 Flash is grounded in practical developer ergonomics and financial governance. Google AI Studio provides a free API tier without requiring a credit card, allowing local development and testing without recurring financial friction. Furthermore, its native support for Pydantic models via \texttt{response\_schema} ensures deterministic, schema-compliant JSON decoding for nested deliverable hierarchies. In production, users can supply their own API keys via browser Bring-Your-Own-Key (BYOK), preserving the €0 software licensing rule for the hosting organization. While OpenAI's \texttt{GPT-4o mini} offers lower per-token pricing on paid tiers, its lack of an ongoing free tier makes it secondary. To prevent vendor lock-in, SyncFlow maintains an unactivated \texttt{OPENAI\_API\_KEY} hook in the codebase, enabling immediate multi-provider failover without modifying schedule calculations.
+
+\newpage
+
+\section{Database Persistence Engines}
+\textbf{MongoDB 7.0 Community} is selected as the primary database because its document paradigm natively mirrors hierarchical project scheduling structures at €0 software license cost. Candidate persistence engines were evaluated across schema fit, atomic concurrency, hosting economics within a €28/month VPS budget, and operational autonomy:
+\begin{itemize}[itemsep=1pt,topsep=1.5pt]
+    \item \textbf{MongoDB 7.0 Community (Primary Selection)}: Hierarchical WBS deliverables, activity precedence networks, baselines, and operational time logs are naturally stored as embedded documents within a single cohesive project entity. Native \texttt{\$jsonSchema} validation enforces strict data types at the database engine level, while atomic array modification operators (\texttt{arrayFilters}, \texttt{\$push}, \texttt{\$set}) allow granular task status updates in a single round-trip without relational ORM layers or multi-table locking;
+    \item \textbf{PostgreSQL 16 (Relational Alternative)}: PostgreSQL provides gold-standard relational ACID compliance and advanced indexing. However, modeling recursive, deeply nested WBS trees and dynamic predecessor lists requires recursive Common Table Expressions (CTEs), multiple junction tables, and complex Object-Relational Mapping (ORM) logic. This relational impedance mismatch adds substantial computational overhead to critical path graph traversals and increases codebase maintenance complexity;
+    \item \textbf{MongoDB Atlas M10 (Managed DBaaS)}: Atlas eliminates operational administration by automating backups, replica sets, and security patching. However, its baseline managed pricing ($\approx$€55/month) totals over €1,980 over 36 months, exceeding SyncFlow's entire three-year cash infrastructure budget (€1,632). Self-hosting MongoDB Community on a dedicated VPS achieves identical functional capabilities at zero additional software cost;
+    \item \textbf{Google Cloud Firestore (Serverless Alternative)}: While Firestore provides serverless elasticity, it restricts nested document sizing, imposes rigid query limitations, and introduces proprietary SDK dependencies that create deep vendor lock-in, violating data sovereignty and self-hostability requirements.
+\end{itemize}
+
+\vspace{3mm}
+
+While embedding deliverables, activities, and time logs inside a single \texttt{projects} document simplifies atomic updates, a rigorous data engineering audit exposes the \textbf{Unbounded Document Growth anti-pattern}. MongoDB enforces a strict limit of \textbf{16 Megabytes} (16,777,216 bytes) per BSON document (\texttt{BSON\_MAX\_SIZE}). Over a standard 36-month horizon across $N = 25$ operational users ($25\text{ users} \times 220\text{ days/yr} \times 3\text{ yrs} \times 4\text{ logs/day} = 66{,}000\text{ entries}$), the \texttt{time\_logs} array expands at $\approx 250\text{ bytes/log}$ to $16{,}500{,}000\text{ bytes}$ ($\approx 16.5\text{ MB}$). Adding 20 baseline snapshots ($2{,}400{,}000\text{ bytes} = 2.4\text{ MB}$) brings total document size to $18{,}900{,}000\text{ bytes}$ ($\approx \mathbf{18.9\text{ decimal MB}}$ or $\mathbf{18.0\text{ MiB}}$), breaching MongoDB's 16\,MB limit and triggering fatal \texttt{DocumentTooLarge} write failures.
+
+\vspace{3mm}
+
+Furthermore, while read operations for CPM graph calculations are accelerated in Python via a thread-safe in-memory LRU cache ($<2\text{ ms}$), timer writes force MongoDB's WiredTiger storage engine to repeatedly rewrite the entire multi-megabyte document to disk and RAM--causing severe \textbf{storage-level write amplification} and cache churn entirely upstream of the LRU cache.
+
+\noindent \textbf{The v2.0 Roadmap: Hybrid Collection Decomposition}. To eliminate this architectural boundary, \textit{SyncFlow v2.0} adopts a \textbf{Hybrid Referencing Model}: keeping bounded core structures (activities, precedence ties, calendar constraints, $<500\text{ KB}$) embedded inside \texttt{projects}, while extracting unbounded \texttt{time\_logs} and versioned \texttt{baselines} into dedicated top-level collections with compound B-tree indexes on \texttt{(project\_id, user\_id, start\_time)}. This slashes core document size by $>95\%$, permanently prevents document overflow, and accelerates graph traversal.
+
+\newpage
+
+\section{Backend Execution Frameworks}
+\textbf{FastAPI on Python 3.12} is selected for backend execution because it unites asynchronous API routing, Pydantic validation, and native operations research algorithms within a single runtime:
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\renewcommand{\arraystretch}{1.06}
+\caption*{Backend Execution Stack Comparative Evaluation.}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.8cm} >{\raggedright\arraybackslash}p{2.4cm} >{\raggedright\arraybackslash}p{2.4cm} >{\raggedright\arraybackslash}X c}
+\toprule
+\textbf{Framework} & \textbf{Concurrency Model} & \textbf{Validation Engine} & \textbf{Key Technical Evaluation Rationale} & \textbf{Selection} \\
+\midrule
+\textbf{FastAPI + Python 3.12} & Async I/O (Uvicorn) & Native Pydantic v2 & Direct model reuse for REST and Gemini. Native execution of Python CPM/PERT math. & \textbf{Primary} \\
+Django REST Framework & Synchronous WSGI & DRF Serializers & Heavy SQL ORM adds structural friction over nested BSON documents, slower async. & Discarded \\
+Node.js + Express & Event Loop & External (Zod/Joi) & Splits OR algorithms into polyglot services. Requires duplicate TypeScript schemas. & Discarded \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent \textbf{Architectural Rationale}: FastAPI's integration with Pydantic v2 enables dual reuse of schemas for REST validation and Gemini structured decoding. Executing Kahn's topological sort and CPM/PERT passes in native Python avoids inter-process serialization overhead. 
+
+\vspace{4mm}
+
+\section{Frontend Visualization Toolkits}
+The client UI uses standard \textbf{ES6 JavaScript} with open libraries (\textbf{\texttt{vis-network}} for PDM graphs and \textbf{\texttt{Chart.js}} for Gantt and S-curves):
+\begin{itemize}[itemsep=0.5pt,topsep=1pt,parsep=0pt]
+    \item \textbf{Vanilla ES6 + Open Libraries (Primary Selection)}: Running standard ES6 in the browser eliminates Node.js build pipelines, Webpack/Vite bundlers, and transpile steps. Static files are served directly by Python or a static container, enabling instant hot-patching via mounted volumes at €0 software cost;
+    \item \textbf{React and Modern SPA Frameworks (Component Alternative)}: Offers structured state management, but introduces heavy Node.js build toolchains, hundreds of megabytes of \texttt{node\_modules}, and build pipeline overhead unjustified for a focused scheduling interface;
+    \item \textbf{Commercial Gantt Suites (Bryntum / DHTMLX) (Commercial Alternative)}: Provide polished features but require expensive recurring per-developer OEM licenses (€1,500--€3,500+/year) that violate the €0 software licensing constraint.
+\end{itemize}
+
+The prototype imports visualization scripts from public unpinned CDNs. Vendoring these assets locally into the repository is prioritized as the Phase 1 hardening milestone in Chapter 5. 
+
+\vspace{4mm}
+
+\section{Container Orchestration Platforms}
+\textbf{Docker Compose} is selected as the container orchestration engine for SyncFlow's single-server 25-user deployment, bundling all three core services (\texttt{syncflow-backend}, \texttt{syncflow-frontend}, \texttt{syncflow-db}) into a unified, reproducible specification. Compared to alternatives, Docker Compose provides automated Python environment isolation, container health checks, and persistent Docker volume mapping via a single command (\texttt{docker compose up -d}). Full-scale \textbf{Kubernetes} was discarded as operational overkill: managed control planes introduce recurring cloud costs ($\approx$€70+/month) and consume significant RAM for cluster daemons without tangible benefit for a single-node system. Bare-metal host scripts were rejected due to host dependency drift and fragile upgrade paths. Crucially, Docker Compose supports horizontal scaling of the stateless FastAPI backend container behind an edge ingress to parallelize CPU-bound CPM calculations.
+
+\newpage
+
+\section{Strategic Evaluation of Prospective Infrastructure Suppliers}
+To support the planned \textit{v2.0} production roadmap and resolve operational hardening gaps, five prospective infrastructure domains must transition to production-grade suppliers. Each candidate is assessed against runtime licensing, operational autonomy, maintenance overhead, and security compliance.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.08}
+\caption*{Prospective Infrastructure Supplier Evaluation Matrix for SyncFlow v2.0 Hardening.}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.8cm} c >{\raggedright\arraybackslash}X c}
+\toprule
+\textbf{Infrastructure Domain} & \textbf{Candidate Supplier} & \textbf{Est. Unit Cost} & \textbf{Key Evaluation Trade-off} & \textbf{Selection} \\
+\midrule
+\textbf{Off-Site Backup Storage} & \textbf{Cloudflare R2} & €0.015/GB-mo & S3 API compatible. Zero egress fees eliminate recovery drill spikes. & \textbf{Primary} \\
+& Backblaze B2 & €0.006/GB-mo & Lower base rate, but egress bandwidth incurs recurring transfer fees. & Secondary \\
+& AWS S3 Standard & €0.023/GB-mo & High durability, but complex IAM surface and €0.09/GB egress pricing. & Discarded \\
+\midrule
+\textbf{Transactional Alerts} & \textbf{Amazon SES} & €0.10 / 1k msgs & High IP reputation, strict SPF/DKIM. Minimal cost within cash budget. & \textbf{Primary} \\
+& Resend & €20/mo post-free & Clean developer API, but carries fixed monthly tier overhead. & Secondary \\
+& Self-Hosted Postfix & €0 software & High spam-box rejection risk and ongoing IP reputation maintenance. & Discarded \\
+\midrule
+\textbf{Edge Ingress \& TLS} & \textbf{Caddy Server 2} & €0 OSS & Automated ACME Let's Encrypt TLS renewal. Zero cron scripts required. & \textbf{Primary} \\
+& Traefik Proxy & €0 OSS & Dynamic Docker routing, but steeper configuration syntax and footprint. & Secondary \\
+& Nginx + Certbot & €0 OSS & Battle-tested standard, but requires companion container and renewal crons. & Discarded \\
+\midrule
+\textbf{Scalable Orchestration} & \textbf{Docker Compose} & €0 OSS & Single-host baseline. Lightweight, zero control-plane cost for 25-user VPS. & \textbf{Baseline} \\
+& \textbf{Kubernetes (K8s / K3s)} & $\approx$€70/mo (cloud) & Multi-node Pod autoscaling, HA, and rolling upgrades for v2.0 SaaS scale. & \textbf{v2.0 Option} \\
+\midrule
+\textbf{Private AI Fallback} & \textbf{DeepSeek-R1 (vLLM)} & €0 OSS (self) & Complete offline data sovereignty for IP-governed enterprise air-gaps. & \textbf{On-Prem} \\
+& OpenAI \texttt{GPT-4o mini} & \$0.15 / 1M in & Rapid cloud fallback via existing \texttt{OPENAI\_API\_KEY} code hook. & \textbf{Cloud Alt.} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{itemize}[itemsep=1pt,topsep=1pt]
+    \item \textbf{Off-Site Backups (Cloudflare R2)}: Zero egress fees eliminate bandwidth billing spikes during disaster recovery drills ($R_7$). Standard S3 compatibility enables daily encrypted \texttt{mongodump} snapshots via \texttt{boto3} without vendor lock-in;
+    \item \textbf{Transactional Alerts (Amazon SES)}: Handles password resets and milestone slippage alerts ($R_4$) at minimal cost, fitting the €1,632 cash budget while guaranteeing high inbox deliverability;
+    \item \textbf{Edge Ingress \& TLS (Caddy Server 2)}: Replaces raw HTTP port exposure with automated HTTPS certificate management, eliminating manual Certbot renewal cron jobs at €0 software license cost;
+    \item \textbf{Scalable Orchestration (Kubernetes for v2.0)}: While Docker Compose satisfies single-host hosting, adopting lightweight Kubernetes (K3s) or managed cloud K8s provides the foundation for \textit{SyncFlow v2.0} commercial SaaS expansion, enabling horizontal Pod autoscaling (HPA), multi-node resilience, and zero-downtime rolling deployments;
+    \item \textbf{Private AI Fallback (DeepSeek-R1)}: Runs via self-hosted vLLM to deliver strict air-gapped data sovereignty for sensitive projects, while OpenAI \texttt{GPT-4o mini} remains available for cloud failover.
+\end{itemize}

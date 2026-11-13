@@ -51,21 +51,21 @@
 \definecolor{backcolour}{rgb}{0.96,0.97,0.98}
 
 \lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},   
+    backgroundcolor=\color{backcolour},
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
     showstringspaces=false,
-    showtabs=false,                  
+    showtabs=false,
     tabsize=2
 }
 \lstset{style=mystyle}
@@ -74,8 +74,8 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small \textit{SyncFlow — Project Documentation}}
-\fancyhead[R]{\small \thepage}
+\fancyhead[L]{\small \textit{SyncFlow - Vendor Analysis}}
+\fancyfoot[C]{\small \thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 \fancypagestyle{plain}{
     \fancyhf{}
@@ -106,22 +106,85 @@
 \exhyphenpenalty=10000
 
 \begin{document}
-
 % 1. Academic Frontispiece / Title Page
+\pagenumbering{roman}
 \input{chapters/0_Frontispiece.tex}
 
 % 2. Table of Contents
-\pagenumbering{roman}
-\setcounter{tocdepth}{1}
+\pagenumbering{arabic}
 \tableofcontents
+
 \newpage
 
 % Main Body Chapters
-\pagenumbering{arabic}
+\input{chapters/1_Introduction.tex}
+\input{chapters/2_Procurement_Methodology.tex}
+\input{chapters/3_Market_Scheduling_Vendors.tex}
+\input{chapters/4_Technology_Suppliers.tex}
+\input{chapters/5_Risk_Sensitivity_Governance.tex}
+\input{chapters/6_Conclusion.tex}
 
 % Bibliography
 \begin{thebibliography}{99}
+\setlength{\itemsep}{1.5pt}
+\setlength{\parskip}{0pt}
+\addcontentsline{toc}{chapter}{Bibliography}
 
+\bibitem{pmbok}
+Project Management Institute. (2021). \textit{A Guide to the Project Management Body of Knowledge (PMBOK\textsuperscript{\textregistered} Guide), Sixth Edition}. Project Management Institute, Newtown Square, PA.
+
+\bibitem{dcma14}
+Defense Contract Management Agency (DCMA). (2012). \textit{DCMA-INST 102: Schedule Health Assessment Framework (14-Point Assessment)}. DCMA Enterprise Performance Division, Fort Lee, VA.
+
+\bibitem{asana}
+Asana Inc. (2025). \textit{Asana Advanced (\$24.99 Annual) and Enterprise Plan Specifications}. Available at: \url{https://asana.com/pricing}.
+
+\bibitem{clickup}
+ClickUp. (2025). \textit{ClickUp Business Plans and ClickUp Brain AI Add-On Pricing}. Available at: \url{https://clickup.com/pricing}.
+
+\bibitem{jira}
+Atlassian Corporation. (2025). \textit{Atlassian Jira Software Pricing Calculator and Plans (Standard, Premium, Enterprise)}. Available at: \url{https://www.atlassian.com/software/jira/pricing}.
+
+\bibitem{msproject}
+Microsoft Corporation. (2025). \textit{Microsoft Planner and Project Plan 3 Pricing and Capabilities (\$30/user/month)}. Available at: \url{https://www.microsoft.com/en-us/microsoft-365/planner/microsoft-planner-plans-and-pricing}.
+
+\bibitem{openproject}
+OpenProject GmbH. (2025). \textit{OpenProject Community vs. Enterprise Cloud Pricing (€5.95 EUR Basic) and Feature Matrix}. Available at: \url{https://www.openproject.org/pricing/}.
+
+\bibitem{primavera}
+Oracle Corporation. (2025). \textit{Oracle Primavera P6 Enterprise Project Portfolio Management Cloud (Oracle Global Price List \$125/user/mo Benchmark and UK G-Cloud)}. Available at: \url{https://www.oracle.com/construction-engineering/primavera-p6/}.
+
+\bibitem{smartsheet}
+Smartsheet Inc. (2025). \textit{Smartsheet Business Plan Pricing (\$19/member/month Annual) and Feature Documentation}. Available at: \url{https://www.smartsheet.com/pricing}.
+
+\bibitem{teamgantt}
+TeamGantt. (2025). \textit{TeamGantt Base, Business (\$95/mo Annual Base + Per-Project Pricing), Builder, AI Features}. Available at: \url{https://www.teamgantt.com/pricing}.
+
+\bibitem{trello}
+Atlassian Corporation. (2025). \textit{Trello Standard and Premium (\$10/user/month Annual) Plan Pricing}. Available at: \url{https://trello.com/pricing}.
+
+\bibitem{eurostat}
+Eurostat (European Commission). (2025). \textit{Wages, Labour Costs, and ICT Personnel Hourly Benchmarks in the European Union}. Available at: \url{https://ec.europa.eu/eurostat}.
+
+\bibitem{geminiapi}
+Google DeepMind / Google AI for Developers. (2025). \textit{Gemini API Pricing, Rate Limits, and Structured Output Documentation}. Available at: \url{https://ai.google.dev/pricing}.
+
+\bibitem{openaiapi}
+OpenAI. (2025). \textit{OpenAI API Model Pricing (GPT-4o mini) and Structured Outputs}. Available at: \url{https://openai.com/api/pricing/}.
+
+\bibitem{anthropicapi}
+Anthropic. (2025). \textit{Anthropic Claude Haiku API Pricing Documentation}. Available at: \url{https://www.anthropic.com/pricing}.
+
+\bibitem{mongodb7}
+MongoDB, Inc. (2024). \textit{MongoDB Community Server vs. Atlas Cloud Pricing and {\normalfont\texttt{\$jsonSchema}} Validation}. Available at: \url{https://www.mongodb.com/docs/manual/core/schema-validation/}.
+
+\bibitem{fastapi}
+Ramírez, S. (2024). \textit{FastAPI: High Performance Modern Python Web Framework}. Available at: \url{https://fastapi.tiangolo.com/}.
+
+\bibitem{docker}
+Docker Inc. (2024). \textit{Docker Compose Specification and Container Orchestration}. Available at: \url{https://docs.docker.com/compose/}.
+
+\bibitem{bpm}
+Business and Project Management course material, University of Pisa.
 \end{thebibliography}
-
 \end{document}

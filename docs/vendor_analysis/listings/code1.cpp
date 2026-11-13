@@ -2,7 +2,7 @@
 #include <cmath>
 using namespace std;
 
-// Codice fittizio check
+// Codice fittizio 1 2 3 check
 
 void ciaoFrancesco(char* matr, int h, int w){
 	for(int i=0; i<h; i++){

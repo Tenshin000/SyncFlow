@@ -14,7 +14,7 @@ import sys
 import json
 import argparse
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from bson import ObjectId
 from pymongo import MongoClient
 
