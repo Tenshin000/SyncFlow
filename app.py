@@ -164,7 +164,7 @@ def main():
     _check_and_install_python_dependencies()
     _ensure_env_file()
 
-    # 2. Check Docker daemon availability
+    # 2. Check Docker daemon availability and status
     print("[2/5] Checking Docker daemon status...")
     if not _check_docker_running():
         print("\n[ERROR] Docker daemon is not running or 'docker' is not in PATH.")

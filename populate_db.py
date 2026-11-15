@@ -82,7 +82,7 @@ def revive_bson(val: Any) -> Any:
         if len(val) == 1 and "$date" in val:
             date_val = val["$date"]
             if isinstance(date_val, (int, float)):
-                # Milliseconds timestamp
+                # Milliseconds timestamp for Database
                 return datetime.fromtimestamp(date_val / 1000.0, tz=timezone.utc)
             if isinstance(date_val, str):
                 cleaned = date_val.replace("Z", "+00:00")
