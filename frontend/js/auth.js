@@ -343,7 +343,8 @@ export function initPasswordToggles() {
 
     btn.addEventListener("click", () => {
       const targetId = btn.getAttribute("data-target");
-      const targetInput = targetId ? document.getElementById(targetId) : btn.closest(".password-input-wrapper")?.querySelector("input");
+      const wrapper = btn.closest(".password-input-wrapper");
+      const targetInput = targetId ? document.getElementById(targetId) : (wrapper ? wrapper.querySelector("input") : null);
       if (!targetInput) return;
 
       const isPassword = targetInput.type === "password";
